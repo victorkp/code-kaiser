@@ -1,0 +1,14 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+index aa12c10..7f136db 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+@@ -384,7 +384,8 @@ public String unitizedDeltaString(boolean showUnit, boolean highGranularity) {
+             return delta_sign + df.format(unitized(value)) +  (showUnit?" mg/dl":"");
+         } else {
+ 
+-            if(highGranularity){
++            // only show 2 decimal places on mmol/l delta when less than 0.1 mmol/l
++            if(highGranularity && (Math.abs(value)<(Constants.MMOLL_TO_MGDL*0.1))){
+                 df.setMaximumFractionDigits(2);
+             } else {
+                 df.setMaximumFractionDigits(1);

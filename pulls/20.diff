@@ -1,0 +1,39 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+index 3dfe5fa..c60e921 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+@@ -126,7 +126,8 @@ public static AlertType get_highest_active_alert(Context context, double bg) {
+             Notifications.getInstance(context).bgUnclearAlert(context);
+         }
+         if (UnclearTime > 0) {
+-            Log.e(TAG_ALERT, "We are in an clear state, but not for too long.");
++            Log.e(TAG_ALERT, "We are in an clear state, but not for too long. Alerts are disabled");
++            return null;
+         }
+         at = get_highest_active_alert_helper(bg);
+         if (at != null) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+index 2674fb1..cf3d041 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+@@ -5,6 +5,7 @@
+ import java.io.BufferedReader;
+ import java.io.InputStreamReader;
+ import java.io.PrintWriter;
++import java.net.InetSocketAddress;
+ import java.net.Socket;
+ import java.net.SocketTimeoutException;
+ import java.util.LinkedList;
+@@ -263,9 +264,10 @@ public static boolean almostEquals( TransmitterRawData e1, TransmitterRawData e2
+             ComunicationHeader ch2 = gson.fromJson(flat, ComunicationHeader.class);
+             System.out.println("Results code" + flat + ch2.version);
+ 
+-
+             // Real client code
+-            Socket MySocket = new Socket(hostName, port);
++            InetSocketAddress ServerAdress = new InetSocketAddress(hostName, port);
++            Socket MySocket = new Socket();
++            MySocket.connect(ServerAdress, 10000);
+ 
+             System.out.println("After the new socket \n");
+             MySocket.setSoTimeout(2000);

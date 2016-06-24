@@ -1,0 +1,124 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index da4a304..e6986ff 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -375,19 +375,22 @@ private void displayCurrentInfo() {
+         df.setMaximumFractionDigits(0);
+ 
+         boolean isDexbridge = CollectionServiceStarter.isDexbridgeWixel(getApplicationContext());
++        boolean displayBattery = prefs.getBoolean("display_bridge_battery",false);
+         int bridgeBattery = prefs.getInt("bridge_battery", 0);
+ 
+-        if (isDexbridge) {
++        if (isDexbridge && displayBattery) {
+             if (bridgeBattery == 0) {
+-                dexbridgeBattery.setText("Waiting for packet");
++                dexbridgeBattery.setText("xBridge Battery: Unknown, Waiting for packet");
++                dexbridgeBattery.setTextColor(Color.WHITE);
+             } else {
+-                dexbridgeBattery.setText("Bridge Battery: " + bridgeBattery + "%");
++                dexbridgeBattery.setText("xBridge Battery: " + bridgeBattery + "%");
+             }
+-            if (bridgeBattery < 50) dexbridgeBattery.setTextColor(Color.YELLOW);
+-            if (bridgeBattery < 25) dexbridgeBattery.setTextColor(Color.RED);
+-            else dexbridgeBattery.setTextColor(Color.GREEN);
++            dexbridgeBattery.setTextColor(Color.GREEN);
++            if (bridgeBattery < 50 && bridgeBattery >30) dexbridgeBattery.setTextColor(Color.YELLOW);
++            if (bridgeBattery <= 30) dexbridgeBattery.setTextColor(Color.RED);
+             dexbridgeBattery.setVisibility(View.VISIBLE);
+         } else {
++            dexbridgeBattery.setText("");
+             dexbridgeBattery.setVisibility(View.INVISIBLE);
+         }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+index 13fec32..eea5e5d 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+@@ -91,6 +91,10 @@ public void onCreate() {
+         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+         listenForChangeInSettings();
+         bgToSpeech = BgToSpeech.setupTTS(mContext); //keep reference to not being garbage collected
++        if(CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())){
++            Log.i(TAG,"onCreate: resetting bridge_battery preference to 0");
++            prefs.edit().putInt("bridge_battery",0).apply();
++        }
+         Log.i(TAG, "onCreate: STARTING SERVICE");
+     }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
+index 6791b89..a13c5c2 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
+@@ -135,7 +135,7 @@ public String bgReading() {
+     }
+ 
+     public String bgDelta() {
+-        return new BgGraphBuilder(mContext).unitizedDeltaString(false, false);
++        return bgGraphBuilder.unitizedDeltaString(false, false);
+     }
+ 
+     public String phoneBattery() {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+index 94a5e07..c97c94d 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+@@ -269,6 +269,7 @@ public void onCreate(Bundle savedInstanceState) {
+ 
+             bindTTSListener();
+             final Preference collectionMethod = findPreference("dex_collection_method");
++            final Preference displayBridgeBatt = findPreference("display_bridge_battery");
+             final Preference runInForeground = findPreference("run_service_in_foreground");
+             final Preference wifiRecievers = findPreference("wifi_recievers_addresses");
+             final Preference predictiveBG = findPreference("predictive_bg");
+@@ -323,6 +324,7 @@ public boolean onPreferenceChange(Preference preference, Object newValue) {
+ 
+             if(prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("DexbridgeWixel") != 0) {
+                 collectionCategory.removePreference(transmitterId);
++                collectionCategory.removePreference(displayBridgeBatt);
+             }
+             pebbleSync.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                 @Override
+@@ -384,8 +386,10 @@ public boolean onPreferenceChange(Preference preference, Object newValue) {
+ 
+                     if(((String) newValue).compareTo("DexbridgeWixel") != 0) {
+                         collectionCategory.removePreference(transmitterId);
++                        collectionCategory.removePreference(displayBridgeBatt);
+                     } else {
+                         collectionCategory.addPreference(transmitterId);
++                        collectionCategory.addPreference(displayBridgeBatt);
+                     }
+ 
+                     String stringValue = newValue.toString();
+diff --git a/app/src/main/res/xml/pref_data_source.xml b/app/src/main/res/xml/pref_data_source.xml
+index 967dfff..2260f6a 100644
+--- a/app/src/main/res/xml/pref_data_source.xml
++++ b/app/src/main/res/xml/pref_data_source.xml
+@@ -22,17 +22,21 @@
+             android:key="scan_share2_barcode"
+             android:shouldDisableView="true"
+             android:summary="@string/pref_share2_scan_barcode_summary" />
+-
+-        <CheckBoxPreference
+-            android:key="run_service_in_foreground"
+-            android:title="Run Collection Service in foreground"
+-            android:summary="Running in foreground prevents android from killing the service and creates a notification with a trend line."
+-            android:defaultValue="false" />
+         <EditTextPreference
+             android:key="dex_txid"
+             android:title="Dexcom Transmitter ID"
+             android:summary="ID of your Dexcom Transmitter, eg 12AB3"
+             android:defaultValue="00000" />
++        <CheckBoxPreference
++            android:key="display_bridge_battery"
++            android:title="Display Bridge Battery"
++            android:summary="Choose to display the bridge battery level"
++            android:defaultValue="true" />
++        <CheckBoxPreference
++            android:key="run_service_in_foreground"
++            android:title="Run Collection Service in foreground"
++            android:summary="Running in foreground prevents android from killing the service and creates a notification with a trend line."
++            android:defaultValue="false" />
+         <EditTextPreference
+             android:title="List of recievers"
+             android:key="wifi_recievers_addresses"

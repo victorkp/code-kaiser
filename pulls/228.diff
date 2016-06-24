@@ -1,0 +1,163 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java b/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java
+index 843e8e6..c4e6d3b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java
+@@ -229,18 +229,6 @@ public void onClick(View v) {
+                                 :
+                                  + (SnoozeActivity.getTimeFromSnoozeValue(snoozeValue.getValue()))) * 1000 * 60;
+                         prefs.edit().putLong(disableType, disableUntil).apply();
+-                        //check if active bg alert exists and delete it depending on type of alert
+-                        ActiveBgAlert aba = ActiveBgAlert.getOnly();
+-                        if (aba != null) {
+-                            AlertType activeBgAlert = ActiveBgAlert.alertTypegetOnly();
+-                            if (disableType.equalsIgnoreCase("alerts_disabled_until")
+-                                    || (activeBgAlert.above && disableType.equalsIgnoreCase("high_alerts_disabled_until"))
+-                                    || (!activeBgAlert.above && disableType.equalsIgnoreCase("low_alerts_disabled_until"))
+-                                    ) {
+-                                //active bg alert exists which is a type that is being disabled so let's remove it completely from the database
+-                                ActiveBgAlert.ClearData();
+-                            }
+-                        }
+ 
+                         if (disableType.equalsIgnoreCase("alerts_disabled_until")) {
+                             //disabling all , after the Snooze time set, all alarms will be re-enabled, inclusive low and high bg alarms
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+index d83925e..1f846c6 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+@@ -295,29 +295,73 @@ public void notificationSetter(Context context) {
+         }
+     }
+ 
++    private long CalcuatleArmTime(Context ctx, long now) {
++
++      Long wakeTime = Long.MAX_VALUE; // This is the absalute time, not time from now.
++      ActiveBgAlert activeBgAlert = ActiveBgAlert.getOnly();
++      if (activeBgAlert != null) {
++          AlertType alert = AlertType.get_alert(activeBgAlert.alert_uuid);
++          if (alert != null) {
++              wakeTime = activeBgAlert.next_alert_at ;
++              Log.d(TAG , "ArmTimer waking at: "+ new Date(wakeTime) +" in " +  (wakeTime - now)/60000d + " minutes");
++          }
++      }
++      
++      // check snooze ending values
++      long alerts_disabled_until = prefs.getLong("alerts_disabled_until", 0);
++      if (alerts_disabled_until != 0) {
++        wakeTime = Math.min(wakeTime, alerts_disabled_until);
++      }
++      long high_alerts_disabled_until = prefs.getLong("high_alerts_disabled_until", 0);
++      if (high_alerts_disabled_until != 0) {
++        wakeTime = Math.min(wakeTime, high_alerts_disabled_until);
++      }
++
++      long low_alerts_disabled_until = prefs.getLong("low_alerts_disabled_until", 0);
++      if (low_alerts_disabled_until != 0) {
++        wakeTime = Math.min(wakeTime, low_alerts_disabled_until);
++      }
++      
++      // All this requires listeners on snooze changes...
++
++      // check when the first alert should be fired. take care of that ???
++      
++      
++      return wakeTime - now;
++    }
++    
+     private void ArmTimer(Context ctx) {
++        Calendar calendar = Calendar.getInstance();
++        final long now = calendar.getTimeInMillis();
+         Log.d(TAG, "ArmTimer called");
+-        ActiveBgAlert activeBgAlert = ActiveBgAlert.getOnly();
+-        if (activeBgAlert != null) {
+-            AlertType alert = AlertType.get_alert(activeBgAlert.alert_uuid);
+-            if (alert != null) {
+-                Calendar calendar = Calendar.getInstance();
+-                AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-                // sleep longer if the alert is snoozed.
+-                long wakeTime = activeBgAlert.next_alert_at;
+-                Log.d(TAG , "ArmTimer waking at: "+ new Date(wakeTime) +" in " +  (wakeTime - calendar.getTimeInMillis())/60000d + " minutes");
+-                if (wakeIntent != null)
+-                    alarm.cancel(wakeIntent);
+-                wakeIntent = PendingIntent.getService(this, 0, new Intent(this, this.getClass()), 0);
+-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+-                    alarm.setAlarmClock(new AlarmManager.AlarmClockInfo(wakeTime, wakeIntent), wakeIntent);
+-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+-                    alarm.setExact(AlarmManager.RTC_WAKEUP, wakeTime, wakeIntent);
+-                } else
+-                    alarm.set(AlarmManager.RTC_WAKEUP, wakeTime, wakeIntent);
+-            }
++
++        long wakeTime = CalcuatleArmTime(ctx, now);
++        if(wakeTime == Long.MAX_VALUE) {
++          Log.d(TAG , "ArmTimer timer will not br armed");
++          return;
+         }
+-    }
++        
++        if(wakeTime < now ) {
++          Log.e(TAG , "ArmTimer recieved a negative time, will fire in 6 minutes");
++          wakeTime = now + 6 * 60000;
++        }
++        
++        AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
++
++        
++        Log.d(TAG , "ArmTimer waking at: "+ new Date(wakeTime ) +" in " +
++            (wakeTime - now) /60000d + " minutes");
++        if (wakeIntent != null)
++            alarm.cancel(wakeIntent);
++        wakeIntent = PendingIntent.getService(this, 0, new Intent(this, this.getClass()), 0);
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
++            alarm.setAlarmClock(new AlarmManager.AlarmClockInfo(wakeTime, wakeIntent), wakeIntent);
++        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
++            alarm.setExact(AlarmManager.RTC_WAKEUP, wakeTime, wakeIntent);
++        } else {
++            alarm.set(AlarmManager.RTC_WAKEUP, wakeTime, wakeIntent);
++        }
++    }   
+ 
+     private Bitmap createWearBitmap(long start, long end) {
+         return new BgSparklineBuilder(mContext)
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+index e568220..3667fe2 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+@@ -27,6 +27,7 @@
+ import com.eveningoutpost.dexdrip.Services.MissedReadingService;
+ import com.eveningoutpost.dexdrip.R;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
++import com.eveningoutpost.dexdrip.UtilityModels.Notifications;
+ import com.eveningoutpost.dexdrip.UtilityModels.PebbleSync;
+ import com.google.zxing.integration.android.IntentIntegrator;
+ import com.google.zxing.integration.android.IntentResult;
+@@ -470,20 +471,25 @@ public void onClick(DialogInterface dialog, int which) {
+             });
+         }
+ 
+-        private static Preference.OnPreferenceChangeListener sBgMissedAlertsHandler = new Preference.OnPreferenceChangeListener() {
++        private static Preference.OnPreferenceChangeListener sAlertsPreferanceHandler = new Preference.OnPreferenceChangeListener() {
+             @Override
+             public boolean onPreferenceChange(Preference preference, Object newValue) {
++            	// some of the alerts parameters have changed, let's make sure that we don't need to alert.
+                 Context context = preference.getContext();
+                 context.startService(new Intent(context, MissedReadingService.class));
++                context.startService(new Intent(context, Notifications.class));
+                 return true;
+             }
+         };
+ 
+         
+         private void bindBgMissedAlertsListener(){
+-          findPreference("bg_missed_alerts").setOnPreferenceChangeListener(sBgMissedAlertsHandler);
+-          findPreference("bg_missed_minutes").setOnPreferenceChangeListener(sBgMissedAlertsHandler);
+-          findPreference("other_alerts_snooze").setOnPreferenceChangeListener(sBgMissedAlertsHandler);
++          findPreference("bg_missed_alerts").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
++          findPreference("bg_missed_minutes").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
++          findPreference("other_alerts_snooze").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
++          findPreference("alerts_disabled_until").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
++          findPreference("high_alerts_disabled_until").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
++          findPreference("low_alerts_disabled_until").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
+         }
+ 
+     }

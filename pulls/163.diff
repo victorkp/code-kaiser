@@ -1,0 +1,843 @@
+diff --git a/app/app.iml b/app/app.iml
+index 8821f17..ff164ff 100644
+--- a/app/app.iml
++++ b/app/app.iml
+@@ -86,7 +86,7 @@
+       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
+       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
+     </content>
+-    <orderEntry type="jdk" jdkName="Android API 22 Platform" jdkType="Android SDK" />
++    <orderEntry type="jdk" jdkName="Android API 22 Platform (1)" jdkType="Android SDK" />
+     <orderEntry type="sourceFolder" forTests="false" />
+     <orderEntry type="library" exported="" name="bson-3.1.0-rc0" level="project" />
+     <orderEntry type="library" exported="" name="okio-1.2.0" level="project" />
+@@ -111,8 +111,8 @@
+     <orderEntry type="library" exported="" name="retrofit-1.9.0" level="project" />
+     <orderEntry type="library" exported="" name="mongodb-driver-core-3.1.0-SNAPSHOT" level="project" />
+     <orderEntry type="library" exported="" name="support-annotations-22.1.1" level="project" />
+-    <orderEntry type="library" exported="" name="gson-2.3.1" level="project" />
+     <orderEntry type="library" exported="" name="slf4j-api-1.7.7" level="project" />
++    <orderEntry type="library" exported="" name="gson-2.3.1" level="project" />
+     <orderEntry type="library" exported="" name="appcompat-v7-22.1.1" level="project" />
+     <orderEntry type="library" exported="" name="snackbar-2.10.8" level="project" />
+     <orderEntry type="library" exported="" name="beta-1.1.3" level="project" />
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 1191184..e215e7d 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -110,6 +110,7 @@
+             android:enabled="true"
+             android:exported="true" >
+         </service>
++
+         <activity
+             android:name=".stats.StatsActivity"
+             android:label="Statistics" >
+@@ -200,11 +201,9 @@
+         <activity
+             android:name=".AlertList"
+             android:label="@string/title_activity_alert_list" />
+-
+         <activity
+             android:name=".ErrorsActivity"
+             android:label="Error List" />
+-
+         <activity
+             android:name=".FollowerManagementActivity"
+             android:label="Manage Followers" />
+@@ -228,14 +227,14 @@
+             android:exported="false" >
+         </service>
+         <service
+-            android:name=".Services.MissedReadingIntentService"
+-            android:exported="false" >
+-        </service>
+-        <service
+             android:name=".UtilityModels.PebbleSync"
+             android:enabled="true"
+             android:exported="true" >
+         </service>
++        <service
++            android:name=".Services.DailyIntentService"
++            android:exported="false" >
++        </service>
+     </application>
+ 
+ </manifest>
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/AlertList.java b/app/src/main/java/com/eveningoutpost/dexdrip/AlertList.java
+index 540ff7a..d69f9d2 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/AlertList.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/AlertList.java
+@@ -8,7 +8,6 @@
+ import android.net.Uri;
+ import android.os.Bundle;
+ import android.preference.PreferenceManager;
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ import android.view.View;
+ import android.view.animation.Animation;
+ import android.view.animation.AnimationUtils;
+@@ -18,6 +17,7 @@
+ import android.widget.SimpleAdapter;
+ 
+ import com.eveningoutpost.dexdrip.Models.AlertType;
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ import com.eveningoutpost.dexdrip.UtilityModels.AlertPlayer;
+ import com.eveningoutpost.dexdrip.utils.ActivityWithMenu;
+ 
+@@ -89,7 +89,7 @@ public void onAnimationStart(Animation animation) {
+                     ListView lv = (ListView) parent;
+                     @SuppressWarnings("unchecked")
+                     HashMap<String, String> item = (HashMap<String, String>) lv.getItemAtPosition(position);
+-                    Log.e(TAG, "Item clicked " + lv.getItemAtPosition(position) + item.get("uuid"));
++                    Log.d(TAG, "Item clicked " + lv.getItemAtPosition(position) + item.get("uuid"));
+ 
+                     //The XML for each item in the list (should you use a custom XML) must have android:longClickable="true"
+                     // as well (or you can use the convenience method lv.setLongClickable(true);). This way you can have a list
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationCheckInActivity.java b/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationCheckInActivity.java
+index 9d1132d..a183a06 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationCheckInActivity.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationCheckInActivity.java
+@@ -49,7 +49,7 @@ public void onClick(View v) {
+                     startActivity(tableIntent);
+                     finish();
+                 } else {
+-                    Log.w("CALIBRATION", "ERROR, sensor not active");
++                    Log.d("CALIBRATION", "ERROR, sensor not active");
+                 }
+             }
+         });
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/ReadData.java b/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/ReadData.java
+index 4dcfa4f..9ae97d5 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/ReadData.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/ReadData.java
+@@ -2,19 +2,15 @@
+ 
+ import android.hardware.usb.UsbDevice;
+ import android.hardware.usb.UsbDeviceConnection;
+-import android.hardware.usb.UsbEndpoint;
+-import android.hardware.usb.UsbInterface;
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ 
+-import com.eveningoutpost.dexdrip.ImportedLibraries.usbserial.driver.CdcAcmSerialDriver;
+-import com.eveningoutpost.dexdrip.ImportedLibraries.usbserial.driver.UsbSerialDriver;
+ import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.records.CalRecord;
+ import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.records.EGVRecord;
+ import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.records.GenericXMLRecord;
+ import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.records.MeterRecord;
+ import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.records.PageHeader;
+ import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.records.SensorRecord;
+-import com.eveningoutpost.dexdrip.ImportedLibraries.usbserial.driver.UsbSerialPort;
++import com.eveningoutpost.dexdrip.ImportedLibraries.usbserial.driver.UsbSerialDriver;
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ 
+ import org.w3c.dom.Element;
+ 
+@@ -24,7 +20,6 @@
+ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.Date;
+-import java.util.List;
+ 
+ public class ReadData {
+ 
+@@ -51,7 +46,7 @@ public ReadData(UsbSerialDriver device, UsbDeviceConnection connection, UsbDevic
+         try {
+       mSerialDevice.getPorts().get(0).open(connection);
+         } catch(IOException e) {
+-            Log.w("FAILED WHILE", "trying to open");
++            Log.d("FAILED WHILE", "trying to open");
+         }
+ //        }
+     }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java
+index 413a92e..f0d9232 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java
+@@ -106,7 +106,7 @@ public static AlertType alertTypegetOnly() {
+ 
+         AlertType alert = AlertType.get_alert(aba.alert_uuid);
+         if(alert == null) {
+-            Log.e(TAG, "alertTypegetOnly did not find the active alert as part of existing alerts. returning null");
++            Log.d(TAG, "alertTypegetOnly did not find the active alert as part of existing alerts. returning null");
+             // removing the alert to be in a better state.
+             ClearData();
+             return null;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+index 0ad82bb..309598c 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+@@ -102,7 +102,7 @@ public static AlertType get_alert(String uuid) {
+     public static AlertType get_highest_active_alert(Context context, double bg) {
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+         if(prefs.getLong("alerts_disabled_until", 0) > new Date().getTime()){
+-            Log.w("NOTIFICATIONS", "Notifications are currently disabled!!");
++            Log.d("NOTIFICATIONS", "Notifications are currently disabled!!");
+             return null;
+         }
+ 
+@@ -119,11 +119,11 @@ public static AlertType get_highest_active_alert(Context context, double bg) {
+ 
+         AlertType at;
+         if (UnclearTime >= UnclearTimeSetting && bg_unclear_readings_alerts ) {
+-            Log.w("NOTIFICATIONS", "Readings have been unclear for too long!!");
++            Log.d("NOTIFICATIONS", "Readings have been unclear for too long!!");
+             Notifications.bgUnclearAlert(context);
+         }
+         if ((UnclearTime > 0 ) && bg_unclear_readings_alerts) {
+-            Log.w(TAG_ALERT, "We are in an clear state, but not for too long. Alerts are disabled");
++            Log.d(TAG_ALERT, "We are in an clear state, but not for too long. Alerts are disabled");
+             return null;
+         }
+         at = get_highest_active_alert_helper(bg);
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+index dde780d..2a6f8d1 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+@@ -256,7 +256,7 @@ public static void create(CalRecord[] calRecords, Context context, boolean overr
+                     calibration.bg = calSubrecord.getCalBGL();
+                     calibration.timestamp = calSubrecord.getDateEntered().getTime() + addativeOffset;
+                     if (calibration.timestamp > new Date().getTime()) {
+-                        Log.w(TAG, "ERROR - Calibration timestamp is from the future, wont save!");
++                        Log.d(TAG, "ERROR - Calibration timestamp is from the future, wont save!");
+                         return;
+                     }
+                     calibration.raw_value = calSubrecord.getCalRaw() / 1000;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/User.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/User.java
+index 226f933..5c2b655 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/User.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/User.java
+@@ -79,7 +79,6 @@ public void success(String gsonResponse, Response response) {
+                     @Override
+                     public void failure(RetrofitError error) {
+                         Response response = error.getResponse();
+-                        Log.w("REST CALL STATUS:", "" + response.getStatus());
+                         Log.w("REST CALL REASON:", response.getReason());
+                     }
+                 }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/UserError.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/UserError.java
+index dc6cf1c..711dd0c 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/UserError.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/UserError.java
+@@ -42,7 +42,6 @@ public UserError(int severity, String shortError, String message) {
+         this.message = message;
+         this.timestamp = new Date().getTime();
+         this.save();
+-        cleanup();
+     }
+ 
+     public UserError(String shortError, String message) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/NewSensorLocation.java b/app/src/main/java/com/eveningoutpost/dexdrip/NewSensorLocation.java
+index 21e3dc5..725dfcd 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/NewSensorLocation.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/NewSensorLocation.java
+@@ -46,7 +46,7 @@
+     private EditText sensor_location_other;
+     CheckBox DontAskAgain;
+     List<Location> locations;
+-    
++
+     final int PRIVATE_ID = 200;
+     final int OTHER_ID = 201;
+ 
+@@ -61,9 +61,9 @@ protected void onCreate(Bundle savedInstanceState) {
+         DontAskAgain = (CheckBox)findViewById(R.id.sensorLocationDontAskAgain);
+         radioGroup = (RadioGroup) findViewById(R.id.myRadioGroup);
+         addListenerOnButton();
+-        
++
+         locations = new LinkedList<Location>();
+-        
++
+         locations.add(new Location("I don't wish to share", PRIVATE_ID));
+         locations.add(new Location("Upper arm", 1));
+         locations.add(new Location("Thigh", 2));
+@@ -71,15 +71,15 @@ protected void onCreate(Bundle savedInstanceState) {
+         locations.add(new Location("Lower back", 4));
+         locations.add(new Location("Buttocks", 5));
+         locations.add(new Location("Other", OTHER_ID));
+-        
++
+         for(Location location : locations) {
+             AddButton(location.location, location.location_id);
+         }
+         radioGroup.check(PRIVATE_ID);
+-        
++
+     }
+ 
+-    
++
+     private void AddButton(String text, int id) {
+         RadioButton newRadioButton = new RadioButton(this);
+         newRadioButton.setText(text);
+@@ -90,7 +90,7 @@ private void AddButton(String text, int id) {
+         radioGroup.addView(newRadioButton);
+ 
+     }
+-    
++
+     @Override
+     public String getMenuName() {
+         return menu_name;
+@@ -101,10 +101,10 @@ public void addListenerOnButton() {
+         button.setOnClickListener(new View.OnClickListener() {
+             public void onClick(View v) {
+ 
+-              
++
+                 int selectedId = radioGroup.getCheckedRadioButtonId();
+                 String location = new String();
+-                
++
+                 if (selectedId == OTHER_ID) {
+                     location = sensor_location_other.getText().toString();;
+                 } else {
+@@ -116,34 +116,34 @@ public void onClick(View v) {
+                     }
+                 }
+                 Toast.makeText(getApplicationContext(), "Sensor locaton is " + location, Toast.LENGTH_LONG).show();
+-                  
+-                  
+-                Log.w("NEW SENSOR", "Sensor location is " + location);
++
++
++                Log.d("NEW SENSOR", "Sensor location is " + location);
+                 Sensor.updateSensorLocation(location);
+-                  
++
+                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+-                  
++
+                 prefs.edit().putBoolean("store_sensor_location", !DontAskAgain.isChecked()).apply();
+-                
++
+                 Intent intent = new Intent(getApplicationContext(), Home.class);
+                 startActivity(intent);
+                 finish();
+             }
+         });
+-        
++
+         buttonCancel.setOnClickListener(new View.OnClickListener() {
+             public void onClick(View v) {
+ 
+                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+-                
++
+                 prefs.edit().putBoolean("store_sensor_location", !DontAskAgain.isChecked()).apply();
+ 
+                 Intent intent = new Intent(getApplicationContext(), Home.class);
+                 startActivity(intent);
+                 finish();
+             }
+-        });        
+-        
++        });
++
+         radioGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+ 
+             @Override
+@@ -156,7 +156,7 @@ public void onCheckedChanged(RadioGroup group, int checkedId) {
+                 }
+             }
+         });
+-        
+-        
++
++
+     }
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Sensor.java b/app/src/main/java/com/eveningoutpost/dexdrip/Sensor.java
+index 5f34be4..d6b2f7c 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Sensor.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Sensor.java
+@@ -1,13 +1,12 @@
+ package com.eveningoutpost.dexdrip;
+ 
+ import android.provider.BaseColumns;
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+-import android.preference.ListPreference;
+ 
+ import com.activeandroid.Model;
+ import com.activeandroid.annotation.Column;
+ import com.activeandroid.annotation.Table;
+ import com.activeandroid.query.Select;
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ import com.eveningoutpost.dexdrip.UtilityModels.SensorSendQueue;
+ 
+ import java.util.UUID;
+@@ -35,7 +34,7 @@
+ //    @Expose
+     @Column(name = "uuid", index = true)
+     public String uuid;
+-    
++
+ //  @Expose
+   @Column(name = "sensor_location")
+   public String sensor_location;
+@@ -76,7 +75,7 @@ public static boolean isActive() {
+             return true;
+         }
+     }
+-    
++
+     public static void updateSensorLocation(String sensor_location) {
+         Sensor sensor = currentSensor();
+         if (sensor == null) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DailyIntentService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DailyIntentService.java
+new file mode 100644
+index 0000000..bc4845f
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DailyIntentService.java
+@@ -0,0 +1,20 @@
++package com.eveningoutpost.dexdrip.Services;
++
++import android.app.IntentService;
++import android.content.Intent;
++
++import com.eveningoutpost.dexdrip.Models.UserError;
++
++public class DailyIntentService extends IntentService {
++    // DAILY TASKS CAN GO IN HERE!
++
++    public DailyIntentService() {
++        super("DailyIntentService");
++    }
++
++    @Override
++    protected void onHandleIntent(Intent intent) {
++        UserError.cleanup();
++    }
++
++  }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+index f533022..fbcd5aa 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+@@ -114,7 +114,7 @@ public int onStartCommand(Intent intent, int flags, int startId) {
+     @Override
+     public void onDestroy() {
+         super.onDestroy();
+-        Log.w(TAG, "onDestroy entered");
++        Log.d(TAG, "onDestroy entered");
+         close();
+         foregroundServiceStarter.stop();
+         setRetryTimer();
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
+index 7b581a8..855f985 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
+@@ -158,7 +158,7 @@ public void onDestroy() {
+     public SharedPreferences.OnSharedPreferenceChangeListener prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+             if(key.compareTo("run_service_in_foreground") == 0) {
+-                Log.e("FOREGROUND", "run_service_in_foreground changed!");
++                Log.d("FOREGROUND", "run_service_in_foreground changed!");
+                 if (prefs.getBoolean("run_service_in_foreground", false)) {
+                     foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), service);
+                     foregroundServiceStarter.start();
+@@ -564,9 +564,9 @@ public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState
+                 } else {
+                     setRetryTimer();
+                 }
+-                Log.w(TAG, "Disconnected from GATT server.");
++                Log.d(TAG, "Disconnected from GATT server.");
+             } else {
+-                Log.w(TAG, "Gatt callback... strange state.");
++                Log.d(TAG, "Gatt callback... strange state.");
+             }
+         }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/MissedReadingIntentService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/MissedReadingIntentService.java
+deleted file mode 100644
+index bf1b276..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/MissedReadingIntentService.java
++++ /dev/null
+@@ -1,91 +0,0 @@
+-package com.eveningoutpost.dexdrip.Services;
+-
+-import android.app.IntentService;
+-import android.content.Intent;
+-import android.content.Context;
+-
+-/**
+- * An {@link IntentService} subclass for handling asynchronous task requests in
+- * a service on a separate handler thread.
+- * <p/>
+- * TODO: Customize class - update intent actions, extra parameters and static
+- * helper methods.
+- */
+-public class MissedReadingIntentService extends IntentService {
+-    // TODO: Rename actions, choose action names that describe tasks that this
+-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
+-    private static final String ACTION_FOO = "com.eveningoutpost.dexdrip.Services.action.FOO";
+-    private static final String ACTION_BAZ = "com.eveningoutpost.dexdrip.Services.action.BAZ";
+-
+-    // TODO: Rename parameters
+-    private static final String EXTRA_PARAM1 = "com.eveningoutpost.dexdrip.Services.extra.PARAM1";
+-    private static final String EXTRA_PARAM2 = "com.eveningoutpost.dexdrip.Services.extra.PARAM2";
+-
+-    /**
+-     * Starts this service to perform action Foo with the given parameters. If
+-     * the service is already performing a task this action will be queued.
+-     *
+-     * @see IntentService
+-     */
+-    // TODO: Customize helper method
+-    public static void startActionFoo(Context context, String param1, String param2) {
+-        Intent intent = new Intent(context, MissedReadingIntentService.class);
+-        intent.setAction(ACTION_FOO);
+-        intent.putExtra(EXTRA_PARAM1, param1);
+-        intent.putExtra(EXTRA_PARAM2, param2);
+-        context.startService(intent);
+-    }
+-
+-    /**
+-     * Starts this service to perform action Baz with the given parameters. If
+-     * the service is already performing a task this action will be queued.
+-     *
+-     * @see IntentService
+-     */
+-    // TODO: Customize helper method
+-    public static void startActionBaz(Context context, String param1, String param2) {
+-        Intent intent = new Intent(context, MissedReadingIntentService.class);
+-        intent.setAction(ACTION_BAZ);
+-        intent.putExtra(EXTRA_PARAM1, param1);
+-        intent.putExtra(EXTRA_PARAM2, param2);
+-        context.startService(intent);
+-    }
+-
+-    public MissedReadingIntentService() {
+-        super("MissedReadingIntentService");
+-    }
+-
+-    @Override
+-    protected void onHandleIntent(Intent intent) {
+-        if (intent != null) {
+-            final String action = intent.getAction();
+-            if (ACTION_FOO.equals(action)) {
+-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
+-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
+-                handleActionFoo(param1, param2);
+-            } else if (ACTION_BAZ.equals(action)) {
+-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
+-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
+-                handleActionBaz(param1, param2);
+-            }
+-        }
+-    }
+-
+-    /**
+-     * Handle action Foo in the provided background thread with the provided
+-     * parameters.
+-     */
+-    private void handleActionFoo(String param1, String param2) {
+-        // TODO: Handle action Foo
+-        throw new UnsupportedOperationException("Not yet implemented");
+-    }
+-
+-    /**
+-     * Handle action Baz in the provided background thread with the provided
+-     * parameters.
+-     */
+-    private void handleActionBaz(String param1, String param2) {
+-        // TODO: Handle action Baz
+-        throw new UnsupportedOperationException("Not yet implemented");
+-    }
+-}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+index 029ee1a..5a847cc 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+@@ -1,28 +1,28 @@
+ package com.eveningoutpost.dexdrip.Services;
+ 
+-import java.io.IOException;
+-import java.util.Date;
++import android.content.Context;
++import android.content.SharedPreferences;
++import android.preference.PreferenceManager;
++
++import com.eveningoutpost.dexdrip.Models.BgReading;
++import com.eveningoutpost.dexdrip.Models.TransmitterData;
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
++import com.eveningoutpost.dexdrip.Sensor;
++import com.eveningoutpost.dexdrip.utils.BgToSpeech;
++import com.google.gson.Gson;
++import com.google.gson.GsonBuilder;
++
+ import java.io.BufferedReader;
++import java.io.IOException;
+ import java.io.InputStreamReader;
+ import java.io.PrintWriter;
+ import java.net.InetSocketAddress;
+ import java.net.Socket;
+ import java.net.SocketTimeoutException;
++import java.util.Date;
+ import java.util.LinkedList;
+ import java.util.List;
+ 
+-import android.content.Context;
+-import android.content.SharedPreferences;
+-import android.preference.PreferenceManager;
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+-
+-import com.eveningoutpost.dexdrip.utils.BgToSpeech;
+-import com.google.gson.Gson;
+-import com.google.gson.GsonBuilder;
+-import com.eveningoutpost.dexdrip.Sensor;
+-import com.eveningoutpost.dexdrip.Models.BgReading;
+-import com.eveningoutpost.dexdrip.Models.TransmitterData;
+-
+ public class WixelReader  extends Thread {
+ 
+     private final static String TAG = WixelReader.class.getName();
+@@ -323,7 +323,7 @@ public void run()
+     {
+     	Long LastReportedTime = new Date().getTime();
+     	TransmitterRawData LastReportedReading = null;
+-    	Log.e(TAG, "Starting... LastReportedReading " + LastReportedReading);
++    	Log.d(TAG, "Starting... LastReportedReading " + LastReportedReading);
+     	try {
+ 	        while (!mStop && !interrupted()) {
+ 	        	// try to read one object...
+@@ -343,7 +343,7 @@ public void run()
+ 	        		        (!almostEquals(LastReading, LastReportedReading)) &&
+ 	        		        LastReading.CaptureDateTime < new Date().getTime() + 120000) {
+ 	        			// We have a real new reading...
+-	        			Log.e(TAG, "calling setSerialDataToTransmitterRawData " + LastReading.RawValue +
++	        			Log.d(TAG, "calling setSerialDataToTransmitterRawData " + LastReading.RawValue +
+ 	        			        " LastReading.CaptureDateTime " + LastReading.CaptureDateTime + " " + LastReading.TransmissionId);
+ 	        			setSerialDataToTransmitterRawData(LastReading.RawValue,  LastReading.FilteredValue, LastReading.BatteryLife, LastReading.CaptureDateTime);
+ 	        			LastReportedReading = LastReading;
+@@ -378,17 +378,17 @@ public void runFake()
+                 }
+ 
+                 int fakedRaw = 100000 + i * 3000;
+-                Log.e(TAG, "calling setSerialDataToTransmitterRawData " + fakedRaw);
++                Log.d(TAG, "calling setSerialDataToTransmitterRawData " + fakedRaw);
+                 setSerialDataToTransmitterRawData(fakedRaw, fakedRaw ,100, new Date().getTime());
+-                Log.e(TAG, "returned from setSerialDataToTransmitterRawData " + fakedRaw);
++                Log.d(TAG, "returned from setSerialDataToTransmitterRawData " + fakedRaw);
+ 
+                 Long StartLoop = new Date().getTime();
+                 for (int j = 0 ; j < 300; j++) {
+                     Thread.sleep(1000);
+-                    Log.e(TAG, "looping ...." + i + " " + j + " " + (new Date().getTime() - StartLoop)/1000);
++                    Log.d(TAG, "looping ...." + i + " " + j + " " + (new Date().getTime() - StartLoop)/1000);
+                     if(mStop ) {
+                     // we were asked to leave, so do it....
+-						Log.e(TAG, "EXITING mstop=true" );
++						Log.d(TAG, "EXITING mstop=true" );
+                         return;
+                     }
+                 }
+@@ -400,7 +400,7 @@ public void runFake()
+                    break;
+                }
+         }
+-		Log.e(TAG, "EXITING mstop=true" );
++		Log.d(TAG, "EXITING mstop=true" );
+     }
+ 
+     public void Stop()
+@@ -418,7 +418,7 @@ public void setSerialDataToTransmitterRawData(int raw_data, int filtered_data ,i
+                 sensor.latest_battery_level = (sensor.latest_battery_level!=0)?Math.min(sensor.latest_battery_level, transmitterData.sensor_battery_level):transmitterData.sensor_battery_level;;
+                 sensor.save();
+             } else {
+-                Log.w(TAG, "No Active Sensor, Data only stored in Transmitter Data");
++                Log.d(TAG, "No Active Sensor, Data only stored in Transmitter Data");
+             }
+         }
+     }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareAuthentication.java b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareAuthentication.java
+index bc12ae0..177360e 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareAuthentication.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareAuthentication.java
+@@ -5,7 +5,6 @@
+ import android.preference.PreferenceManager;
+ import android.util.Log;
+ 
+-import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.eveningoutpost.dexdrip.ShareModels.Models.ShareAuthenticationBody;
+ import com.eveningoutpost.dexdrip.ShareModels.UserAgentInfo.UserAgent;
+ import com.google.gson.Gson;
+@@ -105,7 +104,7 @@ public void success(Response o, Response response) {
+                             Log.d(TAG, "Session is active :-)");
+                             authSuccess();
+                         } else {
+-                            Log.w(TAG, "Session is apparently not active :-( " + new String(((TypedByteArray) response.getBody()).getBytes()));
++                            Log.d(TAG, "Session is apparently not active :-( " + new String(((TypedByteArray) response.getBody()).getBytes()));
+                             StartRemoteMonitoringSession();
+                         }
+                     }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/StartNewSensor.java b/app/src/main/java/com/eveningoutpost/dexdrip/StartNewSensor.java
+index 59a7d59..a222d30 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/StartNewSensor.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/StartNewSensor.java
+@@ -3,17 +3,14 @@
+ import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.os.Bundle;
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ import android.preference.PreferenceManager;
+-import android.support.v4.widget.DrawerLayout;
+-import android.view.Menu;
+-import android.view.MenuItem;
+ import android.view.View;
+ import android.widget.Button;
+ import android.widget.DatePicker;
+ import android.widget.TimePicker;
+ import android.widget.Toast;
+ 
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+ import com.eveningoutpost.dexdrip.utils.ActivityWithMenu;
+ 
+@@ -60,7 +57,7 @@ public void onClick(View v) {
+               long startTime = calendar.getTime().getTime();
+ 
+               Sensor.create(startTime);
+-              Log.w("NEW SENSOR", "Sensor started at " + startTime);
++              Log.d("NEW SENSOR", "Sensor started at " + startTime);
+ 
+               Toast.makeText(getApplicationContext(), "NEW SENSOR STARTED", Toast.LENGTH_LONG).show();
+               CollectionServiceStarter.newStart(getApplicationContext());
+@@ -71,12 +68,12 @@ public void onClick(View v) {
+               } else {
+                   intent = new Intent(getApplicationContext(), Home.class);
+               }
+-              
++
+               startActivity(intent);
+               finish();
+           }
+ 
+         });
+-        
++
+     }
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
+index 2bc81bc..bbf5e55 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
+@@ -123,7 +123,7 @@ public void ClockTick(Context ctx, boolean trendingToAlertEnd, String bgValue)
+             int timeFromStartPlaying = activeBgAlert.getUpdatePlayTime();
+             AlertType alert = AlertType.get_alert(activeBgAlert.alert_uuid);
+             if (alert == null) {
+-                Log.w(TAG, "ClockTick: The alert was already deleted... will not play");
++                Log.d(TAG, "ClockTick: The alert was already deleted... will not play");
+                 ActiveBgAlert.ClearData();
+                 return;
+             }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
+index 667a345..cc3c05e 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
+@@ -1,5 +1,7 @@
+ package com.eveningoutpost.dexdrip.UtilityModels;
+ 
++import android.app.AlarmManager;
++import android.app.PendingIntent;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.content.SharedPreferences;
+@@ -7,12 +9,14 @@
+ import android.preference.PreferenceManager;
+ 
+ import com.eveningoutpost.dexdrip.Models.UserError.Log;
++import com.eveningoutpost.dexdrip.Services.DailyIntentService;
+ import com.eveningoutpost.dexdrip.Services.DexCollectionService;
+ import com.eveningoutpost.dexdrip.Services.DexShareCollectionService;
+ import com.eveningoutpost.dexdrip.Services.SyncService;
+ import com.eveningoutpost.dexdrip.Services.WixelReader;
+ 
+ import java.io.IOException;
++import java.util.Calendar;
+ 
+ /**
+  * Created by stephenblack on 12/22/14.
+@@ -91,6 +95,7 @@ public void start(Context context, String collection_method) {
+             startPebbleSyncService();
+         }
+         startSyncService();
++        startDailyIntentService();
+         Log.d(TAG, collection_method);
+ 
+         // Start logging to logcat
+@@ -159,6 +164,16 @@ private void startSyncService() {
+         Log.d(TAG, "starting Sync service");
+         mContext.startService(new Intent(mContext, SyncService.class));
+     }
++    private void startDailyIntentService() {
++        Calendar calendar = Calendar.getInstance();
++        calendar.set(Calendar.HOUR_OF_DAY, 4);
++        calendar.set(Calendar.MINUTE, 0);
++        calendar.set(Calendar.SECOND, 0);
++
++        PendingIntent pi = PendingIntent.getService(mContext, 0, new Intent(mContext, DailyIntentService.class),PendingIntent.FLAG_UPDATE_CURRENT);
++        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
++        am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pi);
++    }
+     private void stopBtShareService() {
+         Log.d(TAG, "stopping bt share service");
+         mContext.stopService(new Intent(mContext, DexShareCollectionService.class));
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+index 70e47df..0e10fd9 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+@@ -233,7 +233,7 @@ public void notificationSetter(Context context) {
+             bgOngoingNotification(bgGraphBuilder);
+         }
+         if(prefs.getLong("alerts_disabled_until", 0) > new Date().getTime()){
+-            Log.w("NOTIFICATIONS", "Notifications are currently disabled!!");
++            Log.d("NOTIFICATIONS", "Notifications are currently disabled!!");
+             return;
+         }
+         FileBasedNotifications(context);
+@@ -511,7 +511,7 @@ private static void OtherAlert(Context context, String type, String message, int
+         String otherAlertsSound = prefs.getString("other_alerts_sound", "content://settings/system/notification_sound");
+         Boolean otherAlertsOverrideSilent = prefs.getBoolean("other_alerts_override_silent", false);
+ 
+-        Log.e(TAG,"OtherAlert called " + type + " " + message);
++        Log.d(TAG,"OtherAlert called " + type + " " + message);
+         UserNotification userNotification = UserNotification.GetNotificationByType(type); //"bg_unclear_readings_alert"
+         if ((userNotification == null) || (userNotification.timestamp <= ((new Date().getTime()) - (60000 * snooze)))) {
+             if (userNotification != null) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/RestCalls.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/RestCalls.java
+index 411fc56..eef7f6a 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/RestCalls.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/RestCalls.java
+@@ -50,7 +50,6 @@ public void success(Gson gsonResponse, Response response) {
+                     @Override
+                     public void failure(RetrofitError error) {
+                         Response response = error.getResponse();
+-                        Log.w("REST CALL STATUS:", "" + response.getStatus());
+                         Log.w("REST CALL REASON:", response.getReason());
+                     }
+                 }
+@@ -69,7 +68,6 @@ public void success(Gson gsonResponse, Response response) {
+                     @Override
+                     public void failure(RetrofitError error) {
+                         Response response = error.getResponse();
+-                        Log.w("REST CALL STATUS:", "" + response.getStatus());
+                         Log.w("REST CALL REASON:", response.getReason());
+                     }
+                 }
+@@ -90,7 +88,6 @@ public void success(Gson gsonResponse, Response response) {
+                     @Override
+                     public void failure(RetrofitError error) {
+                         Response response = error.getResponse();
+-                        Log.w("REST CALL STATUS:", "" + response.getStatus());
+                         Log.w("REST CALL REASON:", response.getReason());
+                     }
+                 }
+@@ -111,7 +108,6 @@ public void success(Gson gsonResponse, Response response) {
+                     @Override
+                     public void failure(RetrofitError error) {
+                         Response response = error.getResponse();
+-                        Log.w("REST CALL STATUS:", "" + response.getStatus());
+                         Log.w("REST CALL REASON:", response.getReason());
+                     }
+                 }

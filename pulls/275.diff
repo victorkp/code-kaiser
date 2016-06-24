@@ -1,0 +1,1663 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index ab307a9..8ad64bc 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -87,20 +87,34 @@ android {
+         versionName generateVersionName()
+         multiDexEnabled true
+     }
+-    buildTypes {
++
++    productFlavors {
++        xDrip {
++            applicationId = "com.eveningoutpost.dexdrip"
++            resValue "string", "content_provider", "com.example"
++            resValue "string", "app_name", "xDrip"
++            resValue "string", "target_package", "com.eveningoutpost.dexdrip"
++        }
++        xDripViewer {
++            applicationId = "com.eveningoutpost.dexdrip.viewer"
++            resValue "string", "content_provider", "com.example1"
++            resValue "string", "app_name", "xDripViewer"
++            resValue "string", "target_package", "com.eveningoutpost.dexdrip.viewer"
++        }
+     }
+ }
+ 
+ dependencies {
+     compile fileTree(dir: 'libs', include: ['*.jar'])
+     wearApp project(':wear')
+-    testCompile 'com.squareup.okhttp:mockwebserver:2.5.0'
++    testCompile 'com.squareup.okhttp:mockwebserver:2.6.0'
+     compile 'com.nispok:snackbar:2.10.8'
+     compile 'com.android.support:appcompat-v7:23.1.0'
+-    compile 'com.squareup.okhttp:okhttp:2.5.0'
++    compile 'com.squareup.okhttp:okhttp:2.6.0'
+     compile 'com.google.code.gson:gson:2.3'
+     compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
+     compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
++    compile 'com.squareup.okhttp:logging-interceptor:2.6.0' 
+     compile 'com.getpebble:pebblekit:3.0.0'
+     compile 'io.reactivex:rxjava:1.0.0'
+     compile 'com.github.lecho:hellocharts-android:v1.5.5'
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 30448bf..47e7928 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -39,7 +39,7 @@
+ 
+         <provider
+             android:name="com.activeandroid.content.ContentProvider"
+-            android:authorities="com.example"
++            android:authorities="@string/content_provider"
+             android:exported="false" />
+ 
+         <activity
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index 480ff1e..4565752 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -37,6 +37,7 @@
+ import com.eveningoutpost.dexdrip.Models.Sensor;
+ import com.eveningoutpost.dexdrip.Models.UserError;
+ import com.eveningoutpost.dexdrip.Services.WixelReader;
++import com.eveningoutpost.dexdrip.Services.XDripViewer;
+ import com.eveningoutpost.dexdrip.UtilityModels.BgGraphBuilder;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.Intents;
+@@ -257,13 +258,16 @@ private void updateCurrentBgInfo() {
+         isBTShare = CollectionServiceStarter.isBTShare(getApplicationContext());
+         boolean isWifiWixel = CollectionServiceStarter.isWifiWixel(getApplicationContext());
+         alreadyDisplayedBgInfoCommon = false; // reset flag
+-        if (isBTShare) {
++        
++        boolean xDripViewer = XDripViewer.isxDripViewerMode(getApplicationContext());
++        
++        if(xDripViewer) {
++            updateCurrentBgInfoForxDripViewer(notificationText);
++        } else if (isBTShare) {
+             updateCurrentBgInfoForBtShare(notificationText);
+-        }
+-        if (isBTWixel || isDexbridgeWixel ||  isWifiBluetoothWixel) {
++        } else if (isBTWixel || isDexbridgeWixel ||  isWifiBluetoothWixel) {
+             updateCurrentBgInfoForBtBasedWixel(notificationText);
+-        }
+-        if (isWifiWixel || isWifiBluetoothWixel) {
++        } else if (isWifiWixel || isWifiBluetoothWixel) {
+             updateCurrentBgInfoForWifiWixel(notificationText);
+         }
+         if (mPreferences.getLong("alerts_disabled_until", 0) > new Date().getTime()) {
+@@ -297,7 +301,16 @@ private void updateCurrentBgInfoForWifiWixel(TextView notificationText) {
+         updateCurrentBgInfoCommon(notificationText);
+ 
+     }
++    
++    private void updateCurrentBgInfoForxDripViewer(TextView notificationText) {
++        if (!XDripViewer.isxDripViewerConfigured(getApplicationContext())) {
++            notificationText.setText("First configure Nightscout website address");
++            return;
++        }
++        
++        displayCurrentInfo();
+ 
++    }
+     private void updateCurrentBgInfoForBtBasedWixel(TextView notificationText) {
+         if ((android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+             notificationText.setText("Unfortunately your android version does not support Bluetooth Low Energy");
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+index ed8d912..7589dc5 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+@@ -371,6 +371,63 @@ public static BgReading create(double raw_data, double filtered_data, Context co
+ 
+         return bgReading;
+     }
++    
++    // Used by xDripViewer
++    public static void create(Context context, double raw_data, double age_adjusted_raw_value, double filtered_data, Long timestamp,
++            double calculated_bg,  double calculated_current_slope, boolean hide_slope) {
++        
++        BgReading bgReading = new BgReading();
++        Sensor sensor = Sensor.currentSensor();
++        if (sensor == null) {
++            Log.w(TAG, "No sensor, ignoring this bg reading");
++            return ;
++        }
++
++        Calibration calibration = Calibration.last();
++        if (calibration == null) {
++            Log.d(TAG, "create: No calibration yet");
++            bgReading.sensor = sensor;
++            bgReading.sensor_uuid = sensor.uuid;
++            bgReading.raw_data = (raw_data / 1000);
++            bgReading.age_adjusted_raw_value = age_adjusted_raw_value;
++            bgReading.filtered_data = (filtered_data / 1000);
++            bgReading.timestamp = timestamp;
++            bgReading.uuid = UUID.randomUUID().toString();
++            bgReading.calculated_value = calculated_bg;
++            bgReading.calculated_value_slope = calculated_current_slope;
++            bgReading.hide_slope = hide_slope;
++
++            bgReading.save();
++            bgReading.perform_calculations();
++        } else {
++            Log.d(TAG,"Calibrations, so doing everything bgReading = " + bgReading);
++            bgReading.sensor = sensor;
++            bgReading.sensor_uuid = sensor.uuid;
++            bgReading.calibration = calibration;
++            bgReading.calibration_uuid = calibration.uuid;
++            bgReading.raw_data = (raw_data/1000);
++            bgReading.age_adjusted_raw_value = age_adjusted_raw_value;
++            bgReading.filtered_data = (filtered_data/1000);
++            bgReading.timestamp = timestamp;
++            bgReading.uuid = UUID.randomUUID().toString();
++            bgReading.calculated_value = calculated_bg;
++            bgReading.calculated_value_slope = calculated_current_slope;
++            bgReading.hide_slope = hide_slope;
++
++            if (bgReading.calculated_value < 10) {
++                bgReading.calculated_value = 9;
++                bgReading.hide_slope = true;
++            } else {
++                bgReading.calculated_value = Math.min(400, Math.max(39, bgReading.calculated_value));
++            }
++            Log.i(TAG, "NEW VALUE CALCULATED AT: " + bgReading.calculated_value);
++
++            bgReading.save();
++            BgSendQueue.handleNewBgReading(bgReading, "create", context);
++        }
++
++        Log.i("BG GSON: ",bgReading.toS());
++    }
+ 
+     public static String activeSlopeArrow() {
+         double slope = (float) (BgReading.activeSlope() * 60000);
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+index 08e2680..3ecb701 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+@@ -334,6 +334,15 @@ public static Calibration getForTimestamp(double timestamp) {
+                 .executeSingle();
+     }
+ 
++    public static Calibration getByTimestamp(double timestamp) {
++        Sensor sensor = Sensor.currentSensor();
++        return new Select()
++                .from(Calibration.class)
++                .where("Sensor = ? ", sensor.getId())
++                .where("timestamp = ?", timestamp)
++                .executeSingle();
++    }
++
+     public static Calibration create(double bg, Context context) {
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+         String unit = prefs.getString("units", "mgdl");
+@@ -388,6 +397,40 @@ public static Calibration create(double bg, Context context) {
+         return Calibration.last();
+     }
+ 
++    // Used by xDripViewer
++    public static void createUpdate(String xDrip_sensor_uuid, double bg, long timeStamp, double intercept, double slope, 
++            double estimate_raw_at_time_of_calibration, double slope_confidence , double sensor_confidence, 
++            long raw_timestamp) {
++        Sensor sensor = Sensor.getByUuid(xDrip_sensor_uuid);
++
++        if (sensor == null) {
++            Log.d("CALIBRATION", "No sensor found, ignoring cailbration");
++            return;
++        }
++        
++        Calibration calibration = getByTimestamp(timeStamp);
++        if (calibration != null) {
++            Log.d("CALIBRATION", "updatinga an existing calibration");
++        } else {
++            Log.d("CALIBRATION", "creating a new calibration");
++            calibration = new Calibration();
++        }
++
++        calibration.sensor = sensor;
++        calibration.bg = bg;
++        calibration.timestamp = timeStamp;
++        calibration.sensor_uuid = sensor.uuid;
++        calibration.uuid = UUID.randomUUID().toString();
++        calibration.intercept = intercept;
++        calibration.slope = slope;
++        calibration.estimate_raw_at_time_of_calibration = estimate_raw_at_time_of_calibration;
++        calibration.slope_confidence = slope_confidence;
++        calibration.sensor_confidence = sensor_confidence;
++        calibration.raw_timestamp = raw_timestamp;
++        calibration.check_in = false;
++        calibration.save();
++    }
++    
+     public static List<Calibration> allForSensorInLastFiveDays() {
+         Sensor sensor = Sensor.currentSensor();
+         if (sensor == null) { return null; }
+@@ -698,6 +741,6 @@ public static double min_recent() {
+                 .where("timestamp > " + timestamp)
+                 .orderBy("timestamp desc")
+                 .execute();
+-    }
++     }
+ 
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Sensor.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Sensor.java
+index 5bde7c5..569a9e0 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Sensor.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Sensor.java
+@@ -51,13 +51,30 @@ public static Sensor create(long started_at) {
+         return sensor;
+     }
+     
++ // Used by xDripViewer
++    public static void createUpdate(long started_at, long stopped_at,  int latest_battery_level, String uuid) {
++
++        Sensor sensor = getByTimestamp(started_at);
++        if (sensor != null) {
++            Log.d("SENSOR", "updatinga an existing sensor");
++        } else {
++            Log.d("SENSOR", "creating a new sensor");
++            sensor = new Sensor();
++        }
++        sensor.started_at = started_at;
++        sensor.stopped_at = stopped_at;
++        sensor.latest_battery_level = latest_battery_level;
++        sensor.uuid = uuid;
++        sensor.save();
++    }
++    
+     public static void stopSensor() {
+         Sensor sensor = currentSensor();
+         if(sensor == null) {
+             return;
+         }
+         sensor.stopped_at = new Date().getTime();
+-        Log.i("NEW SENSOR", "Sensor stopped at " + sensor.stopped_at);
++        Log.i("SENSOR", "Sensor stopped at " + sensor.stopped_at);
+         sensor.save();
+         SensorSendQueue.addToQueue(sensor);
+         
+@@ -88,6 +105,34 @@ public static boolean isActive() {
+             return true;
+         }
+     }
++    
++    public static Sensor last() {
++        return new Select()
++                .from(Sensor.class)
++                .orderBy("started_at desc")
++                .executeSingle();
++    }
++    
++    public static Sensor getByTimestamp(double started_at) {
++        return new Select()
++                .from(Sensor.class)
++                .where("started_at = ?", started_at)
++                .executeSingle();
++    }
++    
++    public static Sensor getByUuid(String xDrip_sensor_uuid) {
++        if(xDrip_sensor_uuid == null) {
++            Log.e("SENSOR", "xDrip_sensor_uuid is null");
++            return null;
++        }
++        Log.e("SENSOR", "xDrip_sensor_uuid is " + xDrip_sensor_uuid);
++        
++        return new Select()
++                .from(Sensor.class)
++                .where("uuid = ?", xDrip_sensor_uuid)
++                .executeSingle();
++    }
++    
+ 
+     public static void updateBatteryLevel(Sensor sensor, int sensorBatteryLevel) {
+         if(sensorBatteryLevel < 120) {
+@@ -112,7 +157,7 @@ public static void updateBatteryLevel(Sensor sensor, int sensorBatteryLevel) {
+     public static void updateSensorLocation(String sensor_location) {
+         Sensor sensor = currentSensor();
+         if (sensor == null) {
+-            Log.e("SENSOR MODEL:", "updateSensorLocation called but sensor is null");
++            Log.e("SENSOR", "updateSensorLocation called but sensor is null");
+             return;
+         }
+         sensor.sensor_location = sensor_location;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java b/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
+index 0cdcb04..ea554ea 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
+@@ -8,6 +8,7 @@
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.eveningoutpost.dexdrip.Models.Calibration;
+ import com.eveningoutpost.dexdrip.Models.Sensor;
++import com.eveningoutpost.dexdrip.Services.XDripViewer;
+ import com.eveningoutpost.dexdrip.Tables.BgReadingTable;
+ import com.eveningoutpost.dexdrip.Tables.CalibrationDataTable;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+@@ -33,6 +34,8 @@
+ 
+     public NavDrawerBuilder(Context aContext) {
+         context = aContext;
++        boolean xDripViewer = XDripViewer.isxDripViewerMode(aContext);
++        
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+         boolean IUnderstand = prefs.getBoolean("I_understand", false);
+         if (IUnderstand == false) {
+@@ -55,33 +58,35 @@ public NavDrawerBuilder(Context aContext) {
+             this.nav_drawer_intents.add(new Intent(context, CalibrationDataTable.class));
+         }
+ 
+-        if(is_active_sensor) {
+-            if(!CollectionServiceStarter.isBTShare(context)) {
+-                if (last_two_bgReadings.size() > 1) {
+-                    if (last_two_calibrations.size() > 1) {
+-                        if (bGreadings_in_last_30_mins.size() >= 2) {
+-                            if (time_now - last_two_calibrations.get(0).timestamp < (1000 * 60 * 60)) { //Put steps in place to discourage over calibration
+-                                this.nav_drawer_options.add(CalibrationOverride.menu_name);
+-                                this.nav_drawer_intents.add(new Intent(context, CalibrationOverride.class));
++        if(!xDripViewer) {
++            if(is_active_sensor) {
++                if(!CollectionServiceStarter.isBTShare(context)) {
++                    if (last_two_bgReadings.size() > 1) {
++                        if (last_two_calibrations.size() > 1) {
++                            if (bGreadings_in_last_30_mins.size() >= 2) {
++                                if (time_now - last_two_calibrations.get(0).timestamp < (1000 * 60 * 60)) { //Put steps in place to discourage over calibration
++                                    this.nav_drawer_options.add(CalibrationOverride.menu_name);
++                                    this.nav_drawer_intents.add(new Intent(context, CalibrationOverride.class));
++                                } else {
++                                    this.nav_drawer_options.add(AddCalibration.menu_name);
++                                    this.nav_drawer_intents.add(new Intent(context, AddCalibration.class));
++                                }
+                             } else {
+-                                this.nav_drawer_options.add(AddCalibration.menu_name);
+-                                this.nav_drawer_intents.add(new Intent(context, AddCalibration.class));
++                                this.nav_drawer_options.add("Cannot Calibrate right now");
++                                this.nav_drawer_intents.add(new Intent(context, Home.class));
+                             }
+                         } else {
+-                            this.nav_drawer_options.add("Cannot Calibrate right now");
+-                            this.nav_drawer_intents.add(new Intent(context, Home.class));
++                            this.nav_drawer_options.add(DoubleCalibrationActivity.menu_name);
++                            this.nav_drawer_intents.add(new Intent(context, DoubleCalibrationActivity.class));
+                         }
+-                    } else {
+-                        this.nav_drawer_options.add(DoubleCalibrationActivity.menu_name);
+-                        this.nav_drawer_intents.add(new Intent(context, DoubleCalibrationActivity.class));
+                     }
+                 }
++                this.nav_drawer_options.add(StopSensor.menu_name);
++                this.nav_drawer_intents.add(new Intent(context, StopSensor.class));
++            } else {
++                this.nav_drawer_options.add(StartNewSensor.menu_name);
++                this.nav_drawer_intents.add(new Intent(context, StartNewSensor.class));
+             }
+-            this.nav_drawer_options.add(StopSensor.menu_name);
+-            this.nav_drawer_intents.add(new Intent(context, StopSensor.class));
+-        } else {
+-            this.nav_drawer_options.add(StartNewSensor.menu_name);
+-            this.nav_drawer_intents.add(new Intent(context, StartNewSensor.class));
+         }
+ 
+         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/AsyncTaskBase.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/AsyncTaskBase.java
+new file mode 100644
+index 0000000..2666cd1
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/AsyncTaskBase.java
+@@ -0,0 +1,38 @@
++package com.eveningoutpost.dexdrip.Services;
++
++import android.content.Context;
++import android.os.AsyncTask;
++import android.os.PowerManager;
++
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
++
++abstract class AsyncTaskBase extends AsyncTask<String, Void, Void > {
++    protected final Context mContext;
++    PowerManager.WakeLock wakeLock;
++    private static int lockCounter = 0;
++    private final String TAG; 
++
++    abstract void readData();
++    
++    AsyncTaskBase(Context ctx, String tag) {
++        mContext = ctx.getApplicationContext();
++        PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
++        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WifiReader");
++        wakeLock.acquire();
++        lockCounter++;
++        TAG = tag;
++        Log.e(TAG,"wakelock acquired " + lockCounter);
++    }
++    
++    public Void doInBackground(String... urls) {
++        try {
++            readData();
++        } finally {
++            wakeLock.release();
++            lockCounter--;
++            Log.e(TAG,"wakelock released " + lockCounter);
++        }
++        return null;
++    }
++    
++}
+\ No newline at end of file
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/INsRestApi.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/INsRestApi.java
+new file mode 100644
+index 0000000..102e23a
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/INsRestApi.java
+@@ -0,0 +1,39 @@
++package com.eveningoutpost.dexdrip.Services;
++
++import java.util.List;
++
++import retrofit.Call;
++import retrofit.http.GET;
++import retrofit.http.Query;
++import retrofit.http.Headers;
++import retrofit.http.Header;
++
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutBg;
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutMbg;
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutSensor;
++
++public interface INsRestApi {
++    
++    // gets all sgvs
++    @GET("/api/v1/entries.json?find[type][$eq]=sgv")
++    Call<List<NightscoutBg>> getSgv(
++            @Header("api-secret") String key,
++            @Query("find[date][$gt]") long date,
++            @Query("count") long count
++    );
++    
++    
++    @GET("/api/v1/entries.json?find[type][$eq]=mbg")
++    Call<List<NightscoutMbg>> getMbg(
++            @Header("api-secret") String key,
++            @Query("find[date][$gte]") long date,
++            @Query("count") long count
++    );
++    
++    @GET("/api/v1/entries.json?find[type][$eq]=sensor")
++    Call<List<NightscoutSensor>> getSensor(
++            @Header("api-secret") String key,
++            @Query("find[date][$gte]") long date,
++            @Query("count") long count
++    );
++}    
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/NsRestApiReader.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/NsRestApiReader.java
+new file mode 100644
+index 0000000..8f4722e
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/NsRestApiReader.java
+@@ -0,0 +1,177 @@
++package com.eveningoutpost.dexdrip.Services;
++
++import java.io.IOException;
++import java.util.List;
++
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
++
++import com.google.gson.Gson;
++import com.google.gson.GsonBuilder;
++
++import retrofit.Call;
++import retrofit.Response;
++import retrofit.http.GET;
++import retrofit.http.Query;
++import retrofit.Retrofit;
++import retrofit.GsonConverterFactory;
++
++import com.squareup.okhttp.logging.HttpLoggingInterceptor;
++import com.squareup.okhttp.OkHttpClient;
++
++
++public class NsRestApiReader {
++
++	class NightscoutBg {
++	    double xDrip_raw; // raw_data
++	    double xDrip_age_adjusted_raw_value;
++	    double xDrip_filtered; // filtered_data;
++	    Long date; // timestamp
++	    double sgv; // calculated_bg
++	    double xDrip_calculated_value;
++	    double xDrip_calculated_current_slope;
++	    boolean xDrip_hide_slope;
++	}
++
++	class NightscoutMbg {
++	    Long date; // timestamp
++	    double mbg; // calculated_bg
++	    double xDrip_slope;
++	    double xDrip_intercept;
++	    double xDrip_estimate_raw_at_time_of_calibration;
++	    double xDrip_slope_confidence;
++	    double xDrip_sensor_confidence;
++	    long xDrip_raw_timestamp;
++	    String xDrip_sensor_uuid;
++	}
++	
++   class NightscoutSensor {
++       Long xDrip_started_at;
++       Long xDrip_stopped_at;
++       int xDrip_latest_battery_level;
++       String xDrip_uuid;
++   }
++	
++    private final static String TAG = NsRestApiReader.class.getName();
++
++	
++	private INsRestApi CreateNsMethods(String baseUrl) {
++        Retrofit retrofit;
++
++        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();  
++        // set your desired log level
++        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
++
++        OkHttpClient httpClient = new OkHttpClient();  
++        // add your other interceptors ...
++
++        // add logging as last interceptor
++        httpClient.interceptors().add(logging);  // <-- this is the important line for logging
++
++        Gson gson = new GsonBuilder().create();
++        retrofit = new Retrofit.Builder()
++        .baseUrl(baseUrl)
++        .addConverterFactory(GsonConverterFactory.create(gson))
++        .client(httpClient)
++        .build();
++
++        return retrofit.create(INsRestApi.class);
++    }
++    
++    
++    public List<NightscoutSensor> readSensorDataFromNs(String baseUrl, String key, long startTime, long maxCount) {
++        INsRestApi methods = CreateNsMethods(baseUrl);
++        List<NightscoutSensor> nightscoutSensors = null;
++        try {
++        
++            Call<List<NightscoutSensor>> call = methods.getSensor(key,startTime, maxCount); 
++            
++            Response<List<NightscoutSensor>> response = call.execute();
++            if(response == null) {
++                Log.e(TAG,"readSensorDataFromNs  call.execute returned null");
++                return null;
++            }
++            // http://stackoverflow.com/questions/32517114/how-is-error-handling-done-in-retrofit-2-i-can-not-find-the-retrofiterror-clas
++            if(!response.isSuccess() && response.errorBody() != null) {
++                Log.e(TAG,"readSensorDataFromNs  call.execute returned with error " + response.errorBody());
++                return null;
++            }
++            nightscoutSensors = response.body();
++            //
++        } catch (IOException e ) {
++            Log.e(TAG,"RetrofitError exception was cought " + e.toString());
++            return null;
++        }
++        
++        if(nightscoutSensors == null) {
++            Log.e(TAG,"readSensorDataFromNs returned null");
++            return null;
++        }
++        return nightscoutSensors;
++    }
++
++    public List<NightscoutMbg> readCalDataFromNs(String baseUrl, String key, long startTime, long maxCount) {
++        INsRestApi methods = CreateNsMethods(baseUrl);
++        List<NightscoutMbg> nightscoutMbgs = null;
++        try {
++        
++            Call<List<NightscoutMbg>> call = methods.getMbg(key,startTime, maxCount); 
++            
++            Response<List<NightscoutMbg>> response = call.execute();
++            if(response == null) {
++                Log.e(TAG,"readCalDataFromNs  call.execute returned null");
++                return null;
++            }
++            // http://stackoverflow.com/questions/32517114/how-is-error-handling-done-in-retrofit-2-i-can-not-find-the-retrofiterror-clas
++            if(!response.isSuccess() && response.errorBody() != null) {
++                Log.e(TAG,"readCalDataFromNs  call.execute returned with error " + response.errorBody());
++                return null;
++            }
++            nightscoutMbgs = response.body();
++            //
++        } catch (IOException e ) {
++            Log.e(TAG,"RetrofitError exception was cought", e);
++            return null;
++        }
++        
++        if(nightscoutMbgs == null) {
++            Log.e(TAG,"readCalDataFromNs returned null");
++            return null;
++        }
++        return nightscoutMbgs;
++    }
++
++    public List<NightscoutBg> readBgDataFromNs(String baseUrl, String key, long startTime, long maxCount) {
++        Log.e(TAG,"readBgData Starting to read from retrofit");
++        INsRestApi methods = CreateNsMethods(baseUrl);
++        List<NightscoutBg> nightscoutBgs = null;
++        try {
++        
++            Call<List<NightscoutBg>> call = methods.getSgv(key, startTime, maxCount); 
++            
++            Response<List<NightscoutBg>> response = call.execute();
++            if(response == null) {
++                Log.e(TAG,"readBgData  call.execute returned null");
++                return null;
++            }
++            // http://stackoverflow.com/questions/32517114/how-is-error-handling-done-in-retrofit-2-i-can-not-find-the-retrofiterror-clas
++            if(!response.isSuccess() && response.errorBody() != null) {
++                Log.e(TAG,"readBgData  call.execute returned with error " + response.errorBody());
++                return null;
++            }
++            nightscoutBgs = response.body();
++            //
++        } catch (IOException e ) {
++            Log.e(TAG,"RetrofitError exception was cought", e);
++            return null;
++        }
++        
++        
++        if(nightscoutBgs == null) {
++            Log.e(TAG,"readBgData returned null");
++            return null;
++        }
++        Log.e(TAG,"retrofit returning a list, size = " + nightscoutBgs.size());
++        return nightscoutBgs;
++    }
++
++}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WifiCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WifiCollectionService.java
+index 9918e53..128b57b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WifiCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WifiCollectionService.java
+@@ -1,125 +1,130 @@
+-
+-package com.eveningoutpost.dexdrip.Services;
+-
+-import java.util.Calendar;
+-
+-import android.annotation.TargetApi;
+-import android.app.AlarmManager;
+-import android.app.PendingIntent;
+-import android.app.Service;
+-import android.content.Context;
+-import android.content.Intent;
+-import android.content.SharedPreferences;
+-import android.os.Build;
+-import android.os.IBinder;
+-import android.preference.PreferenceManager;
+-
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+-import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+-import com.eveningoutpost.dexdrip.UtilityModels.ForegroundServiceStarter;
+-import com.eveningoutpost.dexdrip.utils.BgToSpeech;
+-
+-/**
+- * Created by tzachi dar on 10/14/15.
+- */
+-@TargetApi(Build.VERSION_CODES.KITKAT)
+-public class WifiCollectionService extends Service {
+-    private final static String TAG = WifiCollectionService.class.getSimpleName();
+-    private SharedPreferences prefs;
+-    private BgToSpeech bgToSpeech;
+-    public WifiCollectionService dexCollectionService;
+-
+-    private ForegroundServiceStarter foregroundServiceStarter;
+-    private Context mContext;
+-
+-    @Override
+-    public IBinder onBind(Intent intent) {
+-        throw new UnsupportedOperationException("Not yet implemented");
+-    }
+-
+-    @Override
+-    public void onCreate() {
+-        foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), this);
+-        foregroundServiceStarter.start();
+-        mContext = getApplicationContext();
+-        dexCollectionService = this;
+-        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+-        listenForChangeInSettings();
+-        bgToSpeech = BgToSpeech.setupTTS(mContext); //keep reference to not being garbage collected
+-        Log.i(TAG, "onCreate: STARTING SERVICE");
+-    }
+-
+-    @Override
+-    public int onStartCommand(Intent intent, int flags, int startId) {
+-        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+-            stopSelf();
+-            return START_NOT_STICKY;
+-        }
+-        if (CollectionServiceStarter.isWifiWixel(getApplicationContext())
+-                || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())) {
+-            runWixelReader();
+-            // For simplicity done here, would better happen once we know if we have a packet or not...
+-            setFailoverTimer();
+-        } else {
+-            stopSelf();
+-            return START_NOT_STICKY;
+-        }
+-        return START_STICKY;
+-    }
+-
+-    @Override
+-    public void onDestroy() {
+-        super.onDestroy();
+-        Log.d(TAG, "onDestroy entered");
+-        foregroundServiceStarter.stop();
+-        BgToSpeech.tearDownTTS();
+-        Log.i(TAG, "SERVICE STOPPED");
+-        // ???? What will realy stop me, or am I already stopped???
+-    }
+-
+-    public SharedPreferences.OnSharedPreferenceChangeListener prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+-        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+-            if (key.compareTo("run_service_in_foreground") == 0) {
+-                Log.d("FOREGROUND", "run_service_in_foreground changed!");
+-                if (prefs.getBoolean("run_service_in_foreground", false)) {
+-                    foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), dexCollectionService);
+-                    foregroundServiceStarter.start();
+-                    Log.d(TAG, "Moving to foreground");
+-                } else {
+-                    dexCollectionService.stopForeground(true);
+-                    Log.d(TAG, "Removing from foreground");
+-                }
+-            }
+-        }
+-    };
+-
+-
+-    public void setFailoverTimer() {
+-        if (CollectionServiceStarter.isWifiWixel(getApplicationContext())
+-                || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())) {
+-            long retry_in = WixelReader.timeForNextRead();
+-            Log.d(TAG, "setFailoverTimer: Fallover Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
+-            Calendar calendar = Calendar.getInstance();
+-            AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-            if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+-                alarm.setExact(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, WifiCollectionService.class), 0));
+-            } else {
+-                alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, WifiCollectionService.class), 0));
+-            }
+-        } else {
+-            stopSelf();
+-        }
+-    }
+-
+-    public void listenForChangeInSettings() {
+-        prefs.registerOnSharedPreferenceChangeListener(prefListener);
+-    }
+-    
+-    private void runWixelReader() {
+-        // Theoretically can create more than one task. Should not be a problem since android runs them
+-        // on the same thread.
+-        WixelReader task = new WixelReader(getApplicationContext());
+-        // Assume here that task will execute, otheirwise we leak a wake lock...
+-        task.execute();
+-    }
+-}
++
++package com.eveningoutpost.dexdrip.Services;
++
++import java.util.Calendar;
++
++import android.annotation.TargetApi;
++import android.app.AlarmManager;
++import android.app.PendingIntent;
++import android.app.Service;
++import android.content.Context;
++import android.content.Intent;
++import android.content.SharedPreferences;
++import android.os.Build;
++import android.os.IBinder;
++import android.preference.PreferenceManager;
++
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
++import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
++import com.eveningoutpost.dexdrip.UtilityModels.ForegroundServiceStarter;
++import com.eveningoutpost.dexdrip.utils.BgToSpeech;
++
++/**
++ * Created by tzachi dar on 10/14/15.
++ */
++@TargetApi(Build.VERSION_CODES.KITKAT)
++public class WifiCollectionService extends Service {
++    private final static String TAG = WifiCollectionService.class.getSimpleName();
++    private SharedPreferences prefs;
++    private BgToSpeech bgToSpeech;
++    public WifiCollectionService dexCollectionService;
++
++    private ForegroundServiceStarter foregroundServiceStarter;
++    private Context mContext;
++
++    @Override
++    public IBinder onBind(Intent intent) {
++        throw new UnsupportedOperationException("Not yet implemented");
++    }
++
++    @Override
++    public void onCreate() {
++        foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), this);
++        foregroundServiceStarter.start();
++        mContext = getApplicationContext();
++        dexCollectionService = this;
++        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
++        listenForChangeInSettings();
++        bgToSpeech = BgToSpeech.setupTTS(mContext); //keep reference to not being garbage collected
++        Log.i(TAG, "onCreate: STARTING SERVICE");
++    }
++
++    @Override
++    public int onStartCommand(Intent intent, int flags, int startId) {
++        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
++            stopSelf();
++            return START_NOT_STICKY;
++        }
++        if (CollectionServiceStarter.isWifiWixel(getApplicationContext())
++                || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())) {
++            runWixelReader();
++            // For simplicity done here, would better happen once we know if we have a packet or not...
++            setFailoverTimer();
++        } else {
++            stopSelf();
++            return START_NOT_STICKY;
++        }
++        return START_STICKY;
++    }
++
++    @Override
++    public void onDestroy() {
++        super.onDestroy();
++        Log.d(TAG, "onDestroy entered");
++        foregroundServiceStarter.stop();
++        BgToSpeech.tearDownTTS();
++        Log.i(TAG, "SERVICE STOPPED");
++        // ???? What will realy stop me, or am I already stopped???
++    }
++
++    public SharedPreferences.OnSharedPreferenceChangeListener prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
++        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
++            if (key.compareTo("run_service_in_foreground") == 0) {
++                Log.d("FOREGROUND", "run_service_in_foreground changed!");
++                if (prefs.getBoolean("run_service_in_foreground", false)) {
++                    foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), dexCollectionService);
++                    foregroundServiceStarter.start();
++                    Log.d(TAG, "Moving to foreground");
++                } else {
++                    dexCollectionService.stopForeground(true);
++                    Log.d(TAG, "Removing from foreground");
++                }
++            }
++        }
++    };
++
++
++    public void setFailoverTimer() {
++        if (CollectionServiceStarter.isWifiWixel(getApplicationContext())
++                || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())) {
++            long retry_in = WixelReader.timeForNextRead();
++            Log.d(TAG, "setFailoverTimer: Fallover Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
++            Calendar calendar = Calendar.getInstance();
++            AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
++            if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
++                alarm.setExact(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, WifiCollectionService.class), 0));
++            } else {
++                alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, WifiCollectionService.class), 0));
++            }
++        } else {
++            stopSelf();
++        }
++    }
++
++    public void listenForChangeInSettings() {
++        prefs.registerOnSharedPreferenceChangeListener(prefListener);
++    }
++    
++    private void runWixelReader() {
++        // Theoretically can create more than one task. Should not be a problem since android runs them
++        // on the same thread.
++        AsyncTaskBase task;
++        if(XDripViewer.isxDripViewerMode(getApplicationContext())) {
++            task = new XDripViewer(getApplicationContext());
++        } else {
++            task = new WixelReader(getApplicationContext());
++        }
++     // Assume here that task will execute, otheirwise we leak a wake lock...
++        task.execute();
++    }
++}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+index 85a6d2e..1c40da8 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+@@ -1,6 +1,8 @@
+ package com.eveningoutpost.dexdrip.Services;
++import com.eveningoutpost.dexdrip.R;
+ 
+ import android.content.Context;
++import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.os.AsyncTask;
+ import android.os.PowerManager;
+@@ -11,12 +13,17 @@
+ import com.eveningoutpost.dexdrip.Models.TransmitterData;
+ import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ import com.eveningoutpost.dexdrip.Models.Sensor;
+-import com.eveningoutpost.dexdrip.utils.BgToSpeech;
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutBg;
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutMbg;
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutSensor;
++import com.eveningoutpost.dexdrip.UtilityModels.Notifications;
+ import com.google.gson.Gson;
+ import com.google.gson.GsonBuilder;
+ import com.squareup.okhttp.OkHttpClient;
+ import com.squareup.okhttp.Request;
+ import com.squareup.okhttp.Response;
++import com.google.common.base.Charsets;
++import com.google.common.hash.Hashing;
+ 
+ import java.io.BufferedReader;
+ import java.io.IOException;
+@@ -25,45 +32,38 @@
+ import java.net.InetSocketAddress;
+ import java.net.Socket;
+ import java.net.SocketTimeoutException;
++import java.net.URI;
++import java.util.ArrayList;
+ import java.util.Date;
+ import java.util.LinkedList;
+ import java.util.List;
+ import java.util.concurrent.TimeUnit;
++import java.util.ListIterator;
+ 
++import com.google.gson.Gson;
++import com.google.gson.GsonBuilder;
++import com.squareup.okhttp.Interceptor;
++import com.squareup.okhttp.logging.HttpLoggingInterceptor;
++import com.squareup.okhttp.OkHttpClient;
+ 
+ // Important note, this class is based on the fact that android will always run it one thread, which means it does not
+ // need synchronization
+ 
+-public class WixelReader extends AsyncTask<String, Void, Void > {
++public class WixelReader extends AsyncTaskBase {
+ 
+     private final static String TAG = WixelReader.class.getName();
+-    private static BgToSpeech bgToSpeech;
+-
+-    private static OkHttpClient httpClient = null;
+-
+-    private final Context mContext;
+-    PowerManager.WakeLock wakeLock;
+-
++    
+     private final static long DEXCOM_PERIOD=300000;
++    private static OkHttpClient httpClient = null;
+     
+-    private static int lockCounter = 0;
+     
+     // This variables are for fake function only
+     static int i = 0;
+     static int added = 5;
+ 
+     public WixelReader(Context ctx) {
+-        mContext = ctx.getApplicationContext();
+-        PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+-        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WifiReader");
+-        wakeLock.acquire();
+-        lockCounter++;
+-        Log.e(TAG,"wakelock acquired " + lockCounter);
++        super(ctx, TAG);
+     }
+-
+-
+-    
+-    
+     public static boolean IsConfigured(Context ctx) {
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+         String recieversIpAddresses = prefs.getString("wifi_recievers_addresses", "");
+@@ -420,20 +420,12 @@ static Long timeForNextRead() {
+         }
+     }
+ 
+-    public Void doInBackground(String... urls) {
+-        try {
+-            readData();
+-        } finally {
+-            wakeLock.release();
+-            lockCounter--;
+-            Log.e(TAG,"wakelock released " + lockCounter);
+-        }
+-        return null;
+-    }
+-    
+-    
++    @Override
+     public void readData()
+     {
++        if(!WixelReader.IsConfigured(mContext)) {
++            return;
++        }
+         Long LastReportedTime = 0L;
+     	TransmitterData lastTransmitterData = TransmitterData.last();
+     	if(lastTransmitterData != null) {
+@@ -453,9 +445,7 @@ public void readData()
+     	Log.d(TAG, "Starting... LastReportedReading " + LastReportedReading);
+     	// try to read one object...
+         TransmitterRawData[] LastReadingArr = null;
+-        if(!WixelReader.IsConfigured(mContext)) {
+-            return;
+-        }
++
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+         String recieversIpAddresses = prefs.getString("wifi_recievers_addresses", "");
+         
+@@ -499,7 +489,7 @@ public void readData()
+     }
+ 
+ 
+-    public void setSerialDataToTransmitterRawData(int raw_data, int filtered_data ,int sensor_battery_leve, Long CaptureTime) {
++     public void setSerialDataToTransmitterRawData(int raw_data, int filtered_data ,int sensor_battery_leve, Long CaptureTime) {
+ 
+         TransmitterData transmitterData = TransmitterData.create(raw_data, sensor_battery_leve, CaptureTime);
+         if (transmitterData != null) {
+@@ -532,4 +522,9 @@ void readDataFake()
+         setSerialDataToTransmitterRawData(fakedRaw, fakedRaw ,215, new Date().getTime());
+         Log.d(TAG, "returned from setSerialDataToTransmitterRawData " + fakedRaw);
+     }
++    
++
++
++    
+ }
++
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/XDripViewer.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/XDripViewer.java
+new file mode 100644
+index 0000000..ba1ca3b
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/XDripViewer.java
+@@ -0,0 +1,190 @@
++package com.eveningoutpost.dexdrip.Services;
++
++import java.util.List;
++import java.util.ListIterator;
++
++import android.content.Context;
++import android.content.Intent;
++import android.content.SharedPreferences;
++import android.os.AsyncTask;
++import android.os.PowerManager;
++import android.preference.PreferenceManager;
++
++import com.eveningoutpost.dexdrip.Models.BgReading;
++import com.eveningoutpost.dexdrip.Models.Calibration;
++import com.eveningoutpost.dexdrip.Models.Sensor;
++import com.eveningoutpost.dexdrip.Models.TransmitterData;
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutBg;
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutMbg;
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutSensor;
++import com.eveningoutpost.dexdrip.UtilityModels.Notifications;
++import com.eveningoutpost.dexdrip.R;
++
++//Important note, this class is based on the fact that android will always run it one thread, which means it does not
++//need synchronization
++
++public class XDripViewer extends AsyncTaskBase {
++    
++    private final static String TAG = XDripViewer.class.getName();
++    
++    XDripViewer(Context ctx) {
++        super(ctx, TAG);
++    }
++
++    @Override
++    public void readData() {
++        try {
++            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
++            String rest_addresses = prefs.getString("xdrip_viewer_ns_addresses", "");
++            String hashedSecret = "";
++            readSensorData(rest_addresses, hashedSecret);
++            readCalData(rest_addresses, hashedSecret);
++            readBgData(rest_addresses, hashedSecret);
++        } catch (Exception e) {
++            Log.e(TAG, "readData cought exception in xDrip viewer mode ", e);
++            e.printStackTrace();
++        }
++    }
++
++
++    private void readSensorData(String baseUrl, String key) {
++
++        NsRestApiReader nsRestApiReader = new NsRestApiReader();
++        Long LastReportedTime = 0L;
++
++        Sensor lastSensor = Sensor.last();
++
++        if(lastSensor != null) {
++            LastReportedTime = (long)lastSensor.started_at;
++        }
++        Log.e(TAG, "readSensorData  LastReportedTime = " + LastReportedTime);
++
++        List<NightscoutSensor> nightscoutSensors = nsRestApiReader.readSensorDataFromNs(baseUrl, key, LastReportedTime, 10 );
++        if(nightscoutSensors == null) {
++            Log.e(TAG, "readBgDataFromNs returned null");
++            return;
++        }
++
++        ListIterator<NightscoutSensor> li = nightscoutSensors.listIterator(nightscoutSensors.size());
++        long lastInserted = 0;
++        while(li.hasPrevious()) {
++            NightscoutSensor nightscoutSensor = li.previous();
++            Log.e(TAG, "nightscoutSensor " + nightscoutSensor.xDrip_uuid + " " + nightscoutSensor.xDrip_started_at);
++            if(nightscoutSensor.xDrip_started_at < lastInserted) {
++                Log.e(TAG, "not inserting Sensor, since order is wrong. ");
++                continue;
++            }
++            Sensor.createUpdate(nightscoutSensor.xDrip_started_at, nightscoutSensor.xDrip_stopped_at, nightscoutSensor.xDrip_latest_battery_level, nightscoutSensor.xDrip_uuid);
++            lastInserted = nightscoutSensor.xDrip_started_at;
++        }
++    }  
++
++    private void readCalData(String baseUrl, String key) {
++
++        NsRestApiReader nsRestApiReader = new NsRestApiReader();
++        Long LastReportedTime = 0L;
++
++        Calibration lastCalibration = Calibration.last();
++
++        if(lastCalibration != null) {
++            LastReportedTime = (long)lastCalibration.timestamp;
++        }
++        Log.e(TAG, "readCalData  LastReportedTime = " + LastReportedTime);
++
++        List<NightscoutMbg> nightscoutMbgs = nsRestApiReader.readCalDataFromNs(baseUrl, key, LastReportedTime, 10 );
++        if(nightscoutMbgs == null) {
++            Log.e(TAG, "readCalDataFromNs returned null");
++            return;
++        }
++
++        ListIterator<NightscoutMbg> li = nightscoutMbgs.listIterator(nightscoutMbgs.size());
++        long lastInserted = 0;
++        while(li.hasPrevious()) {
++            NightscoutMbg nightscoutMbg = li.previous();
++            Log.e(TAG, "NightscoutMbg " + nightscoutMbg.mbg + " " + nightscoutMbg.date);
++            if(nightscoutMbg.date < lastInserted) {
++                Log.e(TAG, "not inserting calibratoin, since order is wrong. ");
++                continue;
++            }
++            Calibration.createUpdate(nightscoutMbg.xDrip_sensor_uuid, nightscoutMbg.mbg, nightscoutMbg.date, nightscoutMbg.xDrip_intercept, nightscoutMbg.xDrip_slope, nightscoutMbg.xDrip_estimate_raw_at_time_of_calibration,
++                    nightscoutMbg.xDrip_slope_confidence , nightscoutMbg.xDrip_sensor_confidence, nightscoutMbg.xDrip_raw_timestamp);
++            lastInserted = nightscoutMbg.date;
++        }
++    }    
++    
++    
++    private void readBgData(String baseUrl, String key) {
++        
++        NsRestApiReader nsRestApiReader = new NsRestApiReader();
++        Long LastReportedTime = 0L;
++        TransmitterData lastTransmitterData = TransmitterData.last();
++        if(lastTransmitterData != null) {
++            LastReportedTime = lastTransmitterData.timestamp;
++        }
++        Log.e(TAG, "readBgData  LastReportedTime = " + LastReportedTime);
++        
++        List<NightscoutBg> nightscoutBgs = nsRestApiReader.readBgDataFromNs(baseUrl,key, LastReportedTime, 12 * 36 );
++        if(nightscoutBgs == null) {
++            Log.e(TAG, "readBgDataFromNs returned null");
++            return;
++        }
++        Log.e(TAG, "readBgData  finished reading from ns");
++        
++        ListIterator<NightscoutBg> li = nightscoutBgs.listIterator(nightscoutBgs.size());
++        long lastInserted = 0;
++        while(li.hasPrevious()) {
++            // also load to other table !!!
++            NightscoutBg nightscoutBg = li.previous();
++            Log.e(TAG, "nightscoutBg " + nightscoutBg.sgv + " " + nightscoutBg.xDrip_raw + " " + mContext);
++            if(nightscoutBg.date == lastInserted) {
++              Log.w(TAG, "not inserting packet, since it seems duplicate ");
++              continue;
++            }
++            if(nightscoutBg.date < lastInserted) {
++              Log.e(TAG, "not inserting packet, since order is wrong. ");
++              continue;
++            }
++            TransmitterData.create((int)nightscoutBg.xDrip_raw, 100 /* ??????? */, nightscoutBg.date);
++            BgReading.create(mContext, 
++                    nightscoutBg.xDrip_raw * 1000,
++                    nightscoutBg.xDrip_age_adjusted_raw_value,
++                    nightscoutBg.xDrip_filtered * 1000,
++                    nightscoutBg.date, 
++                    nightscoutBg.xDrip_calculated_value != 0 ? nightscoutBg.xDrip_calculated_value : nightscoutBg.sgv,
++                    nightscoutBg.xDrip_calculated_current_slope,
++                    nightscoutBg.xDrip_hide_slope);
++            
++            lastInserted = nightscoutBg.date;
++        }
++        
++        Log.e(TAG, "readBgData  finished with BgReading.create ");
++        if(nightscoutBgs.size() > 0) {
++            // Call the notification service only if we have new data...
++            mContext.startService(new Intent(mContext, Notifications.class));
++        }
++    }
++    
++    
++    static public boolean isxDripViewerMode(Context context) {
++        return (context.getPackageName().equals("com.eveningoutpost.dexdrip")) ? false : true;
++    }
++    
++    public static boolean isxDripViewerConfigured(Context ctx) {
++        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
++        String recieversIpAddresses = prefs.getString("xdrip_viewer_ns_addresses", "");
++        if(recieversIpAddresses == null || recieversIpAddresses.equals("") ||
++                recieversIpAddresses.equals(R.string.xdrip_viewer_ns_example)) {
++            return false;
++        }
++        return true;
++    }
++/*
++ * curl examples
++ * curl -X GET --header "Accept: application/json api-secret: 6aaafe81264eb79d079caa91bbf25dba379ff6e2" "https://snirdar.azurewebsites.net/api/v1/entries/cal?count=122" -k
++ * curl -X GET --header "Accept: application/json api-secret: 6aaafe81264eb79d079caa91bbf25dba379ff6e2" "https://snirdar.azurewebsites.net/api/v1/entries.json?find%5Btype%5D%5B%24eq%5D=cal&count=1" -k 
++ * 
++ * 
++ *
++ */
++}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
+index fd35fe4..cfdf123 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
+@@ -14,7 +14,7 @@
+ import com.eveningoutpost.dexdrip.Services.DexShareCollectionService;
+ import com.eveningoutpost.dexdrip.Services.SyncService;
+ import com.eveningoutpost.dexdrip.Services.WifiCollectionService;
+-import com.eveningoutpost.dexdrip.Services.WixelReader;
++import com.eveningoutpost.dexdrip.Services.XDripViewer;
+ 
+ import java.io.IOException;
+ import java.util.Calendar;
+@@ -29,6 +29,9 @@
+ 
+ 
+     public static boolean isWifiandBTWixel(Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return false;
++        }
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+         String collection_method = prefs.getString("dex_collection_method", "BluetoothWixel");
+         if(collection_method.compareTo("WifiBlueToothWixel") == 0) {
+@@ -36,8 +39,18 @@ public static boolean isWifiandBTWixel(Context context) {
+         }
+         return false;
+     }
++    
++    private static boolean isWifiandBTWixel(String collection_method, Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return false;
++        }
++        return collection_method.equals("WifiBlueToothWixel"); 
++    }
+ 
+     public static boolean isBTWixel(Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return false;
++        }
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+         String collection_method = prefs.getString("dex_collection_method", "BluetoothWixel");
+         if(collection_method.compareTo("BluetoothWixel") == 0) {
+@@ -45,9 +58,18 @@ public static boolean isBTWixel(Context context) {
+         }
+         return false;
+     }
+-    public static boolean isBTWixel(String collection_method) { return collection_method.equals("BluetoothWixel"); }
++
++    private static boolean isBTWixel(String collection_method, Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return false;
++        }
++        return collection_method.equals("BluetoothWixel"); 
++    }
+ 
+     public static boolean isDexbridgeWixel(Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return false;
++        }
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+         String collection_method = prefs.getString("dex_collection_method", "BluetoothWixel");
+         if(collection_method.compareTo("DexbridgeWixel") == 0) {
+@@ -55,9 +77,18 @@ public static boolean isDexbridgeWixel(Context context) {
+         }
+         return false;
+     }
+-    public static boolean isDexbridgeWixel(String collection_method) { return collection_method.equals("DexbridgeWixel"); }
++    
++    private static boolean isDexbridgeWixel(String collection_method, Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return false;
++        }
++        return collection_method.equals("DexbridgeWixel"); 
++    }
+ 
+     public static boolean isBTShare(Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return false;
++        }
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+         String collection_method = prefs.getString("dex_collection_method", "BluetoothWixel");
+         if(collection_method.compareTo("DexcomShare") == 0) {
+@@ -65,9 +96,17 @@ public static boolean isBTShare(Context context) {
+         }
+         return false;
+     }
+-    public static boolean isBTShare(String collection_method) { return collection_method.equals("DexcomShare"); }
++    public static boolean isBTShare(String collection_method, Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return false;
++        }
++        return collection_method.equals("DexcomShare"); 
++    }
+ 
+     public static boolean isWifiWixel(Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return true;
++        }
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+         String collection_method = prefs.getString("dex_collection_method", "BluetoothWixel");
+         if(collection_method.compareTo("WifiWixel") == 0) {
+@@ -75,7 +114,12 @@ public static boolean isWifiWixel(Context context) {
+         }
+         return false;
+     }
+-    public static boolean isWifiWixel(String collection_method) { return collection_method.equals("WifiWixel"); }
++    public static boolean isWifiWixel(String collection_method, Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return true;
++        }
++        return collection_method.equals("WifiWixel"); 
++    }
+ 
+     public static void newStart(Context context) {
+         CollectionServiceStarter collectionServiceStarter = new CollectionServiceStarter(context);
+@@ -86,22 +130,22 @@ public void start(Context context, String collection_method) {
+         mContext = context;
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+ 
+-        if(isBTWixel(collection_method)||isDexbridgeWixel(collection_method)) {
++        if(isBTWixel(collection_method, context)||isDexbridgeWixel(collection_method, context)) {
+             Log.d("DexDrip", "Starting bt wixel collector");
+             stopWifWixelThread();
+             stopBtShareService();
+             startBtWixelService();
+-        } else if(isWifiWixel(collection_method)){
++        } else if(isWifiWixel(collection_method, context)){
+             Log.d("DexDrip", "Starting wifi wixel collector");
+             stopBtWixelService();
+             stopBtShareService();
+             startWifWixelThread();
+-        } else if(isBTShare(collection_method)) {
++        } else if(isBTShare(collection_method, context)) {
+             Log.d("DexDrip", "Starting bt share collector");
+             stopBtWixelService();
+             stopWifWixelThread();
+             startBtShareService();
+-        } else if (isWifiandBTWixel(context)) {
++        } else if (isWifiandBTWixel(collection_method, context)) {
+             Log.d("DexDrip", "Starting wifi and bt wixel collector");
+             stopBtWixelService();
+             stopWifWixelThread();
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+index dcc01c9..70645d6 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+@@ -224,6 +224,7 @@ private void populateV1APIBGEntry(JSONArray array, BgReading record, boolean xDr
+ 	            json.put("xDrip_calculated_value", record.calculated_value);
+ 	            json.put("xDrip_age_adjusted_raw_value", record.age_adjusted_raw_value);
+ 	            json.put("xDrip_calculated_current_slope", record.currentSlope());
++	            json.put("xDrip_hide_slope", record.hide_slope);
+             }
+             json.put("sysTime", format.format(record.timestamp));
+             array.put(json);
+@@ -354,6 +355,7 @@ private boolean doMongoUpload(SharedPreferences prefs, List<BgReading> glucoseDa
+ 	                            testData.put("xDrip_calculated_value", record.calculated_value);
+ 	                            testData.put("xDrip_calculated_current_slope", record.currentSlope());
+ 	                            testData.put("xDrip_age_adjusted_raw_value", record.age_adjusted_raw_value);
++	                            testData.put("xDrip_hide_slope", record.hide_slope);
+                             }
+                             testData.put("sysTime", format.format(record.timestamp));
+                             BasicDBObject query = new BasicDBObject("type", "sgv").append("sysTime", format.format(record.timestamp));
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+index 145a125..50fbe60 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+@@ -27,6 +27,7 @@
+ 
+ import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ import com.eveningoutpost.dexdrip.Services.MissedReadingService;
++import com.eveningoutpost.dexdrip.Services.XDripViewer;
+ import com.eveningoutpost.dexdrip.R;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.PebbleSync;
+@@ -235,6 +236,7 @@ private static void bindPreferenceSummaryToValueAndEnsureNumeric(Preference pref
+     }
+ 
+ 
++    // This class is used by android, so it must stay public although this will compile when it is private.
+     public static class AllPrefsFragment extends PreferenceFragment {
+         @Override
+         public void onCreate(Bundle savedInstanceState) {
+@@ -279,6 +281,7 @@ public void onCreate(Bundle savedInstanceState) {
+             final Preference displayBridgeBatt = findPreference("display_bridge_battery");
+             final Preference runInForeground = findPreference("run_service_in_foreground");
+             final Preference wifiRecievers = findPreference("wifi_recievers_addresses");
++            final Preference xDripViewerNsAdresses = findPreference("xdrip_viewer_ns_addresses");
+             final Preference predictiveBG = findPreference("predictive_bg");
+             final Preference interpretRaw = findPreference("interpret_raw");
+ 
+@@ -373,6 +376,7 @@ public boolean onPreferenceChange(Preference preference, Object newValue) {
+             bindPreferenceSummaryToValue(collectionMethod);
+             bindPreferenceSummaryToValue(shareKey);
+             bindPreferenceSummaryToValue(wifiRecievers);
++            bindPreferenceSummaryToValue(xDripViewerNsAdresses);
+             bindPreferenceSummaryToValue(transmitterId);
+             transmitterId.getEditText().setFilters(new InputFilter[]{new InputFilter.AllCaps()});
+             collectionMethod.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+@@ -458,6 +462,32 @@ public boolean onPreferenceChange(Preference preference, Object newValue) {
+                     return true;
+                 }
+             });
++            
++            // Remove all the parts that are not needed in xDripViewer (doing it all in one place to avoid having many ifs)
++            if(XDripViewer.isxDripViewerMode(getActivity())) {
++                collectionCategory.removePreference(collectionMethod);
++                collectionCategory.removePreference(shareKey);
++                collectionCategory.removePreference(scanShare);
++                collectionCategory.removePreference(wifiRecievers);
++                collectionCategory.removePreference(transmitterId);
++                collectionCategory.removePreference(displayBridgeBatt);
++                
++                final PreferenceCategory dataSyncCategory = (PreferenceCategory) findPreference("dataSync");
++                final Preference autoConfigure = findPreference("auto_configure");
++                final Preference cloudStorageMongo =  findPreference("cloud_storage_mongo");
++                final Preference cloudStorageApi =  findPreference("cloud_storage_api");
++                final Preference dexcomServerUploadScreen =  findPreference("dexcom_server_upload_screen");
++                final Preference xDripViewerUploadMode =  findPreference("xDripViewer_upload_mode");
++                
++                dataSyncCategory.removePreference(autoConfigure);
++                dataSyncCategory.removePreference(cloudStorageMongo);
++                dataSyncCategory.removePreference(cloudStorageApi);
++                dataSyncCategory.removePreference(dexcomServerUploadScreen);
++                dataSyncCategory.removePreference(xDripViewerUploadMode);
++                
++            } else {
++                collectionCategory.removePreference(xDripViewerNsAdresses);
++            }
+         }
+ 
+         private void bindWidgetUpdater() {
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index c90fd5c..cf718db 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -3,8 +3,6 @@
+ 
+     <string name="pref_I_understand_title"> I UNDERSTAND AND AGREE</string>
+     <string name="pref_I_understand_summery">xDrip MUST NOT BE USED TO MAKE MEDICAL DECISIONS. THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. </string>
+-    <string name="app_name">xDrip</string>
+-    <string name="hello_world">Hello world!</string>
+     <string name="action_settings">Settings</string>
+     <string name="title_activity_bluetooth_scan">BluetoothScan</string>
+     <string name="connected">Connected</string>
+@@ -100,6 +98,11 @@
+     <string name="wifi_recievers_dialog_message">Comma separated list of ip:port (for example 37.142.132.220:50005,37.142.132.220:50010,mongodb://user:pass@ds053958.mongolab.com:53958/db/collection)</string>
+     <string name="wifi_recievers_dialog_title">Enter ip addresses and ports of receivers (including mongodb addresses if needed)</string>
+ 
++    <!-- xDrip Viewer Settings -->
++    <string name="xdrip_viewer_ns_message_message">Enter nighscout site name and key. For example https://{YOUR-SITE}.azurewebsites.net</string>
++    <string name="xdrip_viewer_ns_dialog_title">Nightscout rest api parameters, and secret key.</string>
++    <string name="xdrip_viewer_ns_example">https://{YOUR-SITE}.azurewebsites.net</string>
++    
+     <!-- Location Settings -->
+     <string name="location_not_found_title">Location Is Not Enabled</string>
+     <string name="location_not_found_message">For Bluetooth discovery to work on newer devices, location must be enabled. xDrip does not track your location and it can be disabled after pairing is successful.</string>
+diff --git a/app/src/main/res/xml/pref_advanced_settings.xml b/app/src/main/res/xml/pref_advanced_settings.xml
+index 22b1bf6..140d4de 100644
+--- a/app/src/main/res/xml/pref_advanced_settings.xml
++++ b/app/src/main/res/xml/pref_advanced_settings.xml
+@@ -138,17 +138,12 @@
+             android:title="Widget Range Lines"
+             android:summary="Show a high and low line on the widget."
+             android:defaultValue="false" />
+-        <CheckBoxPreference
+-            android:key="xDripViewer_upload_mode"
+-            android:title="xDripViewer upload mode"
+-            android:summary="Upload more fields needed for optimum xDripViewer functioning"
+-            android:defaultValue="false" />
+         <Preference
+             android:title="View Recent Errors/Warnings"
+             android:key="recent_errors">
+             <intent
+                 android:action="android.intent.action.MAIN"
+-                android:targetPackage="com.eveningoutpost.dexdrip"
++                android:targetPackage="@string/target_package"
+                 android:targetClass="com.eveningoutpost.dexdrip.ErrorsActivity"/>
+         </Preference>
+     </PreferenceCategory>
+diff --git a/app/src/main/res/xml/pref_data_source.xml b/app/src/main/res/xml/pref_data_source.xml
+index 2260f6a..be9b6c7 100644
+--- a/app/src/main/res/xml/pref_data_source.xml
++++ b/app/src/main/res/xml/pref_data_source.xml
+@@ -45,5 +45,15 @@
+             android:defaultValue=""
+             android:inputType="textUri">
+         </EditTextPreference>
++        
++        <EditTextPreference
++            android:title="Nightscout website address"
++            android:key="xdrip_viewer_ns_addresses"
++            android:dialogTitle="@string/xdrip_viewer_ns_dialog_title"
++            android:dialogMessage="@string/xdrip_viewer_ns_message_message"
++            android:defaultValue="https://{YOUR-SITE}.azurewebsites.net"
++            android:inputType="textUri">
++        </EditTextPreference>
++        
+     </PreferenceCategory>
+ </PreferenceScreen>
+diff --git a/app/src/main/res/xml/pref_data_sync.xml b/app/src/main/res/xml/pref_data_sync.xml
+index 5065bd4..4d4f011 100644
+--- a/app/src/main/res/xml/pref_data_sync.xml
++++ b/app/src/main/res/xml/pref_data_sync.xml
+@@ -105,11 +105,15 @@
+                 android:summary="Manage your existing followers and invite new ones.">
+                 <intent
+                     android:action="android.intent.action.MAIN"
+-                    android:targetPackage="com.eveningoutpost.dexdrip"
++                    android:targetPackage="@string/target_package"
+                     android:targetClass="com.eveningoutpost.dexdrip.FollowerManagementActivity"/>
+             </Preference>
+         </PreferenceScreen>
+-
++        <CheckBoxPreference
++            android:key="xDripViewer_upload_mode"
++            android:title="xDripViewer upload mode"
++            android:summary="Upload more fields needed for optimum xDripViewer functioning"
++            android:defaultValue="false" />
+     </PreferenceCategory>
+ 
+ </PreferenceScreen>
+diff --git a/app/src/main/res/xml/pref_license.xml b/app/src/main/res/xml/pref_license.xml
+index 5394c6a..f2494e0 100644
+--- a/app/src/main/res/xml/pref_license.xml
++++ b/app/src/main/res/xml/pref_license.xml
+@@ -1,14 +1,14 @@
+-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+-    <PreferenceCategory
+-        android:title="EULA"
+-        android:key="title_I_understand">
+-        <Preference android:title="End User License Agreement"
+-            android:key="I_understand" >
+-            <intent
+-                android:action="android.intent.action.MAIN"
+-                android:targetPackage="com.eveningoutpost.dexdrip"
+-                android:targetClass="com.eveningoutpost.dexdrip.LicenseAgreementActivity"
+-                />
+-        </Preference>
+-    </PreferenceCategory>
+-</PreferenceScreen>
++<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
++    <PreferenceCategory
++        android:title="EULA"
++        android:key="title_I_understand">
++        <Preference android:title="End User License Agreement"
++            android:key="I_understand" >
++            <intent
++                android:action="android.intent.action.MAIN"
++                android:targetPackage="@string/target_package"
++                android:targetClass="com.eveningoutpost.dexdrip.LicenseAgreementActivity"
++                />
++        </Preference>
++    </PreferenceCategory>
++</PreferenceScreen>
+diff --git a/app/src/main/res/xml/pref_notifications.xml b/app/src/main/res/xml/pref_notifications.xml
+index 7970a21..3cbb747 100644
+--- a/app/src/main/res/xml/pref_notifications.xml
++++ b/app/src/main/res/xml/pref_notifications.xml
+@@ -6,7 +6,7 @@
+             android:key="bg_level_alerts" >
+             <intent
+                 android:action="android.intent.action.MAIN"
+-                android:targetPackage="com.eveningoutpost.dexdrip"
++                android:targetPackage="@string/target_package"
+                 android:targetClass="com.eveningoutpost.dexdrip.AlertList"
+                 />
+         </Preference>
+diff --git a/wear/build.gradle b/wear/build.gradle
+index 45d4511..2a2aed3 100644
+--- a/wear/build.gradle
++++ b/wear/build.gradle
+@@ -18,6 +18,17 @@ android {
+             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+         }
+     }
++
++    publishNonDefault true
++
++    productFlavors {
++        xdrip {
++            applicationId = "com.eveningoutpost.dexdrip"
++        }
++        xdripviewer {
++            applicationId = "com.eveningoutpost.dexdrip.viewer"
++        }
++    }
+ }
+ 
+ dependencies {

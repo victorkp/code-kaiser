@@ -1,0 +1,27 @@
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 03d9c59..1191184 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -32,7 +32,7 @@
+             android:value="DexDrip.db" />
+         <meta-data
+             android:name="AA_DB_VERSION"
+-            android:value="36" />
++            android:value="37" />
+ 
+         <provider
+             android:name="com.activeandroid.content.ContentProvider"
+diff --git a/app/src/main/assets/migrations/36.sql b/app/src/main/assets/migrations/36.sql
+deleted file mode 100644
+index 36b8ef0..0000000
+--- a/app/src/main/assets/migrations/36.sql
++++ /dev/null
+@@ -1 +0,0 @@
+-ALTER TABLE Sensors ADD COLUMN sensor_location TEXT;
+diff --git a/app/src/main/assets/migrations/37.sql b/app/src/main/assets/migrations/37.sql
+new file mode 100644
+index 0000000..36b8ef0
+--- /dev/null
++++ b/app/src/main/assets/migrations/37.sql
+@@ -0,0 +1 @@
++ALTER TABLE Sensors ADD COLUMN sensor_location TEXT;

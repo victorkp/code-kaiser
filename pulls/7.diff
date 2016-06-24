@@ -1,0 +1,216 @@
+diff --git a/README.md b/README.md
+index aab4495..8e1a971 100644
+--- a/README.md
++++ b/README.md
+@@ -1,4 +1,4 @@
+-DexDrip
++xDrip
+ =======
+ 
+ Android Application that collects dexcom signals, allows calibrations, and (soon) uploads to a secure server
+@@ -32,7 +32,7 @@ Android Application that collects dexcom signals, allows calibrations, and (soon
+ 
+ 
+ # LINKS
+-* [Project Site](http://stephenblackwasalreadytaken.github.io/DexDrip/)
+-* [What you will need & Diagrams](https://github.com/StephenBlackWasAlreadyTaken/DexDrip/blob/gh-pages/hardware_setup.md)
+-* [Wixel App](https://github.com/StephenBlackWasAlreadyTaken/wixel-DexDrip)
+-* [Android App](https://github.com/StephenBlackWasAlreadyTaken/DexDrip)
++* [Project Site](http://stephenblackwasalreadytaken.github.io/xDrip/)
++* [What you will need & Diagrams](https://github.com/StephenBlackWasAlreadyTaken/xDrip/blob/gh-pages/hardware_setup.md)
++* [Wixel App](https://github.com/StephenBlackWasAlreadyTaken/wixel-xDrip)
++* [Android App](https://github.com/StephenBlackWasAlreadyTaken/xDrip)
+diff --git a/app/app.iml b/app/app.iml
+index 0a4a73d..30376dc 100644
+--- a/app/app.iml
++++ b/app/app.iml
+@@ -1,5 +1,5 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+-<module external.linked.project.path="$MODULE_DIR$" external.root.project.path="$MODULE_DIR$/.." external.system.id="GRADLE" type="JAVA_MODULE" version="4">
++<module external.linked.project.path="$MODULE_DIR$" external.root.project.path="$MODULE_DIR$/.." external.system.id="GRADLE" external.system.module.group="xDrip" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
+   <component name="FacetManager">
+     <facet type="android-gradle" name="Android-Gradle">
+       <configuration>
+@@ -9,6 +9,7 @@
+     <facet type="android" name="Android">
+       <configuration>
+         <option name="SELECTED_BUILD_VARIANT" value="debug" />
++        <option name="SELECTED_TEST_ARTIFACT" value="_android_test_" />
+         <option name="ASSEMBLE_TASK_NAME" value="assembleDebug" />
+         <option name="COMPILE_JAVA_TASK_NAME" value="compileDebugSources" />
+         <option name="ASSEMBLE_TEST_TASK_NAME" value="assembleDebugTest" />
+@@ -24,6 +25,7 @@
+   </component>
+   <component name="NewModuleRootManager" inherit-compiler-output="false">
+     <output url="file://$MODULE_DIR$/build/intermediates/classes/debug" />
++    <output-test url="file://$MODULE_DIR$/build/intermediates/classes/test/debug" />
+     <exclude-output />
+     <content url="file://$MODULE_DIR$">
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/r/debug" isTestSource="false" generated="true" />
+@@ -79,7 +81,6 @@
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/rs" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/symbols" />
+       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
+-      <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
+     </content>
+     <orderEntry type="jdk" jdkName="Android API 21 Platform" jdkType="Android SDK" />
+     <orderEntry type="sourceFolder" forTests="false" />
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index bafe36e..7a36042 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -46,7 +46,7 @@
+ 
+ 
+ public class Home extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+-    private String menu_name = "DexDrip";
++    private String menu_name = "xDrip";
+     private NavigationDrawerFragment mNavigationDrawerFragment;
+     private LineChartView chart;
+     private PreviewLineChartView previewChart;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java b/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
+index 58e7d1d..335ac4a 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
+@@ -34,7 +34,7 @@
+             return options;
+         }
+ 
+-        options.add("DexDrip");
++        options.add("xDrip");
+         if(is_active_sensor) {
+             options.add("Calibration Graph");
+         }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+index 0f41f62..3e45077 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+@@ -76,8 +76,8 @@
+     private static final int STATE_CONNECTED = BluetoothProfile.STATE_CONNECTED;
+ 
+     public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
+-    public final static UUID DexDripDataService = UUID.fromString(HM10Attributes.HM_10_SERVICE);
+-    public final static UUID DexDripDataCharacteristic = UUID.fromString(HM10Attributes.HM_RX_TX);
++    public final static UUID xDripDataService = UUID.fromString(HM10Attributes.HM_10_SERVICE);
++    public final static UUID xDripDataCharacteristic = UUID.fromString(HM10Attributes.HM_RX_TX);
+ 
+     @Override
+     public void onCreate() {
+@@ -340,7 +340,7 @@ public void setCharacteristicNotification(BluetoothGattCharacteristic characteri
+         }
+         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+         Log.w(TAG, "UUID FOUND: " + characteristic.getUuid());
+-        if (DexDripDataCharacteristic.equals(characteristic.getUuid())) {
++        if (xDripDataCharacteristic.equals(characteristic.getUuid())) {
+             Log.w(TAG, "UUID MATCH FOUND!!! " + characteristic.getUuid());
+             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
+                     UUID.fromString(HM10Attributes.CLIENT_CHARACTERISTIC_CONFIG));
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/ForegroundServiceStarter.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/ForegroundServiceStarter.java
+index 8a9cd9a..322ded6 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/ForegroundServiceStarter.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/ForegroundServiceStarter.java
+@@ -48,8 +48,8 @@ private Notification notification() {
+         b.setPriority(Notification.PRIORITY_MIN);
+         // Don't show this notification on the lock screen on L+
+         b.setVisibility(Notification.VISIBILITY_SECRET);
+-        b.setContentTitle("DexDrip is Running")
+-                .setContentText("DexDrip Data collection service is running.")
++        b.setContentTitle("xDrip is Running")
++                .setContentText("xDrip Data collection service is running.")
+                 .setSmallIcon(R.drawable.ic_action_communication_invert_colors_on);
+         b.setContentIntent(resultPendingIntent);
+         return(b.build());
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
+index f6a6158..b663ae6 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
+@@ -23,7 +23,7 @@
+     //    CGM_TAPP_KEY = 0x3,		// TUPLE_INT, 4 BYTES (APP / PHONE TIME)
+     //    CGM_DLTA_KEY = 0x4,		// TUPLE_CSTRING, MAX 5 BYTES (BG DELTA, -100 or -10.0)
+     //    CGM_UBAT_KEY = 0x5,		// TUPLE_CSTRING, MAX 3 BYTES (UPLOADER BATTERY, 100)
+-    //    CGM_NAME_KEY = 0x6		// TUPLE_CSTRING, MAX 9 BYTES (DexDrip)
++    //    CGM_NAME_KEY = 0x6		// TUPLE_CSTRING, MAX 9 BYTES (xDrip)
+     public static final UUID PEBBLEAPP_UUID = UUID.fromString("2c3f5ab3-7506-44e7-b8d0-2c63de32e1ec");
+     public static final int ICON_KEY = 0;
+     public static final int BG_KEY = 1;
+@@ -45,7 +45,7 @@ public PebbleDictionary buildDictionary() {
+         dictionary.addUint32(PHONE_TIME_KEY, (int) new Date().getTime());
+         dictionary.addString(BG_DELTA_KEY, bgDelta());
+         dictionary.addString(UPLOADER_BATTERY_KEY, phoneBattery());
+-        dictionary.addString(NAME_KEY, "DexDrip");
++        dictionary.addString(NAME_KEY, "xDrip");
+         return dictionary;
+     }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/FileUtils.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/FileUtils.java
+index ec3ec60..6f23300 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/FileUtils.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/FileUtils.java
+@@ -14,7 +14,7 @@ public static boolean makeSureDirectoryExists( final String dir ) {
+ 	public static String getExternalDir() {
+ 		final StringBuilder sb = new StringBuilder();
+ 		sb.append( Environment.getExternalStorageDirectory().getAbsolutePath() );
+-		sb.append( "/dexdrip" );
++		sb.append( "/xdrip" );
+ 
+ 		final String dir = sb.toString();
+ 		return dir;
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 4f1763f..2ee0933 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -2,8 +2,8 @@
+ <resources>
+ 
+     <string name="pref_I_understand_title"> I UNDERSTAND AND AGREE</string>
+-    <string name="pref_I_understand_summery">DexDrip MUST NOT BE USED TO MAKE MEDICAL DECISIONS. THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. </string>
+-    <string name="app_name">DexDrip</string>
++    <string name="pref_I_understand_summery">xDrip MUST NOT BE USED TO MAKE MEDICAL DECISIONS. THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. </string>
++    <string name="app_name">xDrip</string>
+     <string name="hello_world">Hello world!</string>
+     <string name="action_settings">Settings</string>
+     <string name="title_activity_bluetooth_scan">BluetoothScan</string>
+diff --git a/app/src/main/res/xml/pref_general.xml b/app/src/main/res/xml/pref_general.xml
+index 1a47c7e..57886f3 100644
+--- a/app/src/main/res/xml/pref_general.xml
++++ b/app/src/main/res/xml/pref_general.xml
+@@ -24,7 +24,7 @@
+         <CheckBoxPreference
+             android:key="predictive_bg"
+             android:title="Display Predictive Values"
+-            android:summary="DexDrip will attempt to predict readings each minute based on the past few values, this is not always accurate."
++            android:summary="xDrip will attempt to predict readings each minute based on the past few values, this is not always accurate."
+             android:defaultValue="false" />
+     </PreferenceCategory>
+ </PreferenceScreen>
+diff --git a/xDrip.iml b/xDrip.iml
+new file mode 100644
+index 0000000..c3eb993
+--- /dev/null
++++ b/xDrip.iml
+@@ -0,0 +1,25 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<module external.linked.project.path="$MODULE_DIR$" external.root.project.path="$MODULE_DIR$" external.system.id="GRADLE" external.system.module.group="" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
++  <component name="FacetManager">
++    <facet type="java-gradle" name="Java-Gradle">
++      <configuration>
++        <option name="BUILD_FOLDER_PATH" value="$MODULE_DIR$/build" />
++      </configuration>
++    </facet>
++  </component>
++  <component name="NewModuleRootManager" inherit-compiler-output="false">
++    <output url="file://$MODULE_DIR$/build/classes/main" />
++    <output-test url="file://$MODULE_DIR$/build/classes/test" />
++    <exclude-output />
++    <content url="file://$MODULE_DIR$">
++      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
++      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
++      <excludeFolder url="file://$MODULE_DIR$/.gradle" />
++    </content>
++    <orderEntry type="inheritedJdk" />
++    <orderEntry type="sourceFolder" forTests="false" />
++  </component>
++</module>
++

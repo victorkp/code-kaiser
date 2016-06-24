@@ -1,0 +1,16 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java b/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java
+index 0fca285..923cf0e 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java
+@@ -112,9 +112,9 @@ private void setSensorStatus(){
+             DateFormat df = new SimpleDateFormat();
+             sensor_status.append(df.format(date));
+             sensor_status.append(" (");
+-            sensor_status.append((int) (System.currentTimeMillis() - sens.started_at) / (1000 * 60 * 60 * 24));
++            sensor_status.append((System.currentTimeMillis() - sens.started_at) / (1000 * 60 * 60 * 24));
+             sensor_status.append("d ");
+-            sensor_status.append((int)((System.currentTimeMillis() - sens.started_at)%(1000 * 60 * 60 * 24))/(1000*60*60));
++            sensor_status.append(((System.currentTimeMillis() - sens.started_at)%(1000 * 60 * 60 * 24))/(1000*60*60));
+             sensor_status.append("h)");
+         } else {
+             sensor_status.append("not available");

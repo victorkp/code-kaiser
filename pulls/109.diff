@@ -1,0 +1,285 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index 5a0aa86..dadfd85 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -12,6 +12,12 @@ apply plugin: 'io.fabric'
+ 
+ repositories {
+     maven { url 'https://maven.fabric.io/public' }
++    maven {
++        url "https://raw.github.com/embarkmobile/zxing-android-minimal/mvn-repo/maven-repository/"
++    }
++    maven {
++        url "https://jitpack.io"
++    }
+ }
+ 
+ def generateVersionName = { ->
+@@ -95,6 +101,20 @@ dependencies {
+     compile 'com.getpebble:pebblekit:2.6.0@aar'
+     compile 'io.reactivex:rxjava:1.0.0'
+     compile 'ch.acra:acra:4.5.0'
++
++    compile('com.github.nightscout:android-uploader:CORE_FOR_XDRIP') {
++        transitive = false;
++    }
++    /* begin relevant android-uploader dependencies */
++    compile 'com.embarkmobile:zxing-android-minimal:2.0.0@aar'
++    compile 'com.embarkmobile:zxing-android-legacy:2.0.0@aar'
++    compile 'com.embarkmobile:zxing-android-integration:2.0.0@aar'
++    compile 'com.google.zxing:core:3.1.0'
++    compile 'net.tribe7.seeds:seeds-functional:16.0.1'
++    compile 'net.tribe7.seeds:seeds-primitives:16.0.1'
++    compile 'org.slf4j:slf4j-api:1.7.7'
++    /* end relevant android-uploader dependencies */
++
+     compile('com.crashlytics.sdk.android:crashlytics:2.2.3@aar') {
+         transitive = true;
+     }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/AndroidBarcode.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/AndroidBarcode.java
+new file mode 100644
+index 0000000..b0b19e7
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/AndroidBarcode.java
+@@ -0,0 +1,19 @@
++package com.eveningoutpost.dexdrip.utils;
++
++import android.app.Activity;
++
++import com.google.zxing.client.android.Intents;
++import com.google.zxing.integration.android.IntentIntegrator;
++
++public class AndroidBarcode {
++    public static final String SCAN_INTENT = Intents.Scan.ACTION;
++    Activity activity;
++
++    public AndroidBarcode(Activity activity){
++        this.activity = activity;
++    }
++
++    public void scan() {
++        new IntentIntegrator(activity).initiateScan();
++    }
++}
+\ No newline at end of file
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+index 30a9508..24e4b41 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+@@ -26,7 +26,13 @@
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.ForegroundServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.PebbleSync;
++import com.google.zxing.integration.android.IntentIntegrator;
++import com.google.zxing.integration.android.IntentResult;
++import com.nightscout.core.barcode.NSBarcodeConfig;
+ 
++import net.tribe7.common.base.Joiner;
++
++import java.net.URI;
+ import java.util.List;
+ 
+ /**
+@@ -41,7 +47,82 @@
+  * API Guide</a> for more information on developing a Settings UI.
+  */
+ public class Preferences extends PreferenceActivity {
+-    public  static SharedPreferences prefs;
++    private static final String TAG = "PREFS";
++    private AllPrefsFragment preferenceFragment;
++
++
++    private void refreshFragments() {
++        preferenceFragment = new AllPrefsFragment();
++        getFragmentManager().beginTransaction().replace(android.R.id.content,
++                preferenceFragment).commit();
++    }
++
++    @Override
++    public void onActivityResult(int requestCode, int resultCode, Intent data) {
++        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
++        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
++        if (scanResult == null || scanResult.getContents() == null) {
++            return;
++        }
++        if (scanResult.getFormatName().equals("QR_CODE")) {
++            NSBarcodeConfig barcode = new NSBarcodeConfig(scanResult.getContents());
++            if (barcode.hasMongoConfig()) {
++                if (barcode.getMongoUri().isPresent()) {
++                    SharedPreferences.Editor editor = prefs.edit();
++                    editor.putString("cloud_storage_mongodb_uri", barcode.getMongoUri().get());
++                    editor.putString("cloud_storage_mongodb_collection", barcode.getMongoCollection().or("entries"));
++                    editor.putString("cloud_storage_mongodb_device_status_collection", barcode.getMongoDeviceStatusCollection().or("devicestatus"));
++                    editor.putBoolean("cloud_storage_mongodb_enable", true);
++                    editor.apply();
++                }
++                if (barcode.hasApiConfig()) {
++                    SharedPreferences.Editor editor = prefs.edit();
++                    editor.putBoolean("cloud_storage_api_enable", true);
++                    editor.putString("cloud_storage_api_base", Joiner.on(' ').join(barcode.getApiUris()));
++                    editor.apply();
++                } else {
++                    prefs.edit().putBoolean("cloud_storage_api_enable", false).apply();
++                }
++            }
++            if (barcode.hasApiConfig()) {
++                SharedPreferences.Editor editor = prefs.edit();
++                editor.putBoolean("cloud_storage_api_enable", true);
++                editor.putString("cloud_storage_api_base", Joiner.on(' ').join(barcode.getApiUris()));
++                editor.apply();
++            } else {
++                prefs.edit().putBoolean("cloud_storage_api_enable", false).apply();
++            }
++
++            if (barcode.hasMqttConfig()) {
++                if (barcode.getMqttUri().isPresent()) {
++                    URI uri = URI.create(barcode.getMqttUri().or(""));
++                    if (uri.getUserInfo() != null) {
++                        String[] userInfo = uri.getUserInfo().split(":");
++                        if (userInfo.length == 2) {
++                            String endpoint = uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
++                            if (userInfo[0].length() > 0 && userInfo[1].length() > 0) {
++                                SharedPreferences.Editor editor = prefs.edit();
++                                editor.putString("cloud_storage_mqtt_endpoint", endpoint);
++                                editor.putString("cloud_storage_mqtt_user", userInfo[0]);
++                                editor.putString("cloud_storage_mqtt_password", userInfo[1]);
++                                editor.putBoolean("cloud_storage_mqtt_enable", true);
++                                editor.apply();
++                            }
++                        }
++                    }
++                }
++            } else {
++                SharedPreferences.Editor editor = prefs.edit();
++                editor.putBoolean("cloud_storage_mqtt_enable", false);
++                editor.apply();
++            }
++        } else if (scanResult.getFormatName().equals("CODE_128")) {
++            Log.d(TAG, "Setting serial number to: " + scanResult.getContents());
++            prefs.edit().putString("share_key", scanResult.getContents()).apply();
++        }
++        refreshFragments();
++    }
++
+ 
+     @Override
+     public void onCreate(Bundle savedInstanceState) {
+@@ -146,8 +227,9 @@ private static void bindPreferenceSummaryToValueAndEnsureNumeric(Preference pref
+                         .getDefaultSharedPreferences(preference.getContext())
+                         .getString(preference.getKey(), ""));
+     }
++
+     public static class AllPrefsFragment extends PreferenceFragment {
+-        @Override
++       @Override
+         public void onCreate(Bundle savedInstanceState) {
+             super.onCreate(savedInstanceState);
+             addPreferencesFromResource(R.xml.pref_license);
+@@ -171,6 +253,8 @@ public void onCreate(Bundle savedInstanceState) {
+ 
+ 
+             addPreferencesFromResource(R.xml.pref_data_sync);
++            setupBarcodeConfigScanner();
++            setupBarcodeShareScanner();
+             bindPreferenceSummaryToValue(findPreference("cloud_storage_mongodb_uri"));
+             bindPreferenceSummaryToValue(findPreference("cloud_storage_mongodb_collection"));
+             bindPreferenceSummaryToValue(findPreference("cloud_storage_mongodb_device_status_collection"));
+@@ -190,8 +274,8 @@ public void onCreate(Bundle savedInstanceState) {
+             final PreferenceCategory otherCategory = (PreferenceCategory) findPreference("other_category");
+             final PreferenceScreen calibrationAlertsScreen = (PreferenceScreen) findPreference("calibration_alerts_screen");
+             final PreferenceCategory alertsCategory = (PreferenceCategory) findPreference("alerts_category");
+-            prefs =  getPreferenceManager().getDefaultSharedPreferences(getActivity());
+-            Log.d("PREF", prefs.getString("dex_collection_method", "BluetoothWixel"));
++            final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
++            Log.d(TAG, prefs.getString("dex_collection_method", "BluetoothWixel"));
+             if(prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("DexcomShare") != 0) {
+                 collectionCategory.removePreference(shareKey);
+                 otherCategory.removePreference(interpretRaw);
+@@ -295,6 +379,28 @@ public boolean onPreferenceChange(Preference preference, Object newValue) {
+                 }
+             });
+         }
++
++        private void setupBarcodeConfigScanner() {
++            findPreference("auto_configure").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
++                @Override
++                public boolean onPreferenceClick(Preference preference) {
++                    new AndroidBarcode(getActivity()).scan();
++                    return true;
++                }
++            });
++        }
++
++
++        private void setupBarcodeShareScanner() {
++            findPreference("scan_share2_barcode").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
++                @Override
++                public boolean onPreferenceClick(Preference preference) {
++                    new AndroidBarcode(getActivity()).scan();
++                    return true;
++                }
++            });
++        }
++
+     }
+ 
+     public static boolean isNumeric(String str) {
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index e48aa0a..ce70cb2 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -58,6 +58,10 @@
+     <string name="title_activity_calibration_override">CalibrationOverride</string>
+     <string name="title_activity_calibration_graph">CalibrationGraph</string>
+     <string name="pref_header_cloud_storage">Cloud Storage</string>
++    <string name="auto_configure_title">Auto configure</string>
++    <string name="prefs_auto_config_summary">Auto configure using a barcode. See http://nightscout.github.io/pages/configure/ for more details</string>
++    <string name="scan_share2_barcode">Scan Share Barcode</string>
++    <string name="pref_share2_scan_barcode_summary">Scan the barcode on the share receiver</string>
+ 
+     <!-- MongoDB Settings -->
+     <string name="pref_title_mongodb">MongoDB</string>
+diff --git a/app/src/main/res/xml/pref_data_source.xml b/app/src/main/res/xml/pref_data_source.xml
+index 9e1ff7a..ac65c32 100644
+--- a/app/src/main/res/xml/pref_data_source.xml
++++ b/app/src/main/res/xml/pref_data_source.xml
+@@ -1,8 +1,10 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
++
+     <PreferenceCategory
+         android:key="collection_category"
+         android:title="Data Source Settings">
++
+         <ListPreference
+             android:key="dex_collection_method"
+             android:title="Dexcom Data Collection Method"
+@@ -15,6 +17,12 @@
+             android:key="share_key"
+             android:shouldDisableView="true"
+             android:defaultValue="SM00000000"/>
++        <PreferenceScreen
++            android:title="@string/scan_share2_barcode"
++            android:key="scan_share2_barcode"
++            android:shouldDisableView="true"
++            android:summary="@string/pref_share2_scan_barcode_summary" />
++
+         <CheckBoxPreference
+             android:key="run_service_in_foreground"
+             android:title="Run Collection Service in foreground"
+diff --git a/app/src/main/res/xml/pref_data_sync.xml b/app/src/main/res/xml/pref_data_sync.xml
+index 83d38b7..a1d0c58 100644
+--- a/app/src/main/res/xml/pref_data_sync.xml
++++ b/app/src/main/res/xml/pref_data_sync.xml
+@@ -6,7 +6,10 @@
+     <PreferenceCategory
+         android:title="Data Sync"
+         android:key="dataSync">
+-
++        <PreferenceScreen
++            android:title="@string/auto_configure_title"
++            android:key="auto_configure"
++            android:summary="@string/prefs_auto_config_summary" />
+         <PreferenceScreen
+             android:key="cloud_storage_mongo"
+             android:title="@string/pref_title_mongodb"

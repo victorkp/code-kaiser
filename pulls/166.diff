@@ -1,0 +1,567 @@
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index e215e7d..3e754c2 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -60,6 +60,12 @@
+             android:exported="true" >
+         </service>
+ 
++        <service
++            android:name=".Services.WifiCollectionService"
++            android:enabled="true"
++            android:exported="true" >
++        </service>
++
+         <activity
+             android:name=".Tables.BgReadingTable"
+             android:label="Bg Readings Table" >
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+index 2a6f8d1..954d399 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+@@ -570,6 +570,9 @@ public String toS() {
+     //COMMON SCOPES!
+     public static Calibration last() {
+         Sensor sensor = Sensor.currentSensor();
++        if(sensor == null) {
++            return null;
++        }
+         return new Select()
+                 .from(Calibration.class)
+                 .where("Sensor = ? ", sensor.getId())
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WifiCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WifiCollectionService.java
+new file mode 100644
+index 0000000..b368388
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WifiCollectionService.java
+@@ -0,0 +1,123 @@
++
++package com.eveningoutpost.dexdrip.Services;
++
++import java.util.Calendar;
++
++import android.annotation.TargetApi;
++import android.app.AlarmManager;
++import android.app.PendingIntent;
++import android.app.Service;
++import android.content.Context;
++import android.content.Intent;
++import android.content.SharedPreferences;
++import android.os.Build;
++import android.os.IBinder;
++import android.preference.PreferenceManager;
++
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
++import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
++import com.eveningoutpost.dexdrip.UtilityModels.ForegroundServiceStarter;
++import com.eveningoutpost.dexdrip.utils.BgToSpeech;
++
++/**
++ * Created by tzachi dar on 10/14/15.
++ */
++@TargetApi(Build.VERSION_CODES.KITKAT)
++public class WifiCollectionService extends Service {
++    private final static String TAG = WifiCollectionService.class.getSimpleName();
++    private SharedPreferences prefs;
++    private BgToSpeech bgToSpeech;
++    public WifiCollectionService dexCollectionService;
++
++    private ForegroundServiceStarter foregroundServiceStarter;
++    private Context mContext;
++
++    @Override
++    public IBinder onBind(Intent intent) {
++        throw new UnsupportedOperationException("Not yet implemented");
++    }
++
++    @Override
++    public void onCreate() {
++        foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), this);
++        foregroundServiceStarter.start();
++        mContext = getApplicationContext();
++        dexCollectionService = this;
++        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
++        listenForChangeInSettings();
++        bgToSpeech = BgToSpeech.setupTTS(mContext); //keep reference to not being garbage collected
++        Log.i(TAG, "onCreate: STARTING SERVICE");
++    }
++
++    @Override
++    public int onStartCommand(Intent intent, int flags, int startId) {
++        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1){
++            stopSelf();
++            return START_NOT_STICKY;
++        }
++        if (CollectionServiceStarter.isWifiWixel(getApplicationContext()) ) {
++            runWixelReader();
++            // For simplicity done here, would better happen once we know if we have a packet or not...
++            setFailoverTimer();
++        } else {
++            stopSelf();
++            return START_NOT_STICKY;
++        }
++        return START_STICKY;
++    }
++
++    @Override
++    public void onDestroy() {
++        super.onDestroy();
++        Log.d(TAG, "onDestroy entered");
++        foregroundServiceStarter.stop();
++        BgToSpeech.tearDownTTS();
++        Log.i(TAG, "SERVICE STOPPED");
++        // ???? What will realy stop me, or am I already stopped???
++    }
++
++    public SharedPreferences.OnSharedPreferenceChangeListener prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
++        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
++            if (key.compareTo("run_service_in_foreground") == 0) {
++                Log.d("FOREGROUND", "run_service_in_foreground changed!");
++                if (prefs.getBoolean("run_service_in_foreground", false)) {
++                    foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), dexCollectionService);
++                    foregroundServiceStarter.start();
++                    Log.d(TAG, "Moving to foreground");
++                } else {
++                    dexCollectionService.stopForeground(true);
++                    Log.d(TAG, "Removing from foreground");
++                }
++            }
++        }
++    };
++
++
++    public void setFailoverTimer() {
++        if (CollectionServiceStarter.isWifiWixel(getApplicationContext())) {
++            long retry_in = WixelReader.timeForNextRead();
++            Log.d(TAG, "setFailoverTimer: Fallover Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
++            Calendar calendar = Calendar.getInstance();
++            AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
++            if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
++                alarm.setExact(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, WifiCollectionService.class), 0));
++            } else {
++                alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, WifiCollectionService.class), 0));
++            }
++        } else {
++            stopSelf();
++        }
++    }
++
++    public void listenForChangeInSettings() {
++        prefs.registerOnSharedPreferenceChangeListener(prefListener);
++    }
++    
++    private void runWixelReader() {
++        // Theoretically can create more than one task. Should not be a problem since android runs them
++        // on the same thread.
++        WixelReader task = new WixelReader(getApplicationContext());
++        // Assume here that task will execute, otheirwise we leak a wake lock...
++        task.execute();
++    }
++}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+index 5a847cc..9e8ef43 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+@@ -2,9 +2,12 @@
+ 
+ import android.content.Context;
+ import android.content.SharedPreferences;
++import android.os.AsyncTask;
++import android.os.PowerManager;
+ import android.preference.PreferenceManager;
+ 
+ import com.eveningoutpost.dexdrip.Models.BgReading;
++import com.eveningoutpost.dexdrip.Models.Calibration;
+ import com.eveningoutpost.dexdrip.Models.TransmitterData;
+ import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ import com.eveningoutpost.dexdrip.Sensor;
+@@ -23,57 +26,36 @@
+ import java.util.LinkedList;
+ import java.util.List;
+ 
+-public class WixelReader  extends Thread {
++
++// Important note, this class is based on the fact that android will always run it one thread, which means it does not
++// need synchronization
++
++public class WixelReader extends AsyncTask<String, Void, Void > {
+ 
+     private final static String TAG = WixelReader.class.getName();
+-    private static WixelReader singleton;
+     private static BgToSpeech bgToSpeech;
+ 
+-    public synchronized static WixelReader getInstance(Context ctx) {
+-        if(singleton == null) {
+-           singleton = new WixelReader(ctx);
+-        }
+-        return singleton;
+-    }
+-
+     private final Context mContext;
+-
+-    private volatile boolean mStop = false;
+-    private static boolean sStarted = false;
++    PowerManager.WakeLock wakeLock; 
++    
++    private static int lockCounter = 0;
++    
++    // This variables are for fake function only
++    static int i = 0;
++    static int added = 5;
+ 
+     public WixelReader(Context ctx) {
+         mContext = ctx.getApplicationContext();
++        PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
++        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WifiReader");
++        wakeLock.acquire();
++        lockCounter++;
++        Log.e(TAG,"wakelock acquired " + lockCounter);
+     }
+ 
+-    public static void sStart(Context ctx) {
+-        if(sStarted) {
+-            return;
+-        }
+-        bgToSpeech = BgToSpeech.setupTTS(ctx); //keep reference to not being garbage collected
+-        WixelReader theWixelReader =  getInstance(ctx);
+-        theWixelReader.start();
+-        sStarted = true;
+-
+-    }
+-
+-    public static void sStop() {
+-        if(!sStarted) {
+-            return;
+-        }
+-        BgToSpeech.tearDownTTS();
+-        WixelReader theWixelReader =  getInstance(null);
+-        theWixelReader.Stop();
+-        try {
+-            theWixelReader.join();
+-        } catch (InterruptedException e) {
+-            Log.e(TAG, "cought InterruptedException, could not wait for the wixel thread to exit", e);
+-        }
+-        sStarted = false;
+-        // A stopped thread can not start again, so we need to kill it and will start a new one
+-        // on demand
+-        singleton = null;
+-    }
+ 
++    
++    
+     public static boolean IsConfigured(Context ctx) {
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+         String recieversIpAddresses = prefs.getString("wifi_recievers_addresses", "");
+@@ -318,96 +300,112 @@ public static boolean almostEquals( TransmitterRawData e1, TransmitterRawData e2
+         return trd_list;
+     }
+ 
++    static Long timeForNextRead() {
++        final long DEXCOM_PERIOD=300000;
++        TransmitterData lastTransmitterData = TransmitterData.last();
++        if(lastTransmitterData == null) {
++            // We did not receive a packet, well someone hopefully is looking at data, return relatively fast
++            Log.e(TAG, "lastTransmitterData == null returning 60000");
++            return 60*1000L;
++        }
++        Long gapTime = new Date().getTime() - lastTransmitterData.timestamp;
++        Log.e(TAG, "gapTime = " + gapTime);
++        if(gapTime < 0) {
++            // There is some confusion here (clock was readjusted?)
++            Log.e(TAG, "gapTime <= null returning 60000");
++            return 60*1000L;
++        }
++        
++        if(gapTime < DEXCOM_PERIOD) {
++            // We have received the last packet...
++            // 300000 - gaptime is when we expect to have the next packet.
++            return (DEXCOM_PERIOD - gapTime) + 2000;
++        }
++        
++        gapTime = gapTime % DEXCOM_PERIOD;
++        Log.e(TAG, "gapTime = " + gapTime);
++        if(gapTime < 10000) {
++            // A new packet should arrive any second now
++            return 10000L;
++        }
++        if(gapTime < 60000) {
++            // A new packet should arrive but chance is we have missed it...
++            return 30000L;
++        }
++        return (DEXCOM_PERIOD - gapTime) + 2000;
++    }
+ 
+-    public void run()
++    public Void doInBackground(String... urls) {
++        try {
++            readData();
++        } finally {
++            wakeLock.release();
++            lockCounter--;
++            Log.e(TAG,"wakelock released " + lockCounter);
++        }
++        return null;
++    }
++    
++    
++    public void readData()
+     {
+-    	Long LastReportedTime = new Date().getTime();
++        Long LastReportedTime = 0L;
++    	TransmitterData lastTransmitterData = TransmitterData.last();
++    	if(lastTransmitterData != null) {
++    	    LastReportedTime = lastTransmitterData.timestamp;
++    	}
++    	Long startReadTime = LastReportedTime;
++    	
+     	TransmitterRawData LastReportedReading = null;
+     	Log.d(TAG, "Starting... LastReportedReading " + LastReportedReading);
+-    	try {
+-	        while (!mStop && !interrupted()) {
+-	        	// try to read one object...
+-                TransmitterRawData[] LastReadingArr = null;
+-                if(WixelReader.IsConfigured(mContext)) {
+-                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+-                    String recieversIpAddresses = prefs.getString("wifi_recievers_addresses", "");
+-	        		LastReadingArr = Read(recieversIpAddresses ,1);
+-                }
+-	        	if (LastReadingArr != null  && LastReadingArr.length  > 0) {
+-	        		// Last in the array is the most updated reading we have.
+-	        		TransmitterRawData LastReading = LastReadingArr[LastReadingArr.length -1];
+-
+-	        		//if (LastReading.CaptureDateTime > LastReportedReading + 5000) {
+-	        		// Make sure we do not report packets from the far future...
+-	        		if ((LastReading.CaptureDateTime > LastReportedTime ) &&
+-	        		        (!almostEquals(LastReading, LastReportedReading)) &&
+-	        		        LastReading.CaptureDateTime < new Date().getTime() + 120000) {
+-	        			// We have a real new reading...
+-	        			Log.d(TAG, "calling setSerialDataToTransmitterRawData " + LastReading.RawValue +
+-	        			        " LastReading.CaptureDateTime " + LastReading.CaptureDateTime + " " + LastReading.TransmissionId);
+-	        			setSerialDataToTransmitterRawData(LastReading.RawValue,  LastReading.FilteredValue, LastReading.BatteryLife, LastReading.CaptureDateTime);
+-	        			LastReportedReading = LastReading;
+-	        			LastReportedTime = LastReading.CaptureDateTime;
+-	        		}
+-	        	}
+-	        	// let's sleep (right now for 30 seconds)
+-	        	Thread.sleep(30000);
+-	        }
+-    	} catch (InterruptedException e) {
+-    	    Log.e(TAG, "cought InterruptedException! ", e);
+-            // time to get out...
++    	// try to read one object...
++        TransmitterRawData[] LastReadingArr = null;
++        if(!WixelReader.IsConfigured(mContext)) {
++            return;
+         }
+-    }
+-
+-    // this function is only a test function. It is used to set many points fast in order to allow
+-    // faster testing without real data.
+-    public void runFake()
+-    {
+-        // let's start by faking numbers....
+-        int i = 0;
+-        int added = 5;
+-        while (!mStop) {
+-            try {
+-
+-                i+=added;
+-                if (i==50) {
+-                    added = -5;
+-                }
+-                if (i==0) {
+-                    added = 5;
+-                }
+-
+-                int fakedRaw = 100000 + i * 3000;
+-                Log.d(TAG, "calling setSerialDataToTransmitterRawData " + fakedRaw);
+-                setSerialDataToTransmitterRawData(fakedRaw, fakedRaw ,100, new Date().getTime());
+-                Log.d(TAG, "returned from setSerialDataToTransmitterRawData " + fakedRaw);
+-
+-                Long StartLoop = new Date().getTime();
+-                for (int j = 0 ; j < 300; j++) {
+-                    Thread.sleep(1000);
+-                    Log.d(TAG, "looping ...." + i + " " + j + " " + (new Date().getTime() - StartLoop)/1000);
+-                    if(mStop ) {
+-                    // we were asked to leave, so do it....
+-						Log.d(TAG, "EXITING mstop=true" );
+-                        return;
+-                    }
+-                }
+-
+-
+-               } catch (InterruptedException e) {
+-                   // time to get out...
+-                   Log.e(TAG, "cought InterruptedException! ", e);
+-                   break;
+-               }
++        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
++        String recieversIpAddresses = prefs.getString("wifi_recievers_addresses", "");
++        
++        // How many packets should we read? we look at the maximum time between last calibration and last reading time
++        // and calculate how much are needed.
++        
++        Calibration lastCalibration = Calibration.last();
++        if(lastCalibration != null) {
++            startReadTime = Math.max(startReadTime, (long)(lastCalibration.timestamp));
+         }
+-		Log.d(TAG, "EXITING mstop=true" );
++        Long gapTime = new Date().getTime() - startReadTime + 120000;
++        int packetsToRead = (int) (gapTime / (5 * 60000));
++        packetsToRead = Math.min(packetsToRead, 200); // don't read too much, but always read 1.
++        packetsToRead = Math.max(packetsToRead, 1); 
++        
++        Log.d(TAG,"reading " + packetsToRead + " packets");
++		LastReadingArr = Read(recieversIpAddresses ,packetsToRead);
++		
++		if (LastReadingArr == null || LastReadingArr.length  == 0) {
++		    return;
++		}
++
++		for(TransmitterRawData LastReading : LastReadingArr ) {
++    		// Last in the array is the most updated reading we have.
++    		//TransmitterRawData LastReading = LastReadingArr[LastReadingArr.length -1];
++		    
++
++    		//if (LastReading.CaptureDateTime > LastReportedReading + 5000) {
++    		// Make sure we do not report packets from the far future...
++    		if ((LastReading.CaptureDateTime > LastReportedTime + 120000 ) &&
++    		        (!almostEquals(LastReading, LastReportedReading)) &&
++    		        LastReading.CaptureDateTime < new Date().getTime() + 120000) {
++    			// We have a real new reading...
++    			Log.d(TAG, "calling setSerialDataToTransmitterRawData " + LastReading.RawValue +
++    			        " LastReading.CaptureDateTime " + LastReading.CaptureDateTime + " " + LastReading.TransmissionId);
++    			setSerialDataToTransmitterRawData(LastReading.RawValue,  LastReading.FilteredValue, LastReading.BatteryLife, LastReading.CaptureDateTime);
++    			LastReportedReading = LastReading;
++    			LastReportedTime = LastReading.CaptureDateTime;
++    		}
++    	}
+     }
+ 
+-    public void Stop()
+-    {
+-        mStop = true;
+-        interrupt();
+-    }
++
+     public void setSerialDataToTransmitterRawData(int raw_data, int filtered_data ,int sensor_battery_leve, Long CaptureTime) {
+ 
+         TransmitterData transmitterData = TransmitterData.create(raw_data, sensor_battery_leve, CaptureTime);
+@@ -422,4 +420,24 @@ public void setSerialDataToTransmitterRawData(int raw_data, int filtered_data ,i
+             }
+         }
+     }
++    
++    static Long timeForNextReadFake() {
++        return 10000L;
++    }
++    
++    void readDataFake()
++    {
++        i+=added;
++        if (i==50) {
++            added = -5;
++        }
++        if (i==0) {
++            added = 5;
++        }
++
++        int fakedRaw = 100000 + i * 3000;
++        Log.d(TAG, "calling setSerialDataToTransmitterRawData " + fakedRaw);
++        setSerialDataToTransmitterRawData(fakedRaw, fakedRaw ,215, new Date().getTime());
++        Log.d(TAG, "returned from setSerialDataToTransmitterRawData " + fakedRaw);
++    }
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
+index cc3c05e..997ec12 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
+@@ -13,6 +13,7 @@
+ import com.eveningoutpost.dexdrip.Services.DexCollectionService;
+ import com.eveningoutpost.dexdrip.Services.DexShareCollectionService;
+ import com.eveningoutpost.dexdrip.Services.SyncService;
++import com.eveningoutpost.dexdrip.Services.WifiCollectionService;
+ import com.eveningoutpost.dexdrip.Services.WixelReader;
+ 
+ import java.io.IOException;
+@@ -180,11 +181,13 @@ private void stopBtShareService() {
+     }
+ 
+     private void startWifWixelThread() {
+-        WixelReader.sStart(mContext);
++        Log.d(TAG, "starting wifi wixel service");
++        mContext.startService(new Intent(mContext, WifiCollectionService.class));
+     }
+ 
+     private void stopWifWixelThread() {
+-        WixelReader.sStop();
++        Log.d(TAG, "stopping wifi wixel service");
++        mContext.stopService(new Intent(mContext, WifiCollectionService.class));
+     }
+ 
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+index 43f1fa8..890c031 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+@@ -63,16 +63,6 @@ public NightscoutUploader(Context context) {
+             enableMongoUpload = prefs.getBoolean("cloud_storage_mongodb_enable", false);
+         }
+ 
+-        public boolean upload(BgReading glucoseDataSet, Calibration meterRecord, Calibration calRecord) {
+-            List<BgReading> glucoseDataSets = new ArrayList<BgReading>();
+-            glucoseDataSets.add(glucoseDataSet);
+-            List<Calibration> meterRecords = new ArrayList<Calibration>();
+-            meterRecords.add(meterRecord);
+-            List<Calibration> calRecords = new ArrayList<Calibration>();
+-            calRecords.add(calRecord);
+-            return upload(glucoseDataSets, meterRecords, calRecords);
+-        }
+-
+         public boolean upload(List<BgReading> glucoseDataSets, List<Calibration> meterRecords, List<Calibration> calRecords) {
+             boolean mongoStatus = false;
+             boolean apiStatus = false;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/BgToSpeech.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/BgToSpeech.java
+index 77f5c82..00e5659 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/BgToSpeech.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/BgToSpeech.java
+@@ -5,7 +5,7 @@
+ import android.content.SharedPreferences;
+ import android.preference.PreferenceManager;
+ import android.speech.tts.TextToSpeech;
+-import android.util.Log;
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ 
+ import com.eveningoutpost.dexdrip.UtilityModels.Constants;
+ 
+@@ -62,10 +62,12 @@ private BgToSpeech(Context context){
+             @Override
+             public void onInit(int status) {
+ 
+-                Log.d("BgToSpeech", "Calling onInit()");
+-                if (status == TextToSpeech.SUCCESS) {
+-                    Log.d("BgToSpeech", "status == TextToSpeech.SUCCESS");
++                Log.d("BgToSpeech", "Calling onInit(), tts = " + tts);
++                if (status == TextToSpeech.SUCCESS && tts != null) {
++                    
+                     //try local language
++                    Locale loc = Locale.getDefault();
++                    Log.d("BgToSpeech", "status == TextToSpeech.SUCCESS + loc" + loc);
+                     int result = tts.setLanguage(Locale.getDefault());
+                     if (result == TextToSpeech.LANG_MISSING_DATA
+                             || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+index 3f5d649..56a3d52 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+@@ -291,10 +291,6 @@ public void onCreate(Bundle savedInstanceState) {
+                 prefs.edit().putBoolean("calibration_notifications", false).apply();
+             }
+ 
+-            if(prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("BluetoothWixel") != 0 && prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("DexcomShare") != 0 && prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("DexbridgeWixel") != 0) {
+-                collectionCategory.removePreference(runInForeground);
+-            }
+-
+             if(prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("WifiWixel") != 0) {
+                 collectionCategory.removePreference(wifiRecievers);
+             }

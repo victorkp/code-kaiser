@@ -1,0 +1,435 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/G5CollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/G5CollectionService.java
+index d267044..abd8fde 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/G5CollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/G5CollectionService.java
+@@ -48,6 +48,7 @@
+ import com.eveningoutpost.dexdrip.G5Model.SensorTxMessage;
+ import com.eveningoutpost.dexdrip.G5Model.TransmitterStatus;
+ import com.eveningoutpost.dexdrip.G5Model.TransmitterTimeRxMessage;
++import com.eveningoutpost.dexdrip.G5Model.UnbondRequestTxMessage;
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.eveningoutpost.dexdrip.Models.Sensor;
+ import com.eveningoutpost.dexdrip.Models.TransmitterData;
+@@ -68,6 +69,8 @@
+ import java.util.Date;
+ import java.util.List;
+ import java.util.Set;
++import java.util.Timer;
++import java.util.TimerTask;
+ import java.util.UUID;
+ import java.util.concurrent.Executors;
+ import java.util.concurrent.ScheduledExecutorService;
+@@ -117,6 +120,7 @@
+     private boolean isScanning = false;
+ 
+     private Handler handler;
++    public int lastGattStatus = 0;
+ 
+     StringBuilder log = new StringBuilder();
+ 
+@@ -145,13 +149,32 @@ public int onStartCommand(Intent intent, int flags, int startId) {
+ 
+         Log.d(TAG, "onG5StartCommand");
+         Log.d(TAG, "SDK: " + Build.VERSION.SDK_INT);
+-        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+-        defaultTransmitter = new Transmitter(prefs.getString("dex_txid", "ABCDEF"));
+         keepAlive();
+ 
+         mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+         mBluetoothAdapter = mBluetoothManager.getAdapter();
+ 
++        if (mGatt != null) {
++            mGatt.close();
++            mGatt = null;
++        }
++
++        if (Sensor.isActive()){
++            setupBluetooth();
++            Log.d(TAG, "Active Sensor");
++
++        } else {
++            stopScan();
++            Log.d(TAG, "No Active Sensor");
++        }
++
++        return START_STICKY;
++    }
++
++    private void getTransmitterDetails() {
++        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
++        Log.d(TAG, "Transmitter: " + prefs.getString("dex_txid", "ABCDEF"));
++        defaultTransmitter = new Transmitter(prefs.getString("dex_txid", "ABCDEF"));
+         isBondedOrBonding = false;
+         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+         if (pairedDevices.size() > 0) {
+@@ -168,28 +191,14 @@ public int onStartCommand(Intent intent, int flags, int startId) {
+                 }
+             }
+         }
+-
+-        if (mGatt != null) {
+-            mGatt.close();
+-            mGatt = null;
+-        }
+-
+         Log.d(TAG, "Bonded? " + isBondedOrBonding.toString());
+-        if (Sensor.isActive()){
+-            setupBluetooth();
+-            Log.d(TAG, "Active Sensor");
+-
+-        } else {
+-            stopScan();
+-            Log.d(TAG, "No Active Sensor");
+-        }
+ 
+-        return START_STICKY;
+     }
+ 
+     @Override
+     public void onDestroy() {
+         super.onDestroy();
++        stopScan();
+ //        close();
+ //        setRetryTimer();
+ //        foregroundServiceStarter.stop();
+@@ -269,6 +278,8 @@ public void startScan() {
+             return;
+         }
+ 
++        getTransmitterDetails();
++
+         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+             setupLeScanCallback();
+ 
+@@ -331,15 +342,10 @@ public void onScanResult(int callbackType, ScanResult result) {
+                     String deviceNameLastTwo = Extensions.lastTwoCharactersOfString(btDevice.getName());
+ 
+                     if (transmitterIdLastTwo.equals(deviceNameLastTwo)) {
+-                        if (isFirstTry) {
+-                            Log.d(TAG, "ReadDelay");
+-                            isFirstTry = false;
+-                            stopScan();
+-                            scanAfterDelay(50);
+-                        } else {
+-                            device = btDevice;
+-                            connectToDevice(btDevice);
+-                        }
++
++                        device = btDevice;
++                        connectToDevice(btDevice);
++
+                     }
+                 }
+             }
+@@ -374,6 +380,7 @@ private void connectToDevice(BluetoothDevice device) {
+     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
+         @Override
+         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
++            android.util.Log.i(TAG, "last disconnect status? " + lastGattStatus);
+             switch (newState) {
+                 case BluetoothProfile.STATE_CONNECTED:
+                     android.util.Log.i("gattCallback", "STATE_CONNECTED");
+@@ -381,38 +388,77 @@ public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState
+                     break;
+                 case BluetoothProfile.STATE_DISCONNECTED:
+                     android.util.Log.e("gattCallback", "STATE_DISCONNECTED");
++                    lastGattStatus = status;
+                     mGatt.close();
+                     mGatt = null;
+-                    startScan();
++                    if (status == 19) {
++                        android.util.Log.i(TAG, "scan after delay");
++                        scanAfterDelay(15000);
++                    } else {
++                        startScan();
++                    }
++
+                     break;
+                 default:
+                     android.util.Log.e("gattCallback", "STATE_OTHER");
+             }
+         }
+ 
++        public void authenticate() {
++            mGatt.setCharacteristicNotification(authCharacteristic, true);
++            if (!mGatt.readCharacteristic(authCharacteristic)) {
++                android.util.Log.e(TAG, "onCharacteristicRead : ReadCharacteristicError");
++            }
++        }
++
++        public void getSensorData() {
++            mGatt.setCharacteristicNotification(controlCharacteristic, true);
++            BluetoothGattDescriptor descriptor = controlCharacteristic.getDescriptor(BluetoothServices.CharacteristicUpdateNotification);
++            descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
++            SensorTxMessage sensorTx = new SensorTxMessage();
++            controlCharacteristic.setValue(sensorTx.byteSequence);
++            mGatt.writeDescriptor(descriptor);
++        }
++
+         @Override
+         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
++            Log.w(TAG, "onServicesDiscovered lastgatt: " + lastGattStatus);
+             if (status == BluetoothGatt.GATT_SUCCESS) {
+                 cgmService = mGatt.getService(BluetoothServices.CGMService);
+                 authCharacteristic = cgmService.getCharacteristic(BluetoothServices.Authentication);
+                 controlCharacteristic = cgmService.getCharacteristic(BluetoothServices.Control);
+                 commCharacteristic = cgmService.getCharacteristic(BluetoothServices.Communication);
+ 
+-                mGatt.setCharacteristicNotification(authCharacteristic, true);
+-
+-                if (!mGatt.readCharacteristic(authCharacteristic)) {
+-                    android.util.Log.e(TAG, "onCharacteristicRead : ReadCharacteristicError");
++                switch (lastGattStatus) {
++                    case 0: case 19: case 22:
++                        getSensorData();
++                        break;
++                    default:
++                        authenticate();
+                 }
+-            }
+-            else {
++
++
++            } else {
+                 Log.w(TAG, "onServicesDiscovered received: " + status);
+             }
++            if (status != 0) {
++                mBluetoothAdapter.disable();
++                android.util.Log.e(TAG, "Cycling BT");
++                Timer single_timer = new Timer();
++                single_timer.schedule(new TimerTask() {
++                    @Override
++                    public void run() {
++                        mBluetoothAdapter.enable();
++                    }
++                }, 1000);
++            }
+         }
+ 
+         @Override
+         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+             if (status == BluetoothGatt.GATT_SUCCESS) {
+                 mGatt.writeCharacteristic(descriptor.getCharacteristic());
++                Log.e(TAG, "Writing descriptor");
+             } else {
+                 Log.e(TAG, "Unknown error writing descriptor");
+             }
+@@ -426,13 +472,15 @@ public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristi
+ 
+             if (status == BluetoothGatt.GATT_SUCCESS) {
+                 if (String.valueOf(characteristic.getUuid()).equalsIgnoreCase(String.valueOf(authCharacteristic.getUuid()))) {
++                    android.util.Log.i(TAG, "Char Value: " + Arrays.toString(characteristic.getValue()));
+                     android.util.Log.i(TAG, "auth? " + String.valueOf(characteristic.getUuid()));
+-                    if (characteristic.getValue() != null && characteristic.getValue()[0] != 0x7 && characteristic.getValue()[0] != 0x6) {
++                    if (characteristic.getValue() != null && characteristic.getValue()[0] != 0x7 &&  characteristic.getValue()[0] != 0x6) {
+                         mGatt.readCharacteristic(characteristic);
+                     }
++//                    //&& characteristic.getValue()[0] != 0x7
+                 } else {
+                     android.util.Log.i(TAG, "control?" + String.valueOf(characteristic.getUuid()));
+-
++                    android.util.Log.i(TAG, "status? " + status);
+                 }
+             }
+         }
+@@ -450,27 +498,22 @@ public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic
+                 }
+ 
+                 if (buffer[0] == 5 || buffer[0] <= 0) {
+-                    authStatus = new AuthStatusRxMessage(characteristic.getValue());
+-                    if (authStatus.authenticated == 1 && authStatus.bonded == 1) {
+-                        isBondedOrBonding = true;
+-                        mGatt.setCharacteristicNotification(authCharacteristic, false);
++                    if (buffer[0] == -1) {
+                         mGatt.setCharacteristicNotification(controlCharacteristic, true);
+                         BluetoothGattDescriptor descriptor = controlCharacteristic.getDescriptor(BluetoothServices.CharacteristicUpdateNotification);
+                         descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+-//                        TransmitterTimeTxMessage timeMessage = new TransmitterTimeTxMessage();
+-//                        android.util.Log.i("timeMessage", Arrays.toString(timeMessage.byteSequence));
+-//                        controlCharacteristic.setValue(timeMessage.byteSequence);
+-                        SensorTxMessage sensorTx = new SensorTxMessage();
+-                        controlCharacteristic.setValue(sensorTx.byteSequence);
++                        UnbondRequestTxMessage unbond = new UnbondRequestTxMessage();
++                        controlCharacteristic.setValue(unbond.byteSequence);
+                         mGatt.writeDescriptor(descriptor);
++                    }
++                    authStatus = new AuthStatusRxMessage(characteristic.getValue());
++                    if (authStatus.authenticated == 1 && authStatus.bonded == 1) {
++                        isBondedOrBonding = true;
++                        getSensorData();
+                     } else if (authStatus.authenticated == 1) {
+                         android.util.Log.i(TAG, "Let's Bond!");
+-                        KeepAliveTxMessage keepAlive = new KeepAliveTxMessage(25);
+-                        characteristic.setValue(keepAlive.byteSequence);
+-                        mGatt.writeCharacteristic(characteristic);
+-                        mGatt.readCharacteristic(characteristic);
+                         BondRequestTxMessage bondRequest = new BondRequestTxMessage();
+-                        characteristic.setValue(bondRequest.byteSequence);
++                        authCharacteristic.setValue(bondRequest.byteSequence);
+                         mGatt.writeCharacteristic(characteristic);
+                         device.createBond();
+                     } else {
+@@ -482,7 +525,7 @@ public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic
+                     }
+                 }
+ 
+-                if (buffer[0] == 8) {
++                if (buffer[0] == 8 || buffer[0] == 7) {
+                     android.util.Log.i(TAG, "8 - Transmitter NOT already authenticated");
+                     authRequest = new AuthRequestTxMessage();
+                     characteristic.setValue(authRequest.byteSequence);
+@@ -551,24 +594,9 @@ public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteris
+                 }
+                 keepAlive();
+ 
+-                doDisconnectMessage(gatt, characteristic);
+             }
+-            // Transmitter Time
+-            else if (firstByte == 0x25) {
+-                TransmitterTimeRxMessage transmitterTime = new TransmitterTimeRxMessage(characteristic.getValue());
+-                startTimeInterval = new Date().getTime() - transmitterTime.currentTime;
++            doDisconnectMessage(gatt, characteristic);
+ 
+-                mGatt.setCharacteristicNotification(controlCharacteristic, true);
+-                BluetoothGattDescriptor descriptor = controlCharacteristic.getDescriptor(BluetoothServices.CharacteristicUpdateNotification);
+-                descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+-
+-                SensorTxMessage sensorTx = new SensorTxMessage();
+-                controlCharacteristic.setValue(sensorTx.byteSequence);
+-                mGatt.writeDescriptor(descriptor);
+-
+-            } else {
+-                doDisconnectMessage(gatt, characteristic);
+-            }
+ 
+         }
+     };
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+index 883eb2a..471c1f4 100644
+--- a/gradle/wrapper/gradle-wrapper.properties
++++ b/gradle/wrapper/gradle-wrapper.properties
+@@ -1,6 +1,6 @@
+-#Wed Dec 10 18:45:32 EST 2014
++#Fri Apr 08 12:58:42 EDT 2016
+ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-2.2.1-all.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-2.10-all.zip
+diff --git a/wear/wear.iml b/wear/wear.iml
+index 90628f4..fc32f39 100644
+--- a/wear/wear.iml
++++ b/wear/wear.iml
+@@ -1,5 +1,5 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+-<module external.linked.project.id=":wear" external.linked.project.path="$MODULE_DIR$" external.root.project.path="$MODULE_DIR$/.." external.system.id="GRADLE" external.system.module.group="xDrip-Experimental" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
++<module external.linked.project.id=":wear" external.linked.project.path="$MODULE_DIR$" external.root.project.path="$MODULE_DIR$/.." external.system.id="GRADLE" external.system.module.group="xDripExp" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
+   <component name="FacetManager">
+     <facet type="android-gradle" name="Android-Gradle">
+       <configuration>
+@@ -12,22 +12,20 @@
+         <option name="SELECTED_TEST_ARTIFACT" value="_android_test_" />
+         <option name="ASSEMBLE_TASK_NAME" value="assembleXdripDebug" />
+         <option name="COMPILE_JAVA_TASK_NAME" value="compileXdripDebugSources" />
+-        <option name="ASSEMBLE_TEST_TASK_NAME" value="assembleXdripDebugAndroidTest" />
+-        <option name="COMPILE_JAVA_TEST_TASK_NAME" value="compileXdripDebugAndroidTestSources" />
+         <afterSyncTasks>
+-          <task>generateXdripDebugAndroidTestSources</task>
+           <task>generateXdripDebugSources</task>
+         </afterSyncTasks>
+         <option name="ALLOW_USER_CONFIGURATION" value="false" />
+         <option name="MANIFEST_FILE_RELATIVE_PATH" value="/src/main/AndroidManifest.xml" />
+         <option name="RES_FOLDER_RELATIVE_PATH" value="/src/main/res" />
++        <option name="RES_FOLDERS_RELATIVE_PATH" value="file://$MODULE_DIR$/src/main/res" />
+         <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/src/main/assets" />
+       </configuration>
+     </facet>
+   </component>
+   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
+     <output url="file://$MODULE_DIR$/build/intermediates/classes/xdrip/debug" />
+-    <output-test url="file://$MODULE_DIR$/build/intermediates/classes/androidTest/xdrip/debug" />
++    <output-test url="file://$MODULE_DIR$/build/intermediates/classes/test/xdrip/debug" />
+     <exclude-output />
+     <content url="file://$MODULE_DIR$">
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/r/xdrip/debug" isTestSource="false" generated="true" />
+@@ -43,6 +41,13 @@
+       <sourceFolder url="file://$MODULE_DIR$/src/xdripDebug/java" isTestSource="false" />
+       <sourceFolder url="file://$MODULE_DIR$/src/xdripDebug/jni" isTestSource="false" />
+       <sourceFolder url="file://$MODULE_DIR$/src/xdripDebug/rs" isTestSource="false" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdripDebug/res" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdripDebug/resources" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdripDebug/assets" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdripDebug/aidl" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdripDebug/java" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdripDebug/jni" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdripDebug/rs" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/r/androidTest/xdrip/debug" isTestSource="true" generated="true" />
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/aidl/androidTest/xdrip/debug" isTestSource="true" generated="true" />
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/buildConfig/androidTest/xdrip/debug" isTestSource="true" generated="true" />
+@@ -56,6 +61,13 @@
+       <sourceFolder url="file://$MODULE_DIR$/src/xdrip/java" isTestSource="false" />
+       <sourceFolder url="file://$MODULE_DIR$/src/xdrip/jni" isTestSource="false" />
+       <sourceFolder url="file://$MODULE_DIR$/src/xdrip/rs" isTestSource="false" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdrip/res" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdrip/resources" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdrip/assets" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdrip/aidl" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdrip/java" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdrip/jni" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testXdrip/rs" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/androidTestXdrip/res" type="java-test-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src/androidTestXdrip/resources" type="java-test-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src/androidTestXdrip/assets" type="java-test-resource" />
+@@ -70,6 +82,13 @@
+       <sourceFolder url="file://$MODULE_DIR$/src/debug/java" isTestSource="false" />
+       <sourceFolder url="file://$MODULE_DIR$/src/debug/jni" isTestSource="false" />
+       <sourceFolder url="file://$MODULE_DIR$/src/debug/rs" isTestSource="false" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testDebug/res" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testDebug/resources" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testDebug/assets" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testDebug/aidl" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testDebug/java" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testDebug/jni" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/testDebug/rs" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/main/res" type="java-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src/main/assets" type="java-resource" />
+@@ -84,11 +103,16 @@
+       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/java" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/jni" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/rs" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/test/res" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/test/assets" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/test/aidl" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/test/jni" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/test/rs" isTestSource="true" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/assets" />
+-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/classes" />
+-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/debug" />
+-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
+-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/blame" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/bundles" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/21.0.0/jars" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/22.0.0/jars" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.google.android.gms/play-services-base/7.3.0/jars" />
+@@ -97,16 +121,10 @@
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.ustwo.android/clockwise-wearable/1.0.2/jars" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/manifests" />
+-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/pre-dexed" />
+-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/release" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/res" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/rs" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/symbols" />
+-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/tmp" />
+-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/xdripRelease" />
+-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/xdripviewerRelease" />
+       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
+-      <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
+     </content>
+     <orderEntry type="jdk" jdkName="Android API 23 Platform" jdkType="Android SDK" />
+     <orderEntry type="sourceFolder" forTests="false" />

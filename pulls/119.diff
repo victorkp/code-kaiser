@@ -1,0 +1,84 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/NavigationDrawerFragment.java b/app/src/main/java/com/eveningoutpost/dexdrip/NavigationDrawerFragment.java
+index 51fee77..5111685 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/NavigationDrawerFragment.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/NavigationDrawerFragment.java
+@@ -80,6 +80,7 @@ public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+         navDrawerBuilder = new NavDrawerBuilder(getActivity());
+         List<String> menu_option_list = navDrawerBuilder.nav_drawer_options;
+         String[] menu_options = menu_option_list.toArray(new String[menu_option_list.size()]);
++        intent_list = navDrawerBuilder.nav_drawer_intents;
+ 
+         mDrawerListView.setAdapter(new ArrayAdapter<String>(
+                 getActionBar().getThemedContext(),
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/ActivityWithMenu.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/ActivityWithMenu.java
+index 546a441..597af2e 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/ActivityWithMenu.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/ActivityWithMenu.java
+@@ -20,9 +20,6 @@
+  * Created by stephenblack on 6/8/15.
+  */
+ public abstract class ActivityWithMenu extends FragmentActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+-    private NavDrawerBuilder navDrawerBuilder;
+-    private List<Intent> intent_list;
+-    private List<String> menu_option_list;
+     private int menu_position;
+     private String menu_name;
+     private NavigationDrawerFragment mNavigationDrawerFragment;
+@@ -36,9 +33,8 @@ protected void onCreate(Bundle savedInstanceState) {
+     protected void onResume(){
+         super.onResume();
+         menu_name = getMenuName();
+-        navDrawerBuilder = new NavDrawerBuilder(getApplicationContext());
+-        menu_option_list = navDrawerBuilder.nav_drawer_options;
+-        intent_list = navDrawerBuilder.nav_drawer_intents;
++        NavDrawerBuilder navDrawerBuilder = new NavDrawerBuilder(getApplicationContext());
++        List<String> menu_option_list = navDrawerBuilder.nav_drawer_options;
+         menu_position = menu_option_list.indexOf(menu_name);
+ 
+         mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+@@ -47,6 +43,9 @@ protected void onResume(){
+ 
+     @Override
+     public void onNavigationDrawerItemSelected(int position) {
++        NavDrawerBuilder navDrawerBuilder = new NavDrawerBuilder(getApplicationContext());
++        List<String> menu_option_list = navDrawerBuilder.nav_drawer_options;
++        List<Intent> intent_list = navDrawerBuilder.nav_drawer_intents;
+         if (position != menu_position) {
+             startActivity(intent_list.get(position));
+             //do not close activity if it is the Launcher or "Home".
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/ListActivityWithMenu.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/ListActivityWithMenu.java
+index 95983a7..c15a885 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/ListActivityWithMenu.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/ListActivityWithMenu.java
+@@ -15,9 +15,6 @@
+  * Created by stephenblack on 6/8/15.
+  */
+ public abstract class ListActivityWithMenu extends ListActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+-    private NavDrawerBuilder navDrawerBuilder;
+-    private List<Intent> intent_list;
+-    private List<String> menu_option_list;
+     private int menu_position;
+     private String menu_name;
+     private NavigationDrawerFragment mNavigationDrawerFragment;
+@@ -31,9 +28,8 @@ protected void onCreate(Bundle savedInstanceState) {
+     protected void onResume(){
+         super.onResume();
+         menu_name = getMenuName();
+-        navDrawerBuilder = new NavDrawerBuilder(getApplicationContext());
+-        menu_option_list = navDrawerBuilder.nav_drawer_options;
+-        intent_list = navDrawerBuilder.nav_drawer_intents;
++        NavDrawerBuilder  navDrawerBuilder = new NavDrawerBuilder(getApplicationContext());
++        List<String> menu_option_list = navDrawerBuilder.nav_drawer_options;
+         menu_position = menu_option_list.indexOf(menu_name);
+ 
+         mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+@@ -42,6 +38,9 @@ protected void onResume(){
+ 
+     @Override
+     public void onNavigationDrawerItemSelected(int position) {
++        NavDrawerBuilder navDrawerBuilder = new NavDrawerBuilder(getApplicationContext());
++        List<String> menu_option_list = navDrawerBuilder.nav_drawer_options;
++        List<Intent> intent_list = navDrawerBuilder.nav_drawer_intents;
+         if (position != menu_position) {
+             startActivity(intent_list.get(position));
+             finish();

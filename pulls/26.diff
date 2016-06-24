@@ -1,0 +1,13 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
+index ea9ebd2..e0e2a6b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
+@@ -132,7 +132,7 @@ public String bgReading() {
+ 
+     public String bgDelta() {
+         String deltaString;
+-        if((PreferenceManager.getDefaultSharedPreferences(mContext).getString("units","mg/dl").compareTo("mg/dl") == 0)) {
++        if((PreferenceManager.getDefaultSharedPreferences(mContext).getString("units","mgdl").compareTo("mgdl") == 0)) {
+             deltaString = String.format("%.0f", mBgReading.calculated_value_slope * 360000);
+         } else {
+             deltaString = String.format("%.1f", (mBgReading.calculated_value_slope * 360000)*Constants.MGDL_TO_MMOLL);

@@ -1,0 +1,2073 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="">
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# object: http://ogp.me/ns/object# article: http://ogp.me/ns/article# profile: http://ogp.me/ns/profile#">
+    <meta charset='utf-8'>
+
+    <link crossorigin="anonymous" href="https://assets-cdn.github.com/assets/frameworks-06e4d8f59f5b927f13919c423f40f0888f37f9af7f426e4020948b00b9371059.css" media="all" rel="stylesheet" />
+    <link crossorigin="anonymous" href="https://assets-cdn.github.com/assets/github-c1b086d5f5cc4f877f4b6ac865224ec861d335d78ee3471d96aae5c454471d48.css" media="all" rel="stylesheet" />
+    
+    
+    <link crossorigin="anonymous" href="https://assets-cdn.github.com/assets/site-429acc2fc05149afec2a05196b3100560f117f753931d0afca46da6e1eeafe39.css" media="all" rel="stylesheet" />
+    
+    
+
+    <link as="script" href="https://assets-cdn.github.com/assets/frameworks-f9a40617e5ea71342dc57103554b07a3c1edc88712b04de1a040aed44891a11d.js" rel="preload" />
+    
+    <link as="script" href="https://assets-cdn.github.com/assets/github-f0c4e3f3e6abd6591d9680dafdae890452bbeda80e6d138134b5c59eaa7cbca3.js" rel="preload" />
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="viewport" content="width=device-width">
+    
+    
+    <title>Setup · Issue #2 · StephenBlackWasAlreadyTaken/xDrip-Experimental · GitHub</title>
+    <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="GitHub">
+    <link rel="fluid-icon" href="https://github.com/fluidicon.png" title="GitHub">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <meta property="fb:app_id" content="1401488693436528">
+
+      <meta content="https://avatars3.githubusercontent.com/u/649942?v=3&amp;s=400" name="twitter:image:src" /><meta content="@github" name="twitter:site" /><meta content="summary" name="twitter:card" /><meta content="Setup · Issue #2 · StephenBlackWasAlreadyTaken/xDrip-Experimental" name="twitter:title" /><meta content="To point your existing forks here you can 
+open your existing DexDrip forks and do:
+git remote add experimental https://github.com/StephenBlackWasAlreadyTaken/DexDrip-Experimental.git
+then
+git fetc..." name="twitter:description" />
+      <meta content="https://avatars3.githubusercontent.com/u/649942?v=3&amp;s=400" property="og:image" /><meta content="GitHub" property="og:site_name" /><meta content="object" property="og:type" /><meta content="Setup · Issue #2 · StephenBlackWasAlreadyTaken/xDrip-Experimental" property="og:title" /><meta content="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" property="og:url" /><meta content="To point your existing forks here you can 
+open your existing DexDrip forks and do:
+git remote add experimental https://github.com/StephenBlackWasAlreadyTaken/DexDrip-Experimental.git
+then
+git fetc..." property="og:description" />
+      <meta name="browser-stats-url" content="https://api.github.com/_private/browser/stats">
+    <meta name="browser-errors-url" content="https://api.github.com/_private/browser/errors">
+    <link rel="assets" href="https://assets-cdn.github.com/">
+    
+    <meta name="pjax-timeout" content="1000">
+    
+
+    <meta name="msapplication-TileImage" content="/windows-tile.png">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="selected-link" value="repo_issues" data-pjax-transient>
+
+    <meta name="google-site-verification" content="KT5gs8h0wvaagLKAVWq8bbeNwnZZK1r1XQysX3xurLU">
+<meta name="google-site-verification" content="ZzhVyEFwb7w3e0-uOTltm8Jsck2F5StVihD0exw2fsA">
+    <meta name="google-analytics" content="UA-3769691-2">
+
+<meta content="collector.githubapp.com" name="octolytics-host" /><meta content="github" name="octolytics-app-id" /><meta content="4A58D104:12D4:150F8DE6:576D71A1" name="octolytics-dimension-request_id" />
+<meta content="/&lt;user-name&gt;/&lt;repo-name&gt;/issues/show" data-pjax-transient="true" name="analytics-location" />
+
+
+
+  <meta class="js-ga-set" name="dimension1" content="Logged Out">
+
+
+
+        <meta name="hostname" content="github.com">
+    <meta name="user-login" content="">
+
+        <meta name="expected-hostname" content="github.com">
+      <meta name="js-proxy-site-detection-payload" content="Zjc2ZjM3ZjBjNjUwMjgwNGIyY2FhNDUxOTI5NDMwNDViOGJmNzBkZDk3ZmVmMzYzYzg4MmEzYmY4ZjhhNWNmZHx7InJlbW90ZV9hZGRyZXNzIjoiNzQuODguMjA5LjQiLCJyZXF1ZXN0X2lkIjoiNEE1OEQxMDQ6MTJENDoxNTBGOERFNjo1NzZENzFBMSIsInRpbWVzdGFtcCI6MTQ2Njc5MDMwNn0=">
+
+
+      <link rel="mask-icon" href="https://assets-cdn.github.com/pinned-octocat.svg" color="#4078c0">
+      <link rel="icon" type="image/x-icon" href="https://assets-cdn.github.com/favicon.ico">
+
+    <meta name="html-safe-nonce" content="d058e214e2817a8a44ffaaabc9bbeb7f1fdbfeed">
+    <meta content="38a750e15626289a106e633fdfa25a3a0cad7a3a" name="form-nonce" />
+
+    <meta http-equiv="x-pjax-version" content="b26dd6aa2b8d6a62805b37391f6299c4">
+    
+
+      
+  <meta name="description" content="xDrip-Experimental - Experimental Branches for Collaboration on DexDrip">
+  <meta name="go-import" content="github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental git https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental.git">
+
+  <meta content="649942" name="octolytics-dimension-user_id" /><meta content="StephenBlackWasAlreadyTaken" name="octolytics-dimension-user_login" /><meta content="30898542" name="octolytics-dimension-repository_id" /><meta content="StephenBlackWasAlreadyTaken/xDrip-Experimental" name="octolytics-dimension-repository_nwo" /><meta content="true" name="octolytics-dimension-repository_public" /><meta content="false" name="octolytics-dimension-repository_is_fork" /><meta content="30898542" name="octolytics-dimension-repository_network_root_id" /><meta content="StephenBlackWasAlreadyTaken/xDrip-Experimental" name="octolytics-dimension-repository_network_root_nwo" />
+  <link href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/commits/master.atom" rel="alternate" title="Recent Commits to xDrip-Experimental:master" type="application/atom+xml">
+
+
+  </head>
+
+
+  <body class="logged-out   env-production  vis-public">
+    <div id="js-pjax-loader-bar" class="pjax-loader-bar"></div>
+    <a href="#start-of-content" tabindex="1" class="accessibility-aid js-skip-to-content">Skip to content</a>
+
+    
+    
+    
+
+
+
+          <header class="site-header js-details-container" role="banner">
+  <div class="container-responsive">
+    <a class="header-logo-invertocat" href="https://github.com/" aria-label="Homepage" data-ga-click="(Logged out) Header, go to homepage, icon:logo-wordmark">
+      <svg aria-hidden="true" class="octicon octicon-mark-github" height="32" version="1.1" viewBox="0 0 16 16" width="32"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+    </a>
+
+    <button class="btn-link right site-header-toggle js-details-target" type="button" aria-label="Toggle navigation">
+      <svg aria-hidden="true" class="octicon octicon-three-bars" height="24" version="1.1" viewBox="0 0 12 16" width="18"><path d="M11.41 9H.59C0 9 0 8.59 0 8c0-.59 0-1 .59-1H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1h.01zm0-4H.59C0 5 0 4.59 0 4c0-.59 0-1 .59-1H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1h.01zM.59 11H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1H.59C0 13 0 12.59 0 12c0-.59 0-1 .59-1z"></path></svg>
+    </button>
+
+    <div class="site-header-menu">
+      <nav class="site-header-nav site-header-nav-main">
+        <a href="/personal" class="js-selected-navigation-item nav-item nav-item-personal" data-ga-click="Header, click, Nav menu - item:personal" data-selected-links="/personal /personal">
+          Personal
+</a>        <a href="/open-source" class="js-selected-navigation-item nav-item nav-item-opensource" data-ga-click="Header, click, Nav menu - item:opensource" data-selected-links="/open-source /open-source">
+          Open source
+</a>        <a href="/business" class="js-selected-navigation-item nav-item nav-item-business" data-ga-click="Header, click, Nav menu - item:business" data-selected-links="/business /business/features /business/customers /business">
+          Business
+</a>        <a href="/explore" class="js-selected-navigation-item nav-item nav-item-explore" data-ga-click="Header, click, Nav menu - item:explore" data-selected-links="/explore /trending /trending/developers /integrations /integrations/feature/code /integrations/feature/collaborate /integrations/feature/ship /explore">
+          Explore
+</a>      </nav>
+
+      <div class="site-header-actions">
+            <a class="btn btn-primary site-header-actions-btn" href="/join?source=header-repo" data-ga-click="(Logged out) Header, clicked Sign up, text:sign-up">Sign up</a>
+          <a class="btn site-header-actions-btn mr-2" href="/login?return_to=%2FStephenBlackWasAlreadyTaken%2FxDrip-Experimental%2Fissues%2F2" data-ga-click="(Logged out) Header, clicked Sign in, text:sign-in">Sign in</a>
+      </div>
+
+        <nav class="site-header-nav site-header-nav-secondary">
+          <a class="nav-item" href="/pricing">Pricing</a>
+          <a class="nav-item" href="/blog">Blog</a>
+          <a class="nav-item" href="https://help.github.com">Support</a>
+          <a class="nav-item header-search-link" href="https://github.com/search">Search GitHub</a>
+              <div class="header-search scoped-search site-scoped-search js-site-search" role="search">
+  <!-- </textarea> --><!-- '"` --><form accept-charset="UTF-8" action="/StephenBlackWasAlreadyTaken/xDrip-Experimental/search" class="js-site-search-form" data-scoped-search-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/search" data-unscoped-search-url="/search" method="get"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /></div>
+    <label class="form-control header-search-wrapper js-chromeless-input-container">
+      <div class="header-search-scope">This repository</div>
+      <input type="text"
+        class="form-control header-search-input js-site-search-focus js-site-search-field is-clearable"
+        data-hotkey="s"
+        name="q"
+        placeholder="Search"
+        aria-label="Search this repository"
+        data-unscoped-placeholder="Search GitHub"
+        data-scoped-placeholder="Search"
+        tabindex="1"
+        autocapitalize="off">
+    </label>
+</form></div>
+
+        </nav>
+    </div>
+  </div>
+</header>
+
+
+
+    <div id="start-of-content" class="accessibility-aid"></div>
+
+      <div id="js-flash-container">
+</div>
+
+
+    <div role="main" class="main-content">
+        <div itemscope itemtype="http://schema.org/SoftwareSourceCode">
+    <div id="js-repo-pjax-container" data-pjax-container>
+      
+<div class="pagehead repohead instapaper_ignore readability-menu experiment-repo-nav">
+  <div class="container repohead-details-container">
+
+    
+
+<ul class="pagehead-actions">
+
+  <li>
+      <a href="/login?return_to=%2FStephenBlackWasAlreadyTaken%2FxDrip-Experimental"
+    class="btn btn-sm btn-with-count tooltipped tooltipped-n"
+    aria-label="You must be signed in to watch a repository" rel="nofollow">
+    <svg aria-hidden="true" class="octicon octicon-eye" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"></path></svg>
+    Watch
+  </a>
+  <a class="social-count" href="/StephenBlackWasAlreadyTaken/xDrip-Experimental/watchers">
+    29
+  </a>
+
+  </li>
+
+  <li>
+      <a href="/login?return_to=%2FStephenBlackWasAlreadyTaken%2FxDrip-Experimental"
+    class="btn btn-sm btn-with-count tooltipped tooltipped-n"
+    aria-label="You must be signed in to star a repository" rel="nofollow">
+    <svg aria-hidden="true" class="octicon octicon-star" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74z"></path></svg>
+    Star
+  </a>
+
+    <a class="social-count js-social-count" href="/StephenBlackWasAlreadyTaken/xDrip-Experimental/stargazers">
+      23
+    </a>
+
+  </li>
+
+  <li>
+      <a href="/login?return_to=%2FStephenBlackWasAlreadyTaken%2FxDrip-Experimental"
+        class="btn btn-sm btn-with-count tooltipped tooltipped-n"
+        aria-label="You must be signed in to fork a repository" rel="nofollow">
+        <svg aria-hidden="true" class="octicon octicon-repo-forked" height="16" version="1.1" viewBox="0 0 10 16" width="10"><path d="M8 1a1.993 1.993 0 0 0-1 3.72V6L5 8 3 6V4.72A1.993 1.993 0 0 0 2 1a1.993 1.993 0 0 0-1 3.72V6.5l3 3v1.78A1.993 1.993 0 0 0 5 15a1.993 1.993 0 0 0 1-3.72V9.5l3-3V4.72A1.993 1.993 0 0 0 8 1zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3 10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3-10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
+        Fork
+      </a>
+
+    <a href="/StephenBlackWasAlreadyTaken/xDrip-Experimental/network" class="social-count">
+      63
+    </a>
+  </li>
+</ul>
+
+    <h1 class="public ">
+  <svg aria-hidden="true" class="octicon octicon-repo" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M4 9H3V8h1v1zm0-3H3v1h1V6zm0-2H3v1h1V4zm0-2H3v1h1V2zm8-1v12c0 .55-.45 1-1 1H6v2l-1.5-1.5L3 16v-2H1c-.55 0-1-.45-1-1V1c0-.55.45-1 1-1h10c.55 0 1 .45 1 1zm-1 10H1v2h2v-1h3v1h5v-2zm0-10H2v9h9V1z"></path></svg>
+  <span class="author" itemprop="author"><a href="/StephenBlackWasAlreadyTaken" class="url fn" rel="author">StephenBlackWasAlreadyTaken</a></span><!--
+--><span class="path-divider">/</span><!--
+--><strong itemprop="name"><a href="/StephenBlackWasAlreadyTaken/xDrip-Experimental" data-pjax="#js-repo-pjax-container">xDrip-Experimental</a></strong>
+
+</h1>
+
+  </div>
+  <div class="container">
+    
+<nav class="reponav js-repo-nav js-sidenav-container-pjax"
+     itemscope
+     itemtype="http://schema.org/BreadcrumbList"
+     role="navigation"
+     data-pjax="#js-repo-pjax-container">
+
+  <span itemscope itemtype="http://schema.org/ListItem" itemprop="itemListElement">
+    <a href="/StephenBlackWasAlreadyTaken/xDrip-Experimental" class="js-selected-navigation-item reponav-item" data-hotkey="g c" data-selected-links="repo_source repo_downloads repo_commits repo_releases repo_tags repo_branches /StephenBlackWasAlreadyTaken/xDrip-Experimental" itemprop="url">
+      <svg aria-hidden="true" class="octicon octicon-code" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M9.5 3L8 4.5 11.5 8 8 11.5 9.5 13 14 8 9.5 3zm-5 0L0 8l4.5 5L6 11.5 2.5 8 6 4.5 4.5 3z"></path></svg>
+      <span itemprop="name">Code</span>
+      <meta itemprop="position" content="1">
+</a>  </span>
+
+    <span itemscope itemtype="http://schema.org/ListItem" itemprop="itemListElement">
+      <a href="/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues" aria-selected="true" class="js-selected-navigation-item selected reponav-item" data-hotkey="g i" data-selected-links="repo_issues repo_labels repo_milestones /StephenBlackWasAlreadyTaken/xDrip-Experimental/issues" itemprop="url">
+        <svg aria-hidden="true" class="octicon octicon-issue-opened" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+        <span itemprop="name">Issues</span>
+        <span class="counter">35</span>
+        <meta itemprop="position" content="2">
+</a>    </span>
+
+  <span itemscope itemtype="http://schema.org/ListItem" itemprop="itemListElement">
+    <a href="/StephenBlackWasAlreadyTaken/xDrip-Experimental/pulls" class="js-selected-navigation-item reponav-item" data-hotkey="g p" data-selected-links="repo_pulls /StephenBlackWasAlreadyTaken/xDrip-Experimental/pulls" itemprop="url">
+      <svg aria-hidden="true" class="octicon octicon-git-pull-request" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
+      <span itemprop="name">Pull requests</span>
+      <span class="counter">13</span>
+      <meta itemprop="position" content="3">
+</a>  </span>
+
+
+
+  <a href="/StephenBlackWasAlreadyTaken/xDrip-Experimental/pulse" class="js-selected-navigation-item reponav-item" data-selected-links="pulse /StephenBlackWasAlreadyTaken/xDrip-Experimental/pulse">
+    <svg aria-hidden="true" class="octicon octicon-pulse" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M11.5 8L8.8 5.4 6.6 8.5 5.5 1.6 2.38 8H0v2h3.6l.9-1.8.9 5.4L9 8.5l1.6 1.5H14V8z"></path></svg>
+    Pulse
+</a>
+  <a href="/StephenBlackWasAlreadyTaken/xDrip-Experimental/graphs" class="js-selected-navigation-item reponav-item" data-selected-links="repo_graphs repo_contributors /StephenBlackWasAlreadyTaken/xDrip-Experimental/graphs">
+    <svg aria-hidden="true" class="octicon octicon-graph" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path d="M16 14v1H0V0h1v14h15zM5 13H3V8h2v5zm4 0H7V3h2v10zm4 0h-2V6h2v7z"></path></svg>
+    Graphs
+</a>
+
+</nav>
+
+  </div>
+</div>
+
+<div class="container new-discussion-timeline experiment-repo-nav">
+  <div class="repository-content">
+
+    
+<style type="text/css" media="screen">
+  span.labelstyle-fc2929, .linked-labelstyle-fc2929 {  background-color: #fc2929 !important;  color: #fff !important;}.labelstyle-fc2929.selected {  background-color: #fc2929 !important;  color: #fff !important;}.label-select-menu .labelstyle-fc2929.selected {  background:rgba(252, 41, 41, 0.12) !important;  color: #991818 !important;}
+
+span.labelstyle-cccccc, .linked-labelstyle-cccccc {  background-color: #cccccc !important;  color: #333333 !important;}.labelstyle-cccccc.selected {  background-color: #cccccc !important;  color: #333333 !important;}.label-select-menu .labelstyle-cccccc.selected {  background:rgba(204, 204, 204, 0.12) !important;  color: #999999 !important;}
+
+span.labelstyle-84b6eb, .linked-labelstyle-84b6eb {  background-color: #84b6eb !important;  color: #1c2733 !important;}.labelstyle-84b6eb.selected {  background-color: #84b6eb !important;  color: #1c2733 !important;}.label-select-menu .labelstyle-84b6eb.selected {  background:rgba(132, 182, 235, 0.12) !important;  color: #557699 !important;}
+
+span.labelstyle-159818, .linked-labelstyle-159818 {  background-color: #159818 !important;  color: #fff !important;}.labelstyle-159818.selected {  background-color: #159818 !important;  color: #fff !important;}.label-select-menu .labelstyle-159818.selected {  background:rgba(21, 152, 24, 0.12) !important;  color: #159918 !important;}
+
+span.labelstyle-e6e6e6, .linked-labelstyle-e6e6e6 {  background-color: #e6e6e6 !important;  color: #333333 !important;}.labelstyle-e6e6e6.selected {  background-color: #e6e6e6 !important;  color: #333333 !important;}.label-select-menu .labelstyle-e6e6e6.selected {  background:rgba(230, 230, 230, 0.12) !important;  color: #999999 !important;}
+
+span.labelstyle-cc317c, .linked-labelstyle-cc317c {  background-color: #cc317c !important;  color: #fff !important;}.labelstyle-cc317c.selected {  background-color: #cc317c !important;  color: #fff !important;}.label-select-menu .labelstyle-cc317c.selected {  background:rgba(204, 49, 124, 0.12) !important;  color: #99245c !important;}
+
+span.labelstyle-ffffff, .linked-labelstyle-ffffff {  background-color: #ffffff !important;  color: #333333 !important;}.labelstyle-ffffff.selected {  background-color: #ffffff !important;  color: #333333 !important;}.label-select-menu .labelstyle-ffffff.selected {  background:rgba(255, 255, 255, 0.12) !important;  color: #999999 !important;}
+</style>
+
+<div class="issues-listing" data-pjax>
+    <div id="show_issue" class="js-issues-results">
+
+    
+  <div
+    id="partial-discussion-header"
+    class="gh-header js-details-container js-socket-channel js-updatable-content issue"
+    data-channel="tenant:1:issue:57935805"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2/show_partial?partial=issues%2Ftitle">
+
+  <div class="gh-header-show ">
+      <div class="gh-header-actions">
+          <a href="/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/new" class="btn btn-sm btn-primary right" data-hotkey="c">
+            New issue
+          </a>
+      </div>
+
+    <h1 class="gh-header-title">
+      <span class="js-issue-title">Setup</span>
+      <span class="gh-header-number">#2</span>
+    </h1>
+  </div>
+
+
+  <div class="flex-table gh-header-meta">
+    <div class="flex-table-item">
+        <div class="state state-open">
+          <svg aria-hidden="true" class="octicon octicon-issue-opened" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+          Open
+        </div>
+    </div>
+    <div class="flex-table-item flex-table-item-primary">
+        <a href="/StephenBlackWasAlreadyTaken" class="author">StephenBlackWasAlreadyTaken</a>  opened this <span class="noun">Issue</span> <relative-time datetime="2015-02-17T15:13:57Z">Feb 17, 2015</relative-time>
+        &middot; 18 comments
+    </div>
+  </div>
+</div>
+
+
+    <div id="discussion_bucket" class="clearfix">
+      <div class="discussion-sidebar js-sticky">
+        <div id="partial-discussion-sidebar"
+  class="js-socket-channel js-updatable-content"
+  data-channel="tenant:1:issue:57935805"
+  data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2/show_partial?partial=issues%2Fsidebar">
+  <div class="discussion-sidebar-item sidebar-labels js-discussion-sidebar-item">
+  <!-- </textarea> --><!-- '"` --><form accept-charset="UTF-8" action="/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2?partial=issues%2Fsidebar%2Fshow%2Flabels" class="js-issue-sidebar-form" data-form-nonce="38a750e15626289a106e633fdfa25a3a0cad7a3a" data-remote="true" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="_method" type="hidden" value="put" /><input name="authenticity_token" type="hidden" value="zNqmNKZ2CT+W7yn0kTdRNnD+6Ocz6wR1WkXjcO/PF4aHzdjyemRE4Orwn0Pmc8b3AyJUf+TBqIhPDrIWP2VdnQ==" /></div>
+      
+  <h3 class="discussion-sidebar-heading">
+    Labels
+  </h3>
+
+
+    <div class="labels css-truncate">
+    None yet
+</div>
+
+</form></div>
+
+  <div class="discussion-sidebar-item sidebar-milestone js-discussion-sidebar-item">
+  <!-- </textarea> --><!-- '"` --><form accept-charset="UTF-8" action="/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2/set_milestone?partial=issues%2Fsidebar%2Fshow%2Fmilestone" class="js-issue-sidebar-form" data-form-nonce="38a750e15626289a106e633fdfa25a3a0cad7a3a" data-remote="true" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="_method" type="hidden" value="put" /><input name="authenticity_token" type="hidden" value="lGHVh0a5/hGxTR/oxTT2I4lNzGyDPRPWj7lvHAoDqP8ungV0F3YnAFhxYxcVFDtG1hAfSk8368tX00TOdCX/Kg==" /></div>
+    
+  <h3 class="discussion-sidebar-heading">
+    Milestone
+  </h3>
+
+
+      No milestone
+
+</form></div>
+
+
+ <div class="discussion-sidebar-item sidebar-assignee js-discussion-sidebar-item">
+  <!-- </textarea> --><!-- '"` --><form accept-charset="UTF-8" action="/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2?partial=issues%2Fsidebar%2Fshow%2Fassignees" class="js-issue-sidebar-form" data-form-nonce="38a750e15626289a106e633fdfa25a3a0cad7a3a" data-remote="true" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="_method" type="hidden" value="put" /><input name="authenticity_token" type="hidden" value="NeVBZHd5tDJY2UlWIEyRFSEsCDfvKh30DU8Yab5YXvB+ktWwrqjNwQPIIToKhXHVzalZPAmmsVbavT6UHE+onA==" /></div>
+    
+  <h3 class="discussion-sidebar-heading">
+    Assignees
+  </h3>
+
+
+    <span class="css-truncate">
+    No one assigned
+</span>
+
+</form></div>
+
+
+
+  <div id="partial-users-participants" class="discussion-sidebar-item">
+  <div class="participation">
+
+    <h3 class="discussion-sidebar-heading">
+      6 participants
+    </h3>
+    <div class="participation-avatars">
+        <a class="participant-avatar tooltipped tooltipped-n" aria-label="StephenBlackWasAlreadyTaken" href="/StephenBlackWasAlreadyTaken"><img alt="@StephenBlackWasAlreadyTaken" class="avatar" height="26" src="https://avatars2.githubusercontent.com/u/649942?v=3&amp;s=52" width="26" /> </a>
+        <a class="participant-avatar tooltipped tooltipped-n" aria-label="tzachi-dar" href="/tzachi-dar"><img alt="@tzachi-dar" class="avatar" height="26" src="https://avatars2.githubusercontent.com/u/7942372?v=3&amp;s=52" width="26" /> </a>
+        <a class="participant-avatar tooltipped tooltipped-n" aria-label="bhandfast" href="/bhandfast"><img alt="@bhandfast" class="avatar" height="26" src="https://avatars2.githubusercontent.com/u/1254624?v=3&amp;s=52" width="26" /> </a>
+        <a class="participant-avatar tooltipped tooltipped-n" aria-label="jstevensog" href="/jstevensog"><img alt="@jstevensog" class="avatar" height="26" src="https://avatars1.githubusercontent.com/u/8662259?v=3&amp;s=52" width="26" /> </a>
+        <a class="participant-avatar tooltipped tooltipped-n" aria-label="alexgroth" href="/alexgroth"><img alt="@alexgroth" class="avatar" height="26" src="https://avatars3.githubusercontent.com/u/12214918?v=3&amp;s=52" width="26" /> </a>
+        <a class="participant-avatar tooltipped tooltipped-n" aria-label="Cagier" href="/Cagier"><img alt="@Cagier" class="avatar" height="26" src="https://avatars0.githubusercontent.com/u/10944929?v=3&amp;s=52" width="26" /> </a>
+    </div>
+  </div>
+</div>
+
+
+  
+  
+</div>
+
+      </div>
+
+      <div class="discussion-timeline js-quote-selection-container ">
+
+        <div class="js-discussion js-socket-channel" data-channel="tenant:1:marked-as-read:issue:57935805">
+          
+
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/StephenBlackWasAlreadyTaken"><img alt="@StephenBlackWasAlreadyTaken" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/649942?v=3&amp;s=96" width="48" /></a>
+    <div id="issue-57935805"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    owner-comment  "
+     data-body-version="31372311755efd38033cb04025e4fb7e">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Owner</span>
+
+
+  <div class="timeline-comment-header-text">
+
+    <strong>
+      <a href="/StephenBlackWasAlreadyTaken" class="author">StephenBlackWasAlreadyTaken</a> 
+    </strong>
+
+    commented
+
+    <a href="#issue-57935805" class="timestamp"><relative-time datetime="2015-02-17T15:13:57Z">Feb 17, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body markdown-format js-comment-body">
+          <p>To point your existing forks here you can <br>
+open your existing DexDrip forks and do:<br>
+<code>git remote add experimental https://github.com/StephenBlackWasAlreadyTaken/DexDrip-Experimental.git</code><br>
+then<br>
+<code>git fetch experimental</code><br>
+checkout a new branch if you are currently doing work on master (Please dont push up your master!!!)<br>
+<code>git checkout -b DexcomShareSupport</code> &lt;&lt; (obviously put in what you are actually working on)<br>
+<code>git push experimental DexcomShareSupport</code> &lt;&lt; (again, dont push to master, push to experimental yourbranch)</p>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue:57935805"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue/57935805">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/tzachi-dar"><img alt="@tzachi-dar" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/7942372?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-74766959"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="be88acaf9dde94b77a22c830124cab24">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+      <a href="#issuecomment-74766959" title="This comment left via email reply." class="comment-type-icon">
+        <svg aria-hidden="true" class="octicon octicon-mail-read" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M6 5H4V4h2v1zm3 1H4v1h5V6zm5-.48V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V5.52c0-.33.16-.63.42-.81L2 3.58V3c0-.55.45-1 1-1h1.2L7 0l2.8 2H11c.55 0 1 .45 1 1v.58l1.58 1.13c.27.19.42.48.42.81zM3 7.5L7 10l4-2.5V3H3v4.5zm-2 6l4.5-3-4.5-3v6zm11 .5l-5-3-5 3h10zm1-6.5l-4.5 3 4.5 3v-6z"></path></svg>
+      </a>
+
+    <strong>
+      <a href="/tzachi-dar" class="author">tzachi-dar</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-74766959" class="timestamp"><relative-time datetime="2015-02-17T22:17:20Z">Feb 17, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body email-format js-comment-body">
+          <div class="email-fragment">Just created the first pull request. reviews are welcome.
+
+I have also noticed that bhandfast &lt;<a href="https://github.com/bhandfast">https://github.com/bhandfast</a>&gt; has
+created a branch called: Minor-Fixes-and-Improvements.
+
+I did not see a pull request so I did not comment on this, but here are my
+comments:
+1) Things looks good generally speaking. I hope the tables are more
+readable now, although I did not check that.
+2) as for:
+
+public class TransmitterDataDuplicateDetector {
+    public boolean isConsideredDuplicate(TransmitterData lastData,
+TransmitterData newData) {
+        if(lastData == null)
+            return false;
+
+        return lastData.raw_data == newData.raw_data &amp;&amp;
+Math.abs(lastData.timestamp - newData.timestamp ) &lt; (10000);
+    }
+}
+
+so: we already have a similar functionality:
+    public static boolean almostEquals( TransmitterRawData e1,
+TransmitterRawData e2)
+    {
+        if (e1 == null || e2==null) {
+            return false;
+        }
+        // relative time is in ms
+        if ((Math.abs(e1.CaptureDateTime - e2.CaptureDateTime) &lt; 120 * 1000
+) &amp;&amp;
+                (e1.TransmissionId == e2.TransmissionId)) {
+            return true;
+        }
+        return false;
+    }
+
+In any case I must say that 10 seconds is definitely not enough. I have
+noticed that when there are different android devices they might be 30
+seconds apart. Since we have a 5 minutes granularity, I use 2 minutes to be
+sure.
+Also the TransmissionId is the field that it's only meaning is to tell if
+it is the same packet.
+If one wants to check other fields, that is obviously ok from my side, but
+let's also check the transmission id.
+
+Thanks
+Tzachi</div>
+<span class="email-hidden-toggle"><a href="#">…</a></span><div class="email-hidden-reply" style="display:none">
+<div class="email-quoted-reply">On Tue, Feb 17, 2015 at 5:13 PM, Stephen Black ***@***.***&gt; wrote:
+ To point your existing forks here you can
+ open your existing DexDrip forks and do:
+ git remote add experimental
+ <a href="https://github.com/StephenBlackWasAlreadyTaken/DexDrip-Experimental.git">https://github.com/StephenBlackWasAlreadyTaken/DexDrip-Experimental.git</a>
+ then
+ git fetch experimental
+ checkout a new branch if you are currently doing work on master (Please
+ dont push up your master!!!)
+ git checkout -b DexcomShareSupport &lt;&lt; (obviously put in what you are
+ actually working on)
+ git push experimental DexcomShareSupport &lt;&lt; (again, dont push to master,
+ push to experimental yourbranch)
+
+ —
+ Reply to this email directly or view it on GitHub
+ &lt;<a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2</a>&gt;
+ .
+</div>
+<div class="email-fragment"></div>
+</div>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:74766959"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/74766959">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/bhandfast"><img alt="@bhandfast" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/1254624?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-74769103"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="d60204bd773cf7231e576da701383536">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+
+    <strong>
+      <a href="/bhandfast" class="author">bhandfast</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-74769103" class="timestamp"><relative-time datetime="2015-02-17T22:30:18Z">Feb 17, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body markdown-format js-comment-body">
+          <p>Ok, I take a look at it. Currently that code is only ported from the master. The code is essentially backported from another branch I have which both receives data from the BLE-kit and some raspberry PI devices with Wixels that broadcast raw data to the local LAN.</p>
+
+<p>I'll test things out a bit more and create a PR when I think it's working ok.</p>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:74769103"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/74769103">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/tzachi-dar"><img alt="@tzachi-dar" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/7942372?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-74770927"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="9b98c7a4e931c4423ee37c28546a70a1">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+      <a href="#issuecomment-74770927" title="This comment left via email reply." class="comment-type-icon">
+        <svg aria-hidden="true" class="octicon octicon-mail-read" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M6 5H4V4h2v1zm3 1H4v1h5V6zm5-.48V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V5.52c0-.33.16-.63.42-.81L2 3.58V3c0-.55.45-1 1-1h1.2L7 0l2.8 2H11c.55 0 1 .45 1 1v.58l1.58 1.13c.27.19.42.48.42.81zM3 7.5L7 10l4-2.5V3H3v4.5zm-2 6l4.5-3-4.5-3v6zm11 .5l-5-3-5 3h10zm1-6.5l-4.5 3 4.5 3v-6z"></path></svg>
+      </a>
+
+    <strong>
+      <a href="/tzachi-dar" class="author">tzachi-dar</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-74770927" class="timestamp"><relative-time datetime="2015-02-17T22:40:56Z">Feb 17, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body email-format js-comment-body">
+          <div class="email-fragment">How do this raspberry PI work?
+Is this some open code project?
+Do they have a way to broadcast to longer ranges than local lan?
+
+thanks
+Tzachi</div>
+<span class="email-hidden-toggle"><a href="#">…</a></span><div class="email-hidden-reply" style="display:none">
+<div class="email-quoted-reply">On Wed, Feb 18, 2015 at 12:30 AM, bhandfast ***@***.***&gt; wrote:
+ Ok, I take a look at it. Currently that code is only ported from the
+ master. The code is essentially backported from another branch I have which
+ both receives data from the BLE-kit and some raspberry PI devices with
+ Wixels that broadcast raw data to the local LAN.
+
+ I'll test things out a bit more and create a PR when I think it's working
+ ok.
+
+ —
+ Reply to this email directly or view it on GitHub
+ &lt;<a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-74769103" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>&gt;
+ .
+</div>
+<div class="email-fragment"></div>
+</div>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:74770927"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/74770927">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/bhandfast"><img alt="@bhandfast" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/1254624?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-74772019"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="d9cf5a6a1457e16e023ca31fc89b4aad">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+
+    <strong>
+      <a href="/bhandfast" class="author">bhandfast</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-74772019" class="timestamp"><relative-time datetime="2015-02-17T22:47:56Z">Feb 17, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body markdown-format js-comment-body">
+          <p>Well, the only thing they do is to listen to the serial port from the Wixel (using the same software as <a href="https://github.com/StephenBlackWasAlreadyTaken" class="user-mention">@StephenBlackWasAlreadyTaken</a> created). Then broadcast it the the local LAN in clear text. So I cannot really recommend this since this opens up for anyone to send data over the local LAN (at home, work, cafes etc) to DexDrip.</p>
+
+<p>This need to be secured before making it public :)</p>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:74772019"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/74772019">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/bhandfast"><img alt="@bhandfast" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/1254624?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-74772093"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="297cd24745b9a56af391ca8c095459de">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+
+    <strong>
+      <a href="/bhandfast" class="author">bhandfast</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-74772093" class="timestamp"><relative-time datetime="2015-02-17T22:48:25Z">Feb 17, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body markdown-format js-comment-body">
+          <p>Oh, and the tiny software on the PIs are a just a few lines of python.</p>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:74772093"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/74772093">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/tzachi-dar"><img alt="@tzachi-dar" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/7942372?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-74773493"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="152f953c876f0c45722f232555fdb208">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+      <a href="#issuecomment-74773493" title="This comment left via email reply." class="comment-type-icon">
+        <svg aria-hidden="true" class="octicon octicon-mail-read" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M6 5H4V4h2v1zm3 1H4v1h5V6zm5-.48V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V5.52c0-.33.16-.63.42-.81L2 3.58V3c0-.55.45-1 1-1h1.2L7 0l2.8 2H11c.55 0 1 .45 1 1v.58l1.58 1.13c.27.19.42.48.42.81zM3 7.5L7 10l4-2.5V3H3v4.5zm-2 6l4.5-3-4.5-3v6zm11 .5l-5-3-5 3h10zm1-6.5l-4.5 3 4.5 3v-6z"></path></svg>
+      </a>
+
+    <strong>
+      <a href="/tzachi-dar" class="author">tzachi-dar</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-74773493" class="timestamp"><relative-time datetime="2015-02-17T22:56:51Z">Feb 17, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body email-format js-comment-body">
+          <div class="email-fragment">Well, I guess that if this is python code, they can change that to tcp/ip
+in just a few more lines of code...</div>
+<span class="email-hidden-toggle"><a href="#">…</a></span><div class="email-hidden-reply" style="display:none">
+<div class="email-quoted-reply">On Wed, Feb 18, 2015 at 12:48 AM, bhandfast ***@***.***&gt; wrote:
+ Oh, and the tiny software on the PIs are a just a few lines of python.
+
+ —
+ Reply to this email directly or view it on GitHub
+ &lt;<a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-74772093" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>&gt;
+ .
+</div>
+<div class="email-fragment"></div>
+</div>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:74773493"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/74773493">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/tzachi-dar"><img alt="@tzachi-dar" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/7942372?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-74881062"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="79be031a7b872c03a6c36e7d08d2f181">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+      <a href="#issuecomment-74881062" title="This comment left via email reply." class="comment-type-icon">
+        <svg aria-hidden="true" class="octicon octicon-mail-read" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M6 5H4V4h2v1zm3 1H4v1h5V6zm5-.48V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V5.52c0-.33.16-.63.42-.81L2 3.58V3c0-.55.45-1 1-1h1.2L7 0l2.8 2H11c.55 0 1 .45 1 1v.58l1.58 1.13c.27.19.42.48.42.81zM3 7.5L7 10l4-2.5V3H3v4.5zm-2 6l4.5-3-4.5-3v6zm11 .5l-5-3-5 3h10zm1-6.5l-4.5 3 4.5 3v-6z"></path></svg>
+      </a>
+
+    <strong>
+      <a href="/tzachi-dar" class="author">tzachi-dar</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-74881062" class="timestamp"><relative-time datetime="2015-02-18T15:19:04Z">Feb 18, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body email-format js-comment-body">
+          <div class="email-fragment">By the way, if the PIs can run java, than there is existing code that does
+the tcp/ip part, and also there is no need to change anything in dexdrip,
+it can just connect to them.
+
+Please let me know if you are interested.
+
+Thanks
+Tzachi</div>
+<span class="email-hidden-toggle"><a href="#">…</a></span><div class="email-hidden-reply" style="display:none">
+<div class="email-quoted-reply">On Wed, Feb 18, 2015 at 12:56 AM, Tzachi Dar ***@***.***&gt; wrote:
+ Well, I guess that if this is python code, they can change that to tcp/ip
+ in just a few more lines of code...
+
+ On Wed, Feb 18, 2015 at 12:48 AM, bhandfast ***@***.***&gt;
+ wrote:
+
+&gt; Oh, and the tiny software on the PIs are a just a few lines of python.
+&gt;
+&gt; —
+&gt; Reply to this email directly or view it on GitHub
+&gt; &lt;<a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-74772093" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>&gt;
+&gt; .
+&gt;
+
+</div>
+<div class="email-fragment"></div>
+</div>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:74881062"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/74881062">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/tzachi-dar"><img alt="@tzachi-dar" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/7942372?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-74963350"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="bf5ae6ad32458e42a3d39ba8fb9d8a7b">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+      <a href="#issuecomment-74963350" title="This comment left via email reply." class="comment-type-icon">
+        <svg aria-hidden="true" class="octicon octicon-mail-read" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M6 5H4V4h2v1zm3 1H4v1h5V6zm5-.48V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V5.52c0-.33.16-.63.42-.81L2 3.58V3c0-.55.45-1 1-1h1.2L7 0l2.8 2H11c.55 0 1 .45 1 1v.58l1.58 1.13c.27.19.42.48.42.81zM3 7.5L7 10l4-2.5V3H3v4.5zm-2 6l4.5-3-4.5-3v6zm11 .5l-5-3-5 3h10zm1-6.5l-4.5 3 4.5 3v-6z"></path></svg>
+      </a>
+
+    <strong>
+      <a href="/tzachi-dar" class="author">tzachi-dar</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-74963350" class="timestamp"><relative-time datetime="2015-02-18T22:35:33Z">Feb 18, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body email-format js-comment-body">
+          <div class="email-fragment">Synchronize access to the DexCollectionService (though the service will
+probably never run concurrently in different threads).
+
+On android, services are running on the UI thread. so, I don't see how
+there can be another thread running there. We should probably make sure
+that there are no other threads running, or if there are threads, we should
+understand where they are coming from and make sure that we are ok with it.
+synchronizing one class will not realy help.
+
+So, if we are afraid from threading issues, we should add prints for that
+(maybe even asserts, although I'm afraid to add asserts to this "mission
+critical" code).
+
+All that said, there is one thread that I have introduced, and I intend to
+make sure that it will not call any other part of the code soon.
+
+Thanks
+Tzachi</div>
+<span class="email-hidden-toggle"><a href="#">…</a></span><div class="email-hidden-reply" style="display:none">
+<div class="email-quoted-reply">On Wed, Feb 18, 2015 at 5:19 PM, Tzachi Dar ***@***.***&gt; wrote:
+ By the way, if the PIs can run java, than there is existing code that does
+ the tcp/ip part, and also there is no need to change anything in dexdrip,
+ it can just connect to them.
+
+ Please let me know if you are interested.
+
+ Thanks
+ Tzachi
+
+ On Wed, Feb 18, 2015 at 12:56 AM, Tzachi Dar ***@***.***&gt; wrote:
+
+&gt; Well, I guess that if this is python code, they can change that to tcp/ip
+&gt; in just a few more lines of code...
+&gt;
+&gt; On Wed, Feb 18, 2015 at 12:48 AM, bhandfast ***@***.***&gt;
+&gt; wrote:
+&gt;
+&gt;&gt; Oh, and the tiny software on the PIs are a just a few lines of python.
+&gt;&gt;
+&gt;&gt; —
+&gt;&gt; Reply to this email directly or view it on GitHub
+&gt;&gt; &lt;<a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-74772093" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>&gt;
+&gt;&gt; .
+&gt;&gt;
+&gt;
+&gt;
+</div>
+<div class="email-fragment"></div>
+</div>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:74963350"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/74963350">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/bhandfast"><img alt="@bhandfast" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/1254624?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-75023648"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="c7356f21f22c66e79fba30c5521d74a7">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+
+    <strong>
+      <a href="/bhandfast" class="author">bhandfast</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-75023648" class="timestamp"><relative-time datetime="2015-02-19T09:51:07Z">Feb 19, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body markdown-format js-comment-body">
+          <p>Yes, but I believe the BLE callbacks are from another thread. The documentation indicates this and the ADB log have different thread id on the callbacks.</p>
+
+<p>Anyway, I agree that we should avoid synchronized blocks if we can. We could deliver the callbacks to the UI thread but what about those randomDelay calls? What's their purpose? We don't want to block the UI thread.</p>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:75023648"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/75023648">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/StephenBlackWasAlreadyTaken"><img alt="@StephenBlackWasAlreadyTaken" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/649942?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-75054974"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    owner-comment  "
+     data-body-version="825ce448022482d3667f5514eac298a4">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Owner</span>
+
+
+  <div class="timeline-comment-header-text">
+      <a href="#issuecomment-75054974" title="This comment left via email reply." class="comment-type-icon">
+        <svg aria-hidden="true" class="octicon octicon-mail-read" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M6 5H4V4h2v1zm3 1H4v1h5V6zm5-.48V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V5.52c0-.33.16-.63.42-.81L2 3.58V3c0-.55.45-1 1-1h1.2L7 0l2.8 2H11c.55 0 1 .45 1 1v.58l1.58 1.13c.27.19.42.48.42.81zM3 7.5L7 10l4-2.5V3H3v4.5zm-2 6l4.5-3-4.5-3v6zm11 .5l-5-3-5 3h10zm1-6.5l-4.5 3 4.5 3v-6z"></path></svg>
+      </a>
+
+    <strong>
+      <a href="/StephenBlackWasAlreadyTaken" class="author">StephenBlackWasAlreadyTaken</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-75054974" class="timestamp"><relative-time datetime="2015-02-19T13:55:00Z">Feb 19, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body email-format js-comment-body">
+          <div class="email-fragment">Soooo the random delay calls are a very hacky way to get around duplicate
+data (if for some reason you got in a state with two gatt servers spun up
+for the same device and both get the same callback for the characteristic
+getting updated.
+
+So say we have transmission a and b but they are the same transmission,
+just from different gatt servers
+
+We can check to see if a is not already in the database and on the other
+thread check to see that b is not in the database. Neither will be there at
+this point so it will try to write both of them! And since sqlite is not
+async these commands queue up behind each other which pretty much
+guarantees they all get in which we don't want.
+
+So, I had two thoughts about reducing the race conditions of it all, either
+wait a few seconds and just grab the last entry in that table and process
+that which still seemed a little shaky or purposely delay one more than the
+other on their way in to shuffle the queries for existing records
+(presumably one would have completed before the other one checks to see if
+it already exists)
+
+Im sure there is a way to do this all without being so hacky, I don't know
+Java though so I am using anything I can. Definitely open to suggestions.
+Also I think we definitely need to pull calibration math off the main
+thread, that stuff can lag.</div>
+<span class="email-hidden-toggle"><a href="#">…</a></span><div class="email-hidden-reply" style="display:none">
+<div class="email-quoted-reply">On Feb 19, 2015 4:51 AM, "bhandfast" ***@***.***&gt; wrote:
+ Yes, but I believe the BLE callbacks are from another thread. The
+ documentation indicates this and the ADB log have different thread id on
+ the callbacks.
+
+ Anyway, I agree that we should avoid synchronized blocks if we can. We
+ could deliver the callbacks to the UI thread but what about those
+ randomDelay calls? What's their purpose? We don't want to block the UI
+ thread.
+
+ —
+ Reply to this email directly or view it on GitHub
+ &lt;<a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-75023648" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>&gt;
+ .
+</div>
+<div class="email-fragment"></div>
+</div>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:75054974"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/75054974">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/tzachi-dar"><img alt="@tzachi-dar" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/7942372?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-75061150"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="6f9ae408639f00d1c033aa2da11f5a5f">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+      <a href="#issuecomment-75061150" title="This comment left via email reply." class="comment-type-icon">
+        <svg aria-hidden="true" class="octicon octicon-mail-read" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M6 5H4V4h2v1zm3 1H4v1h5V6zm5-.48V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V5.52c0-.33.16-.63.42-.81L2 3.58V3c0-.55.45-1 1-1h1.2L7 0l2.8 2H11c.55 0 1 .45 1 1v.58l1.58 1.13c.27.19.42.48.42.81zM3 7.5L7 10l4-2.5V3H3v4.5zm-2 6l4.5-3-4.5-3v6zm11 .5l-5-3-5 3h10zm1-6.5l-4.5 3 4.5 3v-6z"></path></svg>
+      </a>
+
+    <strong>
+      <a href="/tzachi-dar" class="author">tzachi-dar</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-75061150" class="timestamp"><relative-time datetime="2015-02-19T14:34:32Z">Feb 19, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body email-format js-comment-body">
+          <div class="email-fragment">Hi,
+
+I have a similar problem in WixelReader.java. Since I'm ready to accept
+data from many sources, there is a chance that two receivers will get the
+same data.
+
+My algorithm is very simple.
+When going up first packet goes in, but I remember it.
+Next packets goes in, if it is not almost equal to the last one that goes
+up.
+
+Actually, since my receivers might delay packets for a long time (they only
+answer when they are asked), I also make sure that the time of the new
+packet is newer than the time of the old packet. Also, since there are a
+few clocks that are involved there, I check that the packets are not from
+the too far future. In other words, if due to clock differences there is a
+time gap of up to 2 minutes, I'm ready to accept the packet). if the time
+differance is bigger, than I assume it is a mistake and the packet does not
+go up.
+
+you can see the code at WixelReader.run()
+
+If we want to make it even more bullet proof, when going up, I should look
+what was the last packet in, and not allow any packet that matches it.
+
+As for the threading issues. If we move the BLE callbaks to the main
+thread, than things will be synced from the fact that only the main thread
+is running, which means there are no races. If needed I can look on the
+ways of moving work to the main thread.
+
+Hope this helps
+Tzachi
+
+
+
+
+On Thu, Feb 19, 2015 at 3:55 PM, Stephen Black &lt;notifications@github.com&gt;
+wrote:</div>
+<span class="email-hidden-toggle"><a href="#">…</a></span><div class="email-hidden-reply" style="display:none">
+<div class="email-quoted-reply"> Soooo the random delay calls are a very hacky way to get around duplicate
+ data (if for some reason you got in a state with two gatt servers spun up
+ for the same device and both get the same callback for the characteristic
+ getting updated.
+
+ So say we have transmission a and b but they are the same transmission,
+ just from different gatt servers
+
+ We can check to see if a is not already in the database and on the other
+ thread check to see that b is not in the database. Neither will be there at
+ this point so it will try to write both of them! And since sqlite is not
+ async these commands queue up behind each other which pretty much
+ guarantees they all get in which we don't want.
+
+ So, I had two thoughts about reducing the race conditions of it all, either
+ wait a few seconds and just grab the last entry in that table and process
+ that which still seemed a little shaky or purposely delay one more than the
+ other on their way in to shuffle the queries for existing records
+ (presumably one would have completed before the other one checks to see if
+ it already exists)
+
+ Im sure there is a way to do this all without being so hacky, I don't know
+ Java though so I am using anything I can. Definitely open to suggestions.
+ Also I think we definitely need to pull calibration math off the main
+ thread, that stuff can lag.
+ On Feb 19, 2015 4:51 AM, "bhandfast" ***@***.***&gt; wrote:
+
+ &gt; Yes, but I believe the BLE callbacks are from another thread. The
+ &gt; documentation indicates this and the ADB log have different thread id on
+ &gt; the callbacks.
+ &gt;
+ &gt; Anyway, I agree that we should avoid synchronized blocks if we can. We
+ &gt; could deliver the callbacks to the UI thread but what about those
+ &gt; randomDelay calls? What's their purpose? We don't want to block the UI
+ &gt; thread.
+ &gt;
+ &gt; —
+ &gt; Reply to this email directly or view it on GitHub
+ &gt; &lt;
+ <a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-75023648" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>
+ &gt;
+
+ &gt; .
+ &gt;
+
+ —
+ Reply to this email directly or view it on GitHub
+ &lt;<a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-75054974" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>&gt;
+ .
+</div>
+<div class="email-fragment"></div>
+</div>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:75061150"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/75061150">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/jstevensog"><img alt="@jstevensog" class="timeline-comment-avatar" height="48" src="https://avatars0.githubusercontent.com/u/8662259?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-75184144"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="a22361de3e78564ae97c4b5c269504ef">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+      <a href="#issuecomment-75184144" title="This comment left via email reply." class="comment-type-icon">
+        <svg aria-hidden="true" class="octicon octicon-mail-read" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M6 5H4V4h2v1zm3 1H4v1h5V6zm5-.48V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V5.52c0-.33.16-.63.42-.81L2 3.58V3c0-.55.45-1 1-1h1.2L7 0l2.8 2H11c.55 0 1 .45 1 1v.58l1.58 1.13c.27.19.42.48.42.81zM3 7.5L7 10l4-2.5V3H3v4.5zm-2 6l4.5-3-4.5-3v6zm11 .5l-5-3-5 3h10zm1-6.5l-4.5 3 4.5 3v-6z"></path></svg>
+      </a>
+
+    <strong>
+      <a href="/jstevensog" class="author">jstevensog</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-75184144" class="timestamp"><relative-time datetime="2015-02-20T03:25:51Z">Feb 20, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body email-format js-comment-body">
+          <div class="email-fragment">I made a slightly different hack.  I simply reject any duplicate packets
+within a time period.  The first one I work with, then ignore any following
+ones for a minute.  Since it should be at least 5 minutes between packets,
+this works well, even for multiple sources transmitting at the same time.
+I thought the random delays were contributing to the "jitter" in the
+graphs.  It still exists now with dexbridge, because there is no
+determination time in the BLE connection happening, and I store the Dexcom
+packet for up to a minute to wait for the connection.
+Cheers
+
+On Fri, Feb 20, 2015 at 1:34 AM, tzachi-dar &lt;notifications@github.com&gt;
+wrote:</div>
+<span class="email-hidden-toggle"><a href="#">…</a></span><div class="email-hidden-reply" style="display:none">
+<div class="email-quoted-reply"> Hi,
+
+ I have a similar problem in WixelReader.java. Since I'm ready to accept
+ data from many sources, there is a chance that two receivers will get the
+ same data.
+
+ My algorithm is very simple.
+ When going up first packet goes in, but I remember it.
+ Next packets goes in, if it is not almost equal to the last one that goes
+ up.
+
+ Actually, since my receivers might delay packets for a long time (they only
+ answer when they are asked), I also make sure that the time of the new
+ packet is newer than the time of the old packet. Also, since there are a
+ few clocks that are involved there, I check that the packets are not from
+ the too far future. In other words, if due to clock differences there is a
+ time gap of up to 2 minutes, I'm ready to accept the packet). if the time
+ differance is bigger, than I assume it is a mistake and the packet does not
+ go up.
+
+ you can see the code at WixelReader.run()
+
+ If we want to make it even more bullet proof, when going up, I should look
+ what was the last packet in, and not allow any packet that matches it.
+
+ As for the threading issues. If we move the BLE callbaks to the main
+ thread, than things will be synced from the fact that only the main thread
+ is running, which means there are no races. If needed I can look on the
+ ways of moving work to the main thread.
+
+ Hope this helps
+ Tzachi
+
+
+
+
+ On Thu, Feb 19, 2015 at 3:55 PM, Stephen Black ***@***.***&gt;
+ wrote:
+
+ &gt; Soooo the random delay calls are a very hacky way to get around duplicate
+ &gt; data (if for some reason you got in a state with two gatt servers spun up
+ &gt; for the same device and both get the same callback for the characteristic
+ &gt; getting updated.
+ &gt;
+ &gt; So say we have transmission a and b but they are the same transmission,
+ &gt; just from different gatt servers
+ &gt;
+ &gt; We can check to see if a is not already in the database and on the other
+ &gt; thread check to see that b is not in the database. Neither will be there
+ at
+ &gt; this point so it will try to write both of them! And since sqlite is not
+ &gt; async these commands queue up behind each other which pretty much
+ &gt; guarantees they all get in which we don't want.
+ &gt;
+ &gt; So, I had two thoughts about reducing the race conditions of it all,
+ either
+ &gt; wait a few seconds and just grab the last entry in that table and process
+ &gt; that which still seemed a little shaky or purposely delay one more than
+ the
+ &gt; other on their way in to shuffle the queries for existing records
+ &gt; (presumably one would have completed before the other one checks to see
+ if
+ &gt; it already exists)
+ &gt;
+ &gt; Im sure there is a way to do this all without being so hacky, I don't
+ know
+ &gt; Java though so I am using anything I can. Definitely open to suggestions.
+ &gt; Also I think we definitely need to pull calibration math off the main
+ &gt; thread, that stuff can lag.
+ &gt; On Feb 19, 2015 4:51 AM, "bhandfast" ***@***.***&gt; wrote:
+ &gt;
+ &gt; &gt; Yes, but I believe the BLE callbacks are from another thread. The
+ &gt; &gt; documentation indicates this and the ADB log have different thread id
+ on
+ &gt; &gt; the callbacks.
+ &gt; &gt;
+ &gt; &gt; Anyway, I agree that we should avoid synchronized blocks if we can. We
+ &gt; &gt; could deliver the callbacks to the UI thread but what about those
+ &gt; &gt; randomDelay calls? What's their purpose? We don't want to block the UI
+ &gt; &gt; thread.
+ &gt; &gt;
+ &gt; &gt; —
+ &gt; &gt; Reply to this email directly or view it on GitHub
+ &gt; &gt; &lt;
+ &gt;
+ <a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-75023648" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>
+ &gt; &gt;
+ &gt;
+ &gt; &gt; .
+ &gt; &gt;
+ &gt;
+ &gt; —
+ &gt; Reply to this email directly or view it on GitHub
+ &gt; &lt;
+ <a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-75054974" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>
+ &gt;
+
+ &gt; .
+ &gt;
+
+ —
+ Reply to this email directly or view it on GitHub
+ &lt;<a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-75061150" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>&gt;
+ .
+</div>
+<div class="email-fragment"></div>
+<div class="email-signature-reply">-- 
+John Stevens
+"You are how you live, not what you have."</div>
+</div>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:75184144"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/75184144">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/StephenBlackWasAlreadyTaken"><img alt="@StephenBlackWasAlreadyTaken" class="timeline-comment-avatar" height="48" src="https://avatars3.githubusercontent.com/u/649942?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-75184564"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    owner-comment  "
+     data-body-version="19700998c3c0b13a7116e0d65b865e2b">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Owner</span>
+
+
+  <div class="timeline-comment-header-text">
+
+    <strong>
+      <a href="/StephenBlackWasAlreadyTaken" class="author">StephenBlackWasAlreadyTaken</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-75184564" class="timestamp"><relative-time datetime="2015-02-20T03:31:37Z">Feb 20, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body markdown-format js-comment-body">
+          <p>That unfortunately wouldn't prevent the issue of two gatt servers responding to the same exact same characteristic update, they would be too close together to rely on the db to help and are on different threads, maybe if we lock down a single observable with rxjava we could make them push back on to the same thread, I think that may be the best bet. The jitter in the graph is unfortunately the library I used bucketing values, if we cut it down to by second instead of my MS it may clear up some. </p>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:75184564"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/75184564">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/jstevensog"><img alt="@jstevensog" class="timeline-comment-avatar" height="48" src="https://avatars0.githubusercontent.com/u/8662259?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-75185303"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="c5ed476d373e7621964ab27981ea0687">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+      <a href="#issuecomment-75185303" title="This comment left via email reply." class="comment-type-icon">
+        <svg aria-hidden="true" class="octicon octicon-mail-read" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M6 5H4V4h2v1zm3 1H4v1h5V6zm5-.48V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V5.52c0-.33.16-.63.42-.81L2 3.58V3c0-.55.45-1 1-1h1.2L7 0l2.8 2H11c.55 0 1 .45 1 1v.58l1.58 1.13c.27.19.42.48.42.81zM3 7.5L7 10l4-2.5V3H3v4.5zm-2 6l4.5-3-4.5-3v6zm11 .5l-5-3-5 3h10zm1-6.5l-4.5 3 4.5 3v-6z"></path></svg>
+      </a>
+
+    <strong>
+      <a href="/jstevensog" class="author">jstevensog</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-75185303" class="timestamp"><relative-time datetime="2015-02-20T03:44:30Z">Feb 20, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body email-format js-comment-body">
+          <div class="email-fragment">I also implemented queuing of the GATT, to avoid any issues of packets
+showing up at the same time.  So, I can never get two or more exactly
+hitting at the same time.  FIFO helps a lot with that.
+Cheers</div>
+<span class="email-hidden-toggle"><a href="#">…</a></span><div class="email-hidden-reply" style="display:none">
+<div class="email-quoted-reply">On Fri, Feb 20, 2015 at 2:31 PM, Stephen Black ***@***.***&gt; wrote:
+ That unfortunately wouldn't prevent the issue of two gatt servers
+ responding to the same exact same characteristic update, they would be too
+ close together to rely on the db to help and are on different threads,
+ maybe if we lock down a single observable with rxjava we could make them
+ push back on to the same thread, I think that may be the best bet. The
+ jitter in the graph is unfortunately the library I used bucketing values,
+ if we cut it down to by second instead of my MS it may clear up some.
+
+ —
+ Reply to this email directly or view it on GitHub
+ &lt;<a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-75184564" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>&gt;
+ .
+</div>
+<div class="email-fragment"></div>
+<div class="email-signature-reply">-- 
+John Stevens
+"You are how you live, not what you have."</div>
+</div>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:75185303"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/75185303">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/alexgroth"><img alt="@alexgroth" class="timeline-comment-avatar" height="48" src="https://avatars2.githubusercontent.com/u/12214918?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-111711242"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                      "
+     data-body-version="ad2d15e6eac1299bf20ff812d64bd68f">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+
+
+  <div class="timeline-comment-header-text">
+
+    <strong>
+      <a href="/alexgroth" class="author">alexgroth</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-111711242" class="timestamp"><relative-time datetime="2015-06-13T13:50:01Z">Jun 13, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body markdown-format js-comment-body">
+          <p>Anyone know how to gap sync the xdrip? His phone was out of range and I want to get yesterday's in so on nightscout. Thank you. </p>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:111711242"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/111711242">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/Cagier"><img alt="@Cagier" class="timeline-comment-avatar" height="48" src="https://avatars1.githubusercontent.com/u/10944929?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-142328036"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                      "
+     data-body-version="05f225b41ec6f78e641e7b72f536d8a3">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+
+
+  <div class="timeline-comment-header-text">
+
+    <strong>
+      <a href="/Cagier" class="author">Cagier</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-142328036" class="timestamp"><relative-time datetime="2015-09-22T15:42:11Z">Sep 22, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body markdown-format js-comment-body">
+          <p>tzachi and bhandfast both have implementations that allow sending the raw data over a private network and the potential of sending it over a public network was discussed above.  It was suggested here that the data needed to be secured before making it public.</p>
+
+<p>I am working on something similar and after reading this comment I was considering using AES but then I decided that maybe generating an SHA-2 hash on the raw data (appended with a secret key) might do the trick.  It may also be applicable in some way to dexterity and other similar solutions.</p>
+
+<p>There are a few SHA256 implementations in C but before I try to implement this on wixel-xdrip I was just wondering if there are any comments regarding this approach?  For the guys above, the xDrip app would probably need to validate the hash.  However, in my implementation I would be sending the data to a socket on a java PC uploader over the internet, which would then validate the hash before uploading it into a mongo db for use by the xDrip (using the pre-existing wifi network receiver functionality) and so no modification to xDrip app should be required.  (Before you ask, my preference would be to upload to mongo directly but I don't think I can do that with my hardware for various technical reasons.)</p>
+
+<p>Would there be any reservations about doing it this way or even am I over-engineering it?  Also, do you think it will fit on the wixel (as I have a load of other stuff going on there as well)?  I suppose there is one way to find out... lol</p>
+
+<p>Sorry if this hijacks a semi-dormant thread but I have been mulling over the concerns regarding sending/receiving data in the clear since I saw it raised above.  Also, I know I am focussing more on the sending technology but it may impact the xdrip-experimental branch if you decided that this is the way to go for securing received data over public networks from dexterity and other related projects.</p>
+
+<p>Cheers</p>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:142328036"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/142328036">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/jstevensog"><img alt="@jstevensog" class="timeline-comment-avatar" height="48" src="https://avatars0.githubusercontent.com/u/8662259?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-142425577"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                    collaborator-comment  "
+     data-body-version="200ed52ce8618fda23b5e411876c4e04">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+    <span class="timeline-comment-label">Collaborator</span>
+
+
+  <div class="timeline-comment-header-text">
+      <a href="#issuecomment-142425577" title="This comment left via email reply." class="comment-type-icon">
+        <svg aria-hidden="true" class="octicon octicon-mail-read" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M6 5H4V4h2v1zm3 1H4v1h5V6zm5-.48V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V5.52c0-.33.16-.63.42-.81L2 3.58V3c0-.55.45-1 1-1h1.2L7 0l2.8 2H11c.55 0 1 .45 1 1v.58l1.58 1.13c.27.19.42.48.42.81zM3 7.5L7 10l4-2.5V3H3v4.5zm-2 6l4.5-3-4.5-3v6zm11 .5l-5-3-5 3h10zm1-6.5l-4.5 3 4.5 3v-6z"></path></svg>
+      </a>
+
+    <strong>
+      <a href="/jstevensog" class="author">jstevensog</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-142425577" class="timestamp"><relative-time datetime="2015-09-22T21:17:57Z">Sep 22, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body email-format js-comment-body">
+          <div class="email-fragment">You should be aware that the wixel has build in encoding engine to simplify
+this.
+Personally, I do not feel there is any need to hash it from the wixel to
+app via BLE.  But then again, I use xBridge which uses a binary protocol,
+rather than the plain text format of the wixel-xdrip.
+I wouldn't use the wixel-xdrip, as it lacks many of the features I wanted,
+and included in xBridge.
+
+I would think it much more important to ensure the data from xDrip to NS is
+encrypted, rather than from the bridge to app.  Especially as the Dexcom
+transmitter sends it unencrypted.
+Cheers</div>
+<span class="email-hidden-toggle"><a href="#">…</a></span><div class="email-hidden-reply" style="display:none">
+<div class="email-quoted-reply">On Wed, Sep 23, 2015 at 1:42 AM, Keith Garland ***@***.***&gt; wrote:
+ tzachi and bhandfast both have implementations that allow sending the raw
+ data over a private network and the potential of sending it over a public
+ network was discussed above. It was suggested here that the data needed to
+ be secured before making it public.
+
+ I am working on something similar and after reading this comment I was
+ considering using AES but then I decided that maybe generating an SHA-2
+ hash on the raw data (appended with a secret key) might do the trick. It
+ may also be applicable in some way to dexterity and other similar solutions.
+
+ There are a few SHA256 implementations in C but before I try to implement
+ this on wixel-xdrip I was just wondering if there are any comments
+ regarding this approach? For the guys above, the xDrip app would probably
+ need to validate the hash. However, in my implementation I would be sending
+ the data to a socket on a java PC uploader over the internet, which would
+ then validate the hash before uploading it into a mongo db for use by the
+ xDrip (using the pre-existing wifi network receiver functionality) and so
+ no modification to xDrip app should be required. (Before you ask, my
+ preference would be to upload to mongo directly but I don't think I can do
+ that with my hardware for various technical reasons.)
+
+ Would there be any reservations about doing it this way or even am I
+ over-engineering it? Also, do you think it will fit on the wixel (as I have
+ a load of other stuff going on there as well)? I suppose there is one way
+ to find out... lol
+
+ Sorry if this hijacks a semi-dormant thread but I have been mulling over
+ the concerns regarding sending/receiving data in the clear since I saw it
+ raised above. Also, I know I am focussing more on the sending technology
+ but it may impact the xdrip-experimental branch if you decided that this is
+ the way to go for securing received data over public networks from
+ dexterity and other related projects.
+
+ Cheers
+
+ —
+ Reply to this email directly or view it on GitHub
+ &lt;<a href="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2#issuecomment-142328036" class="issue-link js-issue-link" data-url="https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2" data-id="57935805" data-error-text="Failed to load issue title" data-permission-text="Issue title is private">#2 (comment)</a>&gt;
+ .
+</div>
+<div class="email-fragment"></div>
+<div class="email-signature-reply">-- 
+John Stevens
+"You are how you live, not what you have."</div>
+</div>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:142425577"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/142425577">
+</div>
+
+</div>
+
+  </div>
+  <div class="timeline-comment-wrapper js-comment-container">
+    <a href="/Cagier"><img alt="@Cagier" class="timeline-comment-avatar" height="48" src="https://avatars1.githubusercontent.com/u/10944929?v=3&amp;s=96" width="48" /></a>
+    <div id="issuecomment-142440993"
+     class="comment previewable-edit timeline-comment js-comment js-task-list-container
+                    
+                     
+                      "
+     data-body-version="3554505f957866e03b9c8cc06fa93a38">
+
+  <div class="timeline-comment-header ">
+
+    <div class="timeline-comment-actions">
+    </div>
+
+
+
+  <div class="timeline-comment-header-text">
+
+    <strong>
+      <a href="/Cagier" class="author">Cagier</a> 
+    </strong>
+
+    commented
+
+    <a href="#issuecomment-142440993" class="timestamp"><relative-time datetime="2015-09-22T22:36:51Z">Sep 22, 2015</relative-time></a>
+
+  </div>
+</div>
+
+
+  <div class="comment-content">
+
+    <div class="edit-comment-hide">
+      <div class="comment-body markdown-body markdown-format js-comment-body">
+          <p>Thanks John.  Yes, hashing over BLE does seem like overkill but I am actually talking about securing the data being sent from a remote monitor over the internet using TCP/IP. The point that bhandfast was making was that someone else anywhere on the internet could go to the same IP address and inject random fake packets if they so wished.</p>
+
+<p>I'm not sure exactly what the binary protocol on the xbridge is that you refer to but I think you mean that it is just sending the raw bytes which are not particularly human-readable.  However, it would seem fairly trivial to spoof these over a public network if someone wanted to.  I was suggesting that if I was adopt an approach using AES or SHA that it would be something that might be also usable on the xbridge to secure remote connections over the internet.</p>
+
+<p>It is a bit of extra work to implement this functionality but I can see the argument for it.  I would be interested in knowing more about the built-in support on the wixel for hashing / encryption as I would just like to generate a checksum to send along with my data.  If the wixel has built-in hashing functions then that would be great.</p>
+
+<p>I'm not sure if I have this right but the I think the wixel-xdrip is the wixel/BLE combo and the xbridge is the wixel/USB combination?  My "xdrip2g" is actually a wixel/fona combination that sends data directly from the wixel over a GPRS connection to a TCP socket on a remote computer.  It is that connection that it seems that I would need to be "secured before making it public".  Personally I am happy to implement "security through obscurity" for the moment but I can see how people might want it to be a bit more robust before releasing it into the wild.</p>
+
+<p>As the fona does not support SSL connections, it is a bit of a nightmare trying to update mongolab databases directly.  However, that would be a direct secure connection if I could manage that and I wouldn't have to worry about any of this hashing stuff.  For the moment I am going with a plaintext TCP/IP socket connection to a PC (using a dynamic dns and port forwarding) to get the data off the wixel.  After that, everything is secure as it will upload to the mongo database using the usual secure methods.  So it is just the first hop from the wixel to the PC which is "vulnerable".</p>
+
+<p>Have you any more info on the "secure encoding engine" please?  I had a browse in the wixel-sdk and did a bit of a google but couldn't find any reference to it.  I'm just looking for an easy way to generate a hashed checksum to verify that the data is not being spoofed.  Some sample code would be nice! ;)</p>
+
+<p>Thanks very much for the swift reply.  It is great to get some feedback and the info you have provided is really useful.</p>
+      </div>
+    </div>
+
+  </div>
+
+    
+<div class="js-socket-channel js-updatable-content comment-reactions  js-reactions-container"
+    data-channel="tenant:1:reaction:issue-comment:142440993"
+    data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/reactions/issue-comment/142440993">
+</div>
+
+</div>
+
+  </div>
+  
+
+
+      
+
+
+
+
+      
+
+
+
+
+      
+
+
+
+
+
+
+
+<!-- Rendered timeline since 2016-02-14 13:11:39 -->
+<div id="partial-timeline-marker"
+      class="js-timeline-marker js-socket-channel js-updatable-content"
+      data-channel="tenant:1:issue:57935805"
+      data-url="/StephenBlackWasAlreadyTaken/xDrip-Experimental/issues/2/show_partial?partial=issues%2Ftimeline_marker&amp;since=1455484299"
+      data-last-modified="Sun, 14 Feb 2016 21:11:39 GMT">
+
+    <!-- </textarea> --><!-- '"` --><form accept-charset="UTF-8" action="/StephenBlackWasAlreadyTaken/xDrip-Experimental/notifications/mark?ids=59121690" class="hidden js-timeline-marker-form" data-form-nonce="38a750e15626289a106e633fdfa25a3a0cad7a3a" data-remote="true" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="authenticity_token" type="hidden" value="shYpBpJyecsTgVbVYovDBS630gJ+vsEkc+j3fPz/rGldvF4px64qFbg6s0mv0P3eArsffHneTaCDyiSwFjQPWQ==" /></div>
+</form></div>
+
+
+        </div>
+
+          <div class="discussion-timeline-actions">
+                <div class="signed-out-comment">
+    <a href="/join?source=comment-repo" class="btn btn-primary" rel="nofollow">Sign up for free</a>
+    <strong>to join this conversation on GitHub</strong>.
+    Already have an account?
+    <a href="/login?return_to=https%3A%2F%2Fgithub.com%2FStephenBlackWasAlreadyTaken%2FxDrip-Experimental%2Fissues%2F2" rel="nofollow">Sign in to comment</a>
+</div>
+
+
+          </div>
+      </div>
+
+    </div>
+    <div class="clear"></div>
+  </div>
+
+</div>
+
+
+  </div>
+  <div class="modal-backdrop js-touch-events"></div>
+</div>
+
+
+    </div>
+  </div>
+
+    </div>
+
+        <div class="container site-footer-container">
+  <div class="site-footer" role="contentinfo">
+    <ul class="site-footer-links right">
+        <li><a href="https://status.github.com/" data-ga-click="Footer, go to status, text:status">Status</a></li>
+      <li><a href="https://developer.github.com" data-ga-click="Footer, go to api, text:api">API</a></li>
+      <li><a href="https://training.github.com" data-ga-click="Footer, go to training, text:training">Training</a></li>
+      <li><a href="https://shop.github.com" data-ga-click="Footer, go to shop, text:shop">Shop</a></li>
+        <li><a href="https://github.com/blog" data-ga-click="Footer, go to blog, text:blog">Blog</a></li>
+        <li><a href="https://github.com/about" data-ga-click="Footer, go to about, text:about">About</a></li>
+
+    </ul>
+
+    <a href="https://github.com" aria-label="Homepage" class="site-footer-mark" title="GitHub">
+      <svg aria-hidden="true" class="octicon octicon-mark-github" height="24" version="1.1" viewBox="0 0 16 16" width="24"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+</a>
+    <ul class="site-footer-links">
+      <li>&copy; 2016 <span title="0.83262s from github-fe127-cp1-prd.iad.github.net">GitHub</span>, Inc.</li>
+        <li><a href="https://github.com/site/terms" data-ga-click="Footer, go to terms, text:terms">Terms</a></li>
+        <li><a href="https://github.com/site/privacy" data-ga-click="Footer, go to privacy, text:privacy">Privacy</a></li>
+        <li><a href="https://github.com/security" data-ga-click="Footer, go to security, text:security">Security</a></li>
+        <li><a href="https://github.com/contact" data-ga-click="Footer, go to contact, text:contact">Contact</a></li>
+        <li><a href="https://help.github.com" data-ga-click="Footer, go to help, text:help">Help</a></li>
+    </ul>
+  </div>
+</div>
+
+
+
+    
+
+    <div id="ajax-error-message" class="ajax-error-message flash flash-error">
+      <svg aria-hidden="true" class="octicon octicon-alert" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path d="M8.865 1.52c-.18-.31-.51-.5-.87-.5s-.69.19-.87.5L.275 13.5c-.18.31-.18.69 0 1 .19.31.52.5.87.5h13.7c.36 0 .69-.19.86-.5.17-.31.18-.69.01-1L8.865 1.52zM8.995 13h-2v-2h2v2zm0-3h-2V6h2v4z"></path></svg>
+      <button type="button" class="flash-close js-flash-close js-ajax-error-dismiss" aria-label="Dismiss error">
+        <svg aria-hidden="true" class="octicon octicon-x" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"></path></svg>
+      </button>
+      Something went wrong with that request. Please try again.
+    </div>
+
+
+      <script crossorigin="anonymous" src="https://assets-cdn.github.com/assets/compat-7db58f8b7b91111107fac755dd8b178fe7db0f209ced51fc339c446ad3f8da2b.js"></script>
+      <script crossorigin="anonymous" src="https://assets-cdn.github.com/assets/frameworks-f9a40617e5ea71342dc57103554b07a3c1edc88712b04de1a040aed44891a11d.js"></script>
+      <script async="async" crossorigin="anonymous" src="https://assets-cdn.github.com/assets/github-f0c4e3f3e6abd6591d9680dafdae890452bbeda80e6d138134b5c59eaa7cbca3.js"></script>
+      
+      
+      
+      
+      
+      
+    <div class="js-stale-session-flash stale-session-flash flash flash-warn flash-banner hidden">
+      <svg aria-hidden="true" class="octicon octicon-alert" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path d="M8.865 1.52c-.18-.31-.51-.5-.87-.5s-.69.19-.87.5L.275 13.5c-.18.31-.18.69 0 1 .19.31.52.5.87.5h13.7c.36 0 .69-.19.86-.5.17-.31.18-.69.01-1L8.865 1.52zM8.995 13h-2v-2h2v2zm0-3h-2V6h2v4z"></path></svg>
+      <span class="signed-in-tab-flash">You signed in with another tab or window. <a href="">Reload</a> to refresh your session.</span>
+      <span class="signed-out-tab-flash">You signed out in another tab or window. <a href="">Reload</a> to refresh your session.</span>
+    </div>
+    <div class="facebox" id="facebox" style="display:none;">
+  <div class="facebox-popup">
+    <div class="facebox-content" role="dialog" aria-labelledby="facebox-header" aria-describedby="facebox-description">
+    </div>
+    <button type="button" class="facebox-close js-facebox-close" aria-label="Close modal">
+      <svg aria-hidden="true" class="octicon octicon-x" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"></path></svg>
+    </button>
+  </div>
+</div>
+
+  </body>
+</html>
+

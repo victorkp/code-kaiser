@@ -1,0 +1,21 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSparklineBuilder.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSparklineBuilder.java
+index b934b49..c94b37d 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSparklineBuilder.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSparklineBuilder.java
+@@ -3,6 +3,7 @@
+ import android.content.Context;
+ import android.content.res.Resources;
+ import android.graphics.Bitmap;
++import android.graphics.Color;
+ import android.util.DisplayMetrics;
+ import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ import android.view.View;
+@@ -129,7 +130,7 @@ private Bitmap getViewBitmap(View v) {
+         // Reset the drawing cache background color to fully transparent
+         // for the duration of this operation
+         int color = v.getDrawingCacheBackgroundColor();
+-        v.setDrawingCacheBackgroundColor(0);
++        v.setDrawingCacheBackgroundColor(Color.TRANSPARENT);
+ 
+         if (color != 0) {
+             v.destroyDrawingCache();

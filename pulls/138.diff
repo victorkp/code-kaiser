@@ -1,0 +1,14 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ImportDatabaseActivity.java b/app/src/main/java/com/eveningoutpost/dexdrip/ImportDatabaseActivity.java
+index f065955..99cf50e 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ImportDatabaseActivity.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ImportDatabaseActivity.java
+@@ -73,7 +73,8 @@ private void sortDatabasesAlphabetically() {
+         Collections.sort(databases, new Comparator<File>() {
+             @Override
+             public int compare(File lhs, File rhs) {
+-                return lhs.getName().compareTo(rhs.getName());
++                //descending sort
++                return rhs.getName().compareTo(lhs.getName());
+             }
+         });
+     }

@@ -1,0 +1,43 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+index d62a781..228cc68 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+@@ -1000,6 +1000,16 @@ public double usedRaw() {
+         return age_adjusted_raw_value;
+     }
+ 
++    public double ageAdjustedFiltered(){
++        double usedRaw = usedRaw();
++        if(usedRaw == raw_data || raw_data == 0d){
++            return filtered_data;
++        } else {
++            // adjust the filtered_data with the same factor as the age adjusted raw value
++            return filtered_data * (usedRaw/raw_data);
++        }
++    }
++
+     // the input of this function is a string. each char can be g(=good) or b(=bad) or s(=skip, point unmissed).
+     static List<BgReading> createlatestTest(String input, Long now) {
+         Random randomGenerator = new Random();
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+index 6212917..a032170 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+@@ -273,7 +273,7 @@ private void populateV1APIBGEntry(JSONObject json, BgReading record) throws Exce
+             json.put("sgv", (int)record.calculated_value);
+             json.put("direction", record.slopeName());
+             json.put("type", "sgv");
+-            json.put("filtered", record.filtered_data * 1000);
++            json.put("filtered", record.ageAdjustedFiltered() * 1000);
+             json.put("unfiltered", record.usedRaw() * 1000);
+             json.put("rssi", 100);
+             json.put("noise", record.noiseValue());
+@@ -374,7 +374,7 @@ private boolean doMongoUpload(SharedPreferences prefs, List<BgReading> glucoseDa
+                             testData.put("sgv", Math.round(record.calculated_value));
+                             testData.put("direction", record.slopeName());
+                             testData.put("type", "sgv");
+-                            testData.put("filtered", record.filtered_data * 1000);
++                            testData.put("filtered", record.ageAdjustedFiltered() * 1000);
+                             testData.put("unfiltered", record.usedRaw() * 1000);
+                             testData.put("rssi", 100);
+                             testData.put("noise", record.noiseValue());

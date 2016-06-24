@@ -1,0 +1,30 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+index 5472f4a..7ff01e7 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+@@ -364,6 +364,7 @@ public static BgReading create(double raw_data, double filtered_data, Context co
+             bgReading.perform_calculations();
+             context.startService(new Intent(context, Notifications.class));
+             BgSendQueue.addToQueue(bgReading, "create", context);
++            BgSendQueue.addToQueue(bgReading, "create", context);
+         }
+ 
+         Log.i("BG GSON: ",bgReading.toS());
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+index 224668b..8283046 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+@@ -305,7 +305,12 @@ private boolean doMongoUpload(SharedPreferences prefs, List<BgReading> glucoseDa
+                             testData.put("unfiltered", record.usedRaw() * 1000);
+                             testData.put("rssi", 100);
+                             testData.put("noise", record.noiseValue());
+-                            dexcomData.insert(testData, WriteConcern.UNACKNOWLEDGED);
++                            testData.put("dex_raw", record.raw_data);
++                            testData.put("dex_filtered", record.filtered_data);
++
++                            testData.put("sysTime", format.format(record.timestamp));
++                            BasicDBObject query = new BasicDBObject("type", "sgv").append("sysTime", format.format(record.timestamp));
++                            dexcomData.update(query, testData, true, false,  WriteConcern.UNACKNOWLEDGED);
+                         }
+ 
+                         Log.i(TAG, "The number of MBG records being sent to MongoDB is " + meterRecords.size());

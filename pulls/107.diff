@@ -1,0 +1,225 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index 8bc4545..6287231 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -15,6 +15,8 @@
+ import android.view.Menu;
+ import android.view.MenuItem;
+ import android.view.View;
++import android.view.ViewGroup;
++import android.view.ViewGroup.LayoutParams;
+ import android.widget.TextView;
+ import android.widget.Toast;
+ 
+@@ -84,7 +86,14 @@ protected void onCreate(Bundle savedInstanceState) {
+ 
+         this.dexbridgeBattery = (TextView) findViewById(R.id.textBridgeBattery);
+         this.currentBgValueText = (TextView) findViewById(R.id.currentBgValueRealTime);
++        if(BgGraphBuilder.isXLargeTablet(getApplicationContext())) {
++            this.currentBgValueText.setTextSize(100);
++        }
+         this.notificationText = (TextView) findViewById(R.id.notices);
++        if(BgGraphBuilder.isXLargeTablet(getApplicationContext())) {
++            this.notificationText.setTextSize(40);
++        }
++
+     }
+ 
+     @Override
+@@ -132,6 +141,13 @@ public void setupCharts() {
+         bgGraphBuilder = new BgGraphBuilder(this);
+         updateStuff = false;
+         chart = (LineChartView) findViewById(R.id.chart);
++
++        if(BgGraphBuilder.isXLargeTablet(getApplicationContext())) {
++            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) chart.getLayoutParams();
++            params.topMargin = 105;
++            chart.setLayoutParams(params);
++        }
++
+         chart.setZoomType(ZoomType.HORIZONTAL);
+ 
+         previewChart = (PreviewLineChartView) findViewById(R.id.chart_preview);
+@@ -169,6 +185,9 @@ public void onPause() {
+ 
+     public void updateCurrentBgInfo() {
+         final TextView notificationText = (TextView) findViewById(R.id.notices);
++        if(BgGraphBuilder.isXLargeTablet(getApplicationContext())) {
++            notificationText.setTextSize(40);
++        }
+         notificationText.setText("");
+         notificationText.setTextColor(Color.RED);
+         isBTWixel = CollectionServiceStarter.isBTWixel(getApplicationContext());
+@@ -197,34 +216,7 @@ private void updateCurrentBgInfoForWifiWixel(TextView notificationText) {
+             return;
+         }
+ 
+-        final boolean sensorIsActive = Sensor.isActive();
+-        if(!sensorIsActive) {
+-            notificationText.setText("Now start your sensor");
+-            return;
+-        }
+-
+-        final long now = System.currentTimeMillis();
+-        if (Sensor.currentSensor().started_at + 60000 * 60 * 2 >= now) {
+-            double waitTime = ((Sensor.currentSensor().started_at + (60000 * 60 * 2)) - now) / (60000);
+-            notificationText.setText("Please wait while sensor warms up! (" + String.format("%.2f", waitTime) + " minutes)");
+-            return;
+-        }
+-
+-        if (BgReading.latest(2).size() < 2) {
+-            notificationText.setText("Please wait, need 2 readings from transmitter first.");
+-            return;
+-        }
+-
+-        List<Calibration> calibrations = Calibration.latest(2);
+-        if(calibrations.size() < 2) {
+-            notificationText.setText("Please enter two calibrations to get started!");
+-            return;
+-        }
+-
+-        if (calibrations.get(0).possible_bad != null && calibrations.get(0).possible_bad == true && calibrations.get(1).possible_bad != null && calibrations.get(1).possible_bad != true) {
+-            notificationText.setText("Possible bad calibration slope, please have a glass of water, wash hands, then recalibrate in a few!");
+-        }
+-        displayCurrentInfo();
++        updateCurrentBgInfoCommon(notificationText);
+ 
+     }
+ 
+@@ -238,7 +230,10 @@ private void updateCurrentBgInfoForBtBasedWixel(TextView notificationText) {
+             notificationText.setText("First pair with your BT device!");
+             return;
+         }
+-
++        updateCurrentBgInfoCommon(notificationText);
++    }
++    
++    private void updateCurrentBgInfoCommon(TextView notificationText) {
+         final boolean isSensorActive = Sensor.isActive();
+         if(!isSensorActive){
+             notificationText.setText("Now start your sensor");
+@@ -271,7 +266,7 @@ private void updateCurrentBgInfoForBtBasedWixel(TextView notificationText) {
+                     notificationText.setText("Please enter two calibrations to get started!");
+                 }
+             }
+-        }
++        }        
+     }
+ 
+     private void updateCurrentBgInfoForBtShare(TextView notificationText) {
+@@ -375,8 +370,13 @@ private void displayCurrentInfoFromReading(BgReading lastBgReading, boolean pred
+         List<BgReading> bgReadingList = BgReading.latest(2);
+         if(bgReadingList != null && bgReadingList.size() == 2) {
+             // same logic as in xDripWidget (refactor that to BGReadings to avoid redundancy / later inconsistencies)?
+-            notificationText.append("\n"
+-                    + bgGraphBuilder.unitizedDeltaString(lastBgReading.calculated_value - bgReadingList.get(1).calculated_value));
++            if(BgGraphBuilder.isXLargeTablet(getApplicationContext())) {
++                notificationText.append("  ");
++            } else {
++                notificationText.append("\n");
++            }
++            notificationText.append(
++                    bgGraphBuilder.unitizedDeltaString(lastBgReading.calculated_value - bgReadingList.get(1).calculated_value));
+         }
+         if(bgGraphBuilder.unitized(estimate) <= bgGraphBuilder.lowMark) {
+             currentBgValueText.setTextColor(Color.parseColor("#C30909"));
+diff --git a/app/src/main/res/layout-xlarge/activity_home.xml b/app/src/main/res/layout-xlarge/activity_home.xml
+deleted file mode 100644
+index 9cb11b8..0000000
+--- a/app/src/main/res/layout-xlarge/activity_home.xml
++++ /dev/null
+@@ -1,94 +0,0 @@
+-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-    xmlns:tools="http://schemas.android.com/tools" android:id="@+id/drawer_layout"
+-    android:layout_width="match_parent" android:layout_height="match_parent"
+-    tools:context="com.eveningoutpost.dexdrip.Home">
+-
+-    <!-- As the main content view, the view below consumes the entire
+-         space available using match_parent in both dimensions. -->
+-    <FrameLayout android:id="@+id/container" android:layout_width="match_parent"
+-        android:layout_height="match_parent" >
+-
+-    </FrameLayout>
+-
+-        <LinearLayout
+-            android:orientation="vertical"
+-            android:layout_width="fill_parent"
+-            android:layout_height="fill_parent">
+-
+-            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-                xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+-                android:layout_height="0dp"
+-                android:paddingLeft="0dp"
+-                android:paddingRight="0dp"
+-                android:layout_weight="0.80"
+-                android:paddingTop="0dp"
+-                android:paddingBottom="0dp" tools:context=".Home"
+-                android:layout_marginTop="0dp">
+-
+-                <TextView
+-                    android:layout_width="900dp"
+-                    android:layout_height="wrap_content"
+-                    android:textAppearance="?android:attr/textAppearanceSmall"
+-                    android:textColor="#C30909"
+-                    android:id="@+id/notices"
+-                    android:background="#212121"
+-                    android:paddingEnd="10dp"
+-                    android:paddingStart="10dp"
+-                    android:gravity="left|top"
+-                    android:layout_alignParentLeft="true"
+-                    android:layout_alignParentTop="true"
+-                    android:textSize="40dp"
+-                    android:text="Alerts and messages" />
+-
+-                <lecho.lib.hellocharts.view.LineChartView
+-                    android:id="@+id/chart"
+-                    android:layout_width="match_parent"
+-                    android:layout_alignParentStart="false"
+-                    android:layout_alignParentEnd="true"
+-                    android:layout_height="match_parent"
+-                    android:layout_marginTop="105dp">
+-                </lecho.lib.hellocharts.view.LineChartView>
+-
+-                <TextView
+-                    android:layout_width="wrap_content"
+-                    android:layout_height="wrap_content"
+-                    android:background="#212121"
+-                    android:id="@+id/currentBgValueRealTime"
+-                    android:gravity="right"
+-                    android:layout_alignParentEnd="true"
+-                    android:paddingEnd="20dp"
+-                    android:textSize="100dp"
+-                    android:paddingTop="0dp" />
+-
+-                <TextView
+-                    android:layout_width="wrap_content"
+-                    android:layout_height="wrap_content"
+-                    android:textAppearance="?android:attr/textAppearanceSmall"
+-                    android:text="100%"
+-                    android:id="@+id/textBridgeBattery"
+-                    android:textStyle="normal"
+-                    android:textSize="12sp"
+-                    android:inputType="none"
+-                    android:layout_below="@+id/notices"
+-                    android:layout_alignParentStart="true" />
+-            </RelativeLayout>
+-
+-            <lecho.lib.hellocharts.view.PreviewLineChartView
+-                android:id="@+id/chart_preview"
+-                android:layout_width="wrap_content"
+-                android:layout_weight=".20"
+-                android:layout_alignParentBottom="true"
+-                android:layout_alignParentStart="true"
+-                android:layout_height="0dp">
+-            </lecho.lib.hellocharts.view.PreviewLineChartView>
+-
+-        </LinearLayout>
+-
+-    <fragment android:id="@+id/navigation_drawer"
+-        android:layout_width="@dimen/navigation_drawer_width" android:layout_height="match_parent"
+-        android:layout_gravity="start"
+-        android:name="com.eveningoutpost.dexdrip.NavigationDrawerFragment"
+-        tools:layout="@layout/fragment_navigation_drawer" />
+-
+-</android.support.v4.widget.DrawerLayout>
+-

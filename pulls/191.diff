@@ -1,0 +1,135 @@
+diff --git a/app/app.iml b/app/app.iml
+index 210cf01..58d446e 100644
+--- a/app/app.iml
++++ b/app/app.iml
+@@ -102,39 +102,39 @@
+     </content>
+     <orderEntry type="jdk" jdkName="Android API 23 Platform" jdkType="Android SDK" />
+     <orderEntry type="sourceFolder" forTests="false" />
+-    <orderEntry type="library" exported="" name="bson-3.1.0-rc0" level="project" />
+-    <orderEntry type="library" exported="" name="answers-1.3.0" level="project" />
+-    <orderEntry type="library" exported="" name="crashlytics-core-2.3.3" level="project" />
+-    <orderEntry type="library" exported="" name="zxing-android-integration-2.0.0" level="project" />
+-    <orderEntry type="library" exported="" name="core-3.1.0" level="project" />
+-    <orderEntry type="library" exported="" name="retrofit-2.0.0-beta2" level="project" />
+-    <orderEntry type="library" exported="" name="converter-gson-2.0.0-beta2" level="project" />
+-    <orderEntry type="library" exported="" name="rxjava-1.0.0" level="project" />
+-    <orderEntry type="library" exported="" name="crashlytics-2.5.0" level="project" />
+-    <orderEntry type="library" exported="" name="guava-18.0" level="project" />
+-    <orderEntry type="library" exported="" name="seeds-functional-16.0.1" level="project" />
+-    <orderEntry type="library" exported="" name="seeds-strings-16.0.1" level="project" />
+-    <orderEntry type="library" exported="" name="appcompat-v7-23.1.0" level="project" />
+-    <orderEntry type="library" exported="" name="usb-serial-for-android-v010" level="project" />
++    <orderEntry type="library" exported="" name="gson-2.3.1" level="project" />
+     <orderEntry type="library" exported="" name="okio-1.6.0" level="project" />
++    <orderEntry type="library" exported="" name="zxing-android-legacy-2.0.0" level="project" />
+     <orderEntry type="library" exported="" name="seeds-base-16.0.1" level="project" />
+-    <orderEntry type="library" exported="" name="fabric-1.3.5" level="project" />
++    <orderEntry type="library" exported="" name="pebblekit-3.0.0" level="project" />
++    <orderEntry type="library" exported="" name="okhttp-2.5.0" level="project" />
++    <orderEntry type="library" exported="" name="usb-serial-for-android-v010" level="project" />
+     <orderEntry type="library" exported="" name="recyclerview-v7-22.0.0" level="project" />
+-    <orderEntry type="library" exported="" name="zxing-android-minimal-2.0.0" level="project" />
+-    <orderEntry type="library" exported="" name="support-annotations-23.1.0" level="project" />
+-    <orderEntry type="library" exported="" name="android-uploader-CORE_FOR_XDRIP" level="project" />
+-    <orderEntry type="library" exported="" name="ActiveAndroid" level="project" />
+-    <orderEntry type="library" exported="" name="zxing-android-legacy-2.0.0" level="project" />
+     <orderEntry type="library" exported="" name="mongodb-driver-core-3.1.0-SNAPSHOT" level="project" />
+-    <orderEntry type="library" exported="" name="gson-2.3.1" level="project" />
++    <orderEntry type="library" exported="" name="ActiveAndroid" level="project" />
++    <orderEntry type="library" exported="" name="core-3.1.0" level="project" />
++    <orderEntry type="library" exported="" name="mongodb-driver-3.1.0-SNAPSHOT" level="project" />
++    <orderEntry type="library" exported="" name="seeds-strings-16.0.1" level="project" />
++    <orderEntry type="library" exported="" name="android-uploader-CORE_FOR_XDRIP" level="project" />
++    <orderEntry type="library" exported="" name="support-v4-23.1.0" level="project" />
++    <orderEntry type="library" exported="" name="appcompat-v7-23.1.0" level="project" />
++    <orderEntry type="library" exported="" name="support-annotations-23.1.0" level="project" />
++    <orderEntry type="library" exported="" name="converter-gson-2.0.0-beta2" level="project" />
+     <orderEntry type="library" exported="" name="slf4j-api-1.7.7" level="project" />
+-    <orderEntry type="library" exported="" name="snackbar-2.10.8" level="project" />
+-    <orderEntry type="library" exported="" name="okhttp-2.5.0" level="project" />
++    <orderEntry type="library" exported="" name="guava-18.0" level="project" />
++    <orderEntry type="library" exported="" name="retrofit-2.0.0-beta2" level="project" />
++    <orderEntry type="library" exported="" name="zxing-android-minimal-2.0.0" level="project" />
+     <orderEntry type="library" exported="" name="beta-1.1.3" level="project" />
++    <orderEntry type="library" exported="" name="fabric-1.3.5" level="project" />
++    <orderEntry type="library" exported="" name="snackbar-2.10.8" level="project" />
++    <orderEntry type="library" exported="" name="zxing-android-integration-2.0.0" level="project" />
+     <orderEntry type="library" exported="" name="seeds-primitives-16.0.1" level="project" />
+-    <orderEntry type="library" exported="" name="mongodb-driver-3.1.0-SNAPSHOT" level="project" />
+-    <orderEntry type="library" exported="" name="pebblekit-3.0.0" level="project" />
++    <orderEntry type="library" exported="" name="crashlytics-core-2.3.3" level="project" />
++    <orderEntry type="library" exported="" name="crashlytics-2.5.0" level="project" />
++    <orderEntry type="library" exported="" name="rxjava-1.0.0" level="project" />
++    <orderEntry type="library" exported="" name="bson-3.1.0-rc0" level="project" />
++    <orderEntry type="library" exported="" name="seeds-functional-16.0.1" level="project" />
+     <orderEntry type="library" exported="" name="hellocharts-android-v1.5.5" level="project" />
+-    <orderEntry type="library" exported="" name="support-v4-23.1.0" level="project" />
++    <orderEntry type="library" exported="" name="answers-1.3.0" level="project" />
+   </component>
+ </module>
+\ No newline at end of file
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+index 4795a15..6cb65f9 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+@@ -149,7 +149,12 @@ public void listenForChangeInSettings() {
+ 
+     public void setRetryTimer() {
+         if (CollectionServiceStarter.isBTWixel(getApplicationContext()) || CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
+-            long retry_in = (1000 * 65);
++            long retry_in;
++            if(CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
++                retry_in = (1000 * 25);
++            }else {
++                retry_in = (1000*65);
++            }
+             Log.d(TAG, "setRetryTimer: Restarting in: " + (retry_in / 1000) + " seconds");
+             Calendar calendar = Calendar.getInstance();
+             AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+@@ -310,16 +315,7 @@ public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteris
+             try {
+                 Log.i(TAG, "onCharacteristicChanged entered");
+                 final byte[] data = characteristic.getValue();
+-                if (lastdata != null && data != null && data.length > 0) {
+-                    if (!Arrays.equals(lastdata, data)) {
+-                        Log.v(TAG, "broadcastUpdate: new data.");
+-                        setSerialDataToTransmitterRawData(data, data.length);
+-                    } else if (Arrays.equals(lastdata, data)) {
+-                        Log.v(TAG, "broadcastUpdate: duplicate data, ignoring");
+-                    }
+-                } else if (data != null && data.length > 0) {
+-                    setSerialDataToTransmitterRawData(data, data.length);
+-                }
++                setSerialDataToTransmitterRawData(data, data.length);
+                 lastdata = data;
+             } finally {
+                 wakeLock1.release();
+@@ -455,13 +451,6 @@ public void setSerialDataToTransmitterRawData(byte[] buffer, int len) {
+             if (buffer[0] == 0x11 && buffer[1] == 0x00) {
+                 //we have a data packet.  Check to see if the TXID is what we are expecting.
+                 Log.i(TAG, "setSerialDataToTransmitterRawData: Received Data packet");
+-                //make sure we are not processing a packet we already have
+-                if (secondsNow - lastPacketTime < 60000) {
+-                    Log.v(TAG, "setSerialDataToTransmitterRawData: Received Duplicate Packet.  Exiting.");
+-                    return;
+-                } else {
+-                    lastPacketTime = secondsNow;
+-                }
+                 if (len >= 0x11) {
+                     //DexSrc starts at Byte 12 of a data packet.
+                     DexSrc = tmpBuffer.getInt(12);
+@@ -482,6 +471,13 @@ public void setSerialDataToTransmitterRawData(byte[] buffer, int len) {
+                     ackMessage.put(0, (byte) 0x02);
+                     ackMessage.put(1, (byte) 0xF0);
+                     sendBtMessage(ackMessage);
++                    //make sure we are not processing a packet we already have
++                    if (secondsNow - lastPacketTime < 60000) {
++                        Log.v(TAG, "setSerialDataToTransmitterRawData: Received Duplicate Packet.  Exiting.");
++                        return;
++                    } else {
++                        lastPacketTime = secondsNow;
++                    }
+                     Log.v(TAG, "setSerialDataToTransmitterRawData: Creating TransmitterData at " + timestamp);
+                     processNewTransmitterData(TransmitterData.create(buffer, len, timestamp), timestamp);
+                 }
