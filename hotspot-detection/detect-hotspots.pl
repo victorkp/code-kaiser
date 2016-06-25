@@ -34,41 +34,59 @@ foreach my $diff_file (@files) {
         # print "\nLine2: ", $change->line2;
         # print "\nType: ", $change->type;
         my $size = $change->size;
-        # foreach my $line ( 0..($size-1) ) {
-        #     print "\nLine: ", $change->text( $line );
-        # }
-        # printf "\n\n";
+        my $file_changed;
+
+        # Handle cases where file was created or deleted
+        if($change->filename1 eq "/dev/null") {
+            # A new file was created; filename1 = /dev/null
+            # and filename2 = the new file
+            $file_changed = substr($change->filename2, 2);
+            $files{$file_changed}{created} = $diff_file;
+        } else {
+            $file_changed = substr($change->filename1, 2);
+
+            if($change->filename2 eq "/dev/null") {
+                $files{$file_changed}{deleted} = $diff_file;
+            }
+        }
+
 
         # Create hash value for filename if needed
-        if(! exists $files{$change->filename1}) {
-            $files{$change->filename1}{changes} = 0;
-            $files{$change->filename1}{pr_count} = 0;
-            $files{$change->filename1}{adds} = 0;
-            $files{$change->filename1}{removes} = 0;
+        if(! exists $files{$file_changed}) {
+            $files{$file_changed}{changes} = 0;
+            $files{$file_changed}{pr_count} = 0;
+            $files{$file_changed}{adds} = 0;
+            $files{$file_changed}{removes} = 0;
         }
 
         # Update our statistics for this filename
-        $files{$change->filename1}{changes} += $size;
-        $files{$change->filename1}{pr_count} += 1;
+        $files{$file_changed}{changes} += $size;
         if($change->type eq "ADD") {
-            $files{$change->filename1}{adds}++;
+            $files{$file_changed}{adds}++;
         } elsif($change->type eq "REMOVE") {
-            $files{$change->filename1}{removes}++;
+            $files{$file_changed}{removes}++;
         } else { # Change is a "modify" 
-            $files{$change->filename1}{adds}++;
-            $files{$change->filename1}{removes}++;
+            $files{$file_changed}{adds}++;
+            $files{$file_changed}{removes}++;
         }
         
-        if(! exists $files{$change->filename1}{pull_requests}){
-            push(@{$files{$change->filename1}{pull_requests}}, $diff_file);
-        } elsif(${$files{$change->filename1}{pull_requests}}[-1] ne $diff_file) {
-            push(@{$files{$change->filename1}{pull_requests}}, $diff_file);
+        # If this filename has no recorded diffs, or if the last
+        # diff is not the same as this one, then add this diff to the
+        # list of pull requests that modified this file. This avoids
+        # recording duplicate diff files, when a diff has multiple 
+        # entries for the same file (e.g. multiple modifications
+        # in different places)
+        if(! exists $files{$file_changed}{pull_requests} ||
+                ${$files{$file_changed}{pull_requests}}[-1] ne $diff_file) {
+            push(@{$files{$file_changed}{pull_requests}}, $diff_file);
+            $files{$file_changed}{pr_count} += 1;
         }
+
         
     }
 }
 
-my @sorted = sort { $files{$b}{changes} <=> $files{$a}{changes} } keys %files;
+my @sorted = sort { $files{$a}{changes} <=> $files{$b}{changes} } keys %files;
 foreach my $file (@sorted) {
     print "$file \n";
     print Dumper $files{$file};
