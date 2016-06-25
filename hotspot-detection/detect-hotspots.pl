@@ -100,11 +100,11 @@ foreach my $diff_file (@files) {
     }
 
     # Now that all changes have been made by this diff, 
-    # Add to changes_score, such that
-    # changes_score = Sum_{diffs} (changes_{diff})^2
+    # add to the changes_score for this file
     foreach my $f (keys %files_changed_by_diff) {
+        # Changes_Score for this PR is changes^2 * recency
         my $changes = $files_changed_by_diff{$f}{changes};
-        $files{$f}{changes_score} += $changes * $changes;
+        $files{$f}{changes_score} += ($changes**2) * ($diff_file / $PR_LAST)**2;
     }
 }
 
@@ -114,7 +114,7 @@ for my $f (keys %files) {
     for my $pr ($files{$f}{pull_requests}) {
         $pr_sum += ($pr * $pr) / ($PR_LAST / $PR_LAST);
     }
-    $files{$f}{hotspot_score} = $files{$f}{changes_score} * $files{$f}{pr_count} * $pr_sum;
+    $files{$f}{hotspot_score} = $files{$f}{changes_score} * $files{$f}{pr_count};
 }
 
 my @sorted = sort { $files{$a}{hotspot_score} 
