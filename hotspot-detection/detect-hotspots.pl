@@ -10,21 +10,30 @@ use Data::Dumper qw(Dumper);
 my %files;
 
 opendir(PULLS, "../pulls");
-my @files = readdir(PULLS);
+my @dir_files = readdir(PULLS);
 closedir(PULLS);
 
-foreach my $diff_file (@files) {
-    # skip non *.diff files
-    next if($diff_file =~ /^\.$/);
-    next if($diff_file =~ /^\.\.$/);
-    next if(! ($diff_file =~ /^.*\.diff$/));
+# Sort pull request diff files to be in order
+my @files;
+foreach my $f (@dir_files) {
+    if($f =~ m/(\d+)\.diff/) {
+        push @files, $1;
+    }
+}
+@files = sort { $a <=> $b } @files;
 
-    print "Processing file $diff_file\n";
+my $PR_LAST = @files[-1];
+
+foreach my $diff_file (@files) {
+    print "Processing file $diff_file.diff\n";
 
     # Strip one directory, because GitHub uses 'a/' and 'b/'
     # base branch and branch to merge
-    my $parser = Text::Diff::Parser->new("../pulls/$diff_file");
+    my $parser = Text::Diff::Parser->new("../pulls/$diff_file.diff");
     $parser->simplify();
+
+    # Used to keep track of changes_score
+    my %files_changed_by_diff;
 
     # Find results
     foreach my $change ( $parser->changes ) {
@@ -33,6 +42,7 @@ foreach my $diff_file (@files) {
         # print "\nFile2: ", $change->filename2;
         # print "\nLine2: ", $change->line2;
         # print "\nType: ", $change->type;
+        
         my $size = $change->size;
         my $file_changed;
 
@@ -50,10 +60,10 @@ foreach my $diff_file (@files) {
             }
         }
 
-
         # Create hash value for filename if needed
         if(! exists $files{$file_changed}) {
             $files{$file_changed}{changes} = 0;
+            $files{$file_changed}{changes_score} = 0;
             $files{$file_changed}{pr_count} = 0;
             $files{$file_changed}{adds} = 0;
             $files{$file_changed}{removes} = 0;
@@ -82,11 +92,33 @@ foreach my $diff_file (@files) {
             $files{$file_changed}{pr_count} += 1;
         }
 
-        
+        if(! exists $files_changed_by_diff{$file_changed}) {
+            $files_changed_by_diff{$file_changed}{changes} = $size;
+        } else {
+            $files_changed_by_diff{$file_changed}{changes} += $size;
+        }
+    }
+
+    # Now that all changes have been made by this diff, 
+    # Add to changes_score, such that
+    # changes_score = Sum_{diffs} (changes_{diff})^2
+    foreach my $f (keys %files_changed_by_diff) {
+        my $changes = $files_changed_by_diff{$f}{changes};
+        $files{$f}{changes_score} += $changes * $changes;
     }
 }
 
-my @sorted = sort { $files{$a}{changes} <=> $files{$b}{changes} } keys %files;
+# Calculate a hotspot score per file
+for my $f (keys %files) {
+    my $pr_sum = 0;
+    for my $pr ($files{$f}{pull_requests}) {
+        $pr_sum += ($pr * $pr) / ($PR_LAST / $PR_LAST);
+    }
+    $files{$f}{hotspot_score} = $files{$f}{changes_score} * $files{$f}{pr_count} * $pr_sum;
+}
+
+my @sorted = sort { $files{$a}{hotspot_score} 
+                    <=> $files{$b}{hotspot_score} } keys %files;
 foreach my $file (@sorted) {
     print "$file \n";
     print Dumper $files{$file};
