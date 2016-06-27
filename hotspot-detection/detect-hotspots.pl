@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Text::Diff::Parser;
 use Data::Dumper qw(Dumper);
+use GD::Graph::pie;
 
 # Iterate through diff files in ../pulls/, 
 # keeping track of file changes. Try to identify
@@ -20,11 +21,11 @@ foreach my $f (@dir_files) {
         push @files, $1;
     }
 }
-@files = sort { $a <=> $b } @files;
+my @diff_files = sort { $a <=> $b } @files;
 
-my $PR_LAST = @files[-1];
+my $PR_LAST = @diff_files[-1];
 
-foreach my $diff_file (@files) {
+foreach my $diff_file (@diff_files) {
     print "Processing file $diff_file.diff\n";
 
     # Strip one directory, because GitHub uses 'a/' and 'b/'
@@ -110,11 +111,7 @@ foreach my $diff_file (@files) {
 
 # Calculate a hotspot score per file
 for my $f (keys %files) {
-    my $pr_sum = 0;
-    for my $pr ($files{$f}{pull_requests}) {
-        $pr_sum += ($pr * $pr) / ($PR_LAST / $PR_LAST);
-    }
-    $files{$f}{hotspot_score} = $files{$f}{changes_score} * $files{$f}{pr_count};
+    $files{$f}{hotspot_score} = $files{$f}{changes_score} * $files{$f}{pr_count}**2;
 }
 
 my @sorted = sort { $files{$a}{hotspot_score} 
@@ -123,3 +120,27 @@ foreach my $file (@sorted) {
     print "$file \n";
     print Dumper $files{$file};
 }
+
+
+#### Show a chart demonstrating hotspots
+
+
+# Create dataset object and specify the properties of the dataset
+my @scores;
+
+foreach my $f (@sorted) {
+    print $f . "\n";
+}
+foreach my $f (@sorted) {
+    printf $files{$f}{hotspot_score} . "\n";
+    push(@scores, $files{$f}{hotspot_score});
+}
+
+my $chart = GD::Graph::pie->new(400, 300);
+$chart->set( 
+            title             => 'Some simple graph'
+        ) or die $chart->error;
+
+my @data = [ \@sorted, \@scores, \@scores];
+
+my $gd = $chart->plot(\@data) or die $chart->error;
