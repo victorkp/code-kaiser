@@ -11,5 +11,5 @@ for(my $i = 355; $i > 0; $i--) {
 
 system "rm -f wget.log";
 
-# Remove not-merged pulls
+# Remove not-merged pulls (closed pull requests show up as HTML pages, with no diff)
 system "find . -type f -exec grep -q DOCTYPE {} \; -exec echo rm {} \;"
