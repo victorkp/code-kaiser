@@ -1,9 +1,10 @@
 #!/bin/perl
-use strict;
-use warnings;
+use GD::Graph::Map;
+use GD::Graph::pie;
 use Text::Diff::Parser;
 use Data::Dumper qw(Dumper);
-use GD::Graph::pie;
+use strict;
+use warnings;
 
 # Iterate through diff files in ../pulls/, 
 # keeping track of file changes. Try to identify
@@ -149,3 +150,13 @@ open OUT, ">hotspots.png" or die "Couldn't open output file: $!";
 binmode(OUT);
 print OUT $chart->plot(\@data)->png;
 close OUT;
+
+# Create HTML Map for hover-over information
+my $html_map = new GD::Graph::Map($chart, newWindow => 1);
+$html_map->set(info => "%x is %.1p% hot");
+$html_map->set(mapName => "hotspot_map");
+open HTML, ">hotspots.html" or die "Couldn't open HTML output file: $!";
+print HTML "<!DOCTYPE html><html><body>\n";
+print HTML $html_map->imagemap("hotspots.png", \@data);
+print HTML "</body></html>\n";
+close HTML;
