@@ -127,12 +127,15 @@ foreach my $f (@labels) {
 }
 close CSV;
 
-my $chart = new GD::Graph::pie(800, 600);
+my @CHART_COLORS = ['#dF0000', '#e04000', '#e07500', '#e0a800', '#e0e000', '#a8e000'];
+my @CHART_COLORS_SHADOWS = ['#dF0000', '#e04000', '#e07500', '#e0a800', '#e0e000', '#a8e000'];
+my $chart = new GD::Graph::pie(3200, 2400);
 $chart->set(title => 'Recent Code Hotspots') or die $chart->error;
-$chart->set(dclrs => ['#dF0000', '#e04000', '#e07500', '#e0a800', '#e0e000', '#a8e000']);
-$chart->set_title_font('fonts/arial.ttf', 24);
-$chart->set_label_font('fonts/arial.ttf', 16);
-$chart->set_value_font('fonts/arial.ttf', 16);
+$chart->set(dclrs => @CHART_COLORS);
+$chart->set(transparent => 0);
+$chart->set_title_font('fonts/arial.ttf', 24*4);
+$chart->set_label_font('fonts/arial.ttf', 16*4);
+$chart->set_value_font('fonts/arial.ttf', 16*4);
 
 my $FILE_COUNT_IN_CHART = 6;
 my $top_index  = (scalar(@labels) < $FILE_COUNT_IN_CHART) ? (scalar(@labels)) : ($FILE_COUNT_IN_CHART);
@@ -146,17 +149,28 @@ my @top_scores = @scores[0 .. $top_index];
 
 my @data = ([@top_files_shortened], [@top_scores]);
 
-open OUT, ">hotspots.png" or die "Couldn't open output file: $!";
+open OUT, ">hotspots-large.png" or die "Couldn't open output file: $!";
 binmode(OUT);
 print OUT $chart->plot(\@data)->png;
+close OUT;
+
+# Resample image down (dumb antialiasing)
+my $image_large = new GD::Image("hotspots-large.png");
+my $image_final = new GD::Image(800, 600);
+$image_final->copyResampled($image_large, 0, 0, 0, 0, 800, 600, 3200, 2400);
+open OUT, ">hotspots.png" or die "Couldn't open output file: $!";
+binmode(OUT);
+print OUT $image_final->png;
 close OUT;
 
 # Create HTML Map for hover-over information
 my $html_map = new GD::Graph::Map($chart, newWindow => 1);
 $html_map->set(info => "%x is %.1p% hot");
 $html_map->set(mapName => "hotspot_map");
+$html_map->set(noImgMarkup => 1);
 open HTML, ">hotspots.html" or die "Couldn't open HTML output file: $!";
 print HTML "<!DOCTYPE html><html><body>\n";
 print HTML $html_map->imagemap("hotspots.png", \@data);
+print HTML "<Img UseMap=#hotspot_map Src=\"hotspots.png\" border=0 Height=600 Width=800>\n";
 print HTML "</body></html>\n";
 close HTML;
