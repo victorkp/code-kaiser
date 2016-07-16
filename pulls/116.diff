@@ -1,0 +1,387 @@
+diff --git a/app/app.iml b/app/app.iml
+index a7b3e9b..865f8e5 100644
+--- a/app/app.iml
++++ b/app/app.iml
+@@ -94,7 +94,6 @@
+     <orderEntry type="library" exported="" name="crashlytics-2.2.3" level="project" />
+     <orderEntry type="library" exported="" name="answers-1.1.2" level="project" />
+     <orderEntry type="library" exported="" name="rxjava-1.0.0" level="project" />
+-    <orderEntry type="library" exported="" name="acra-4.5.0" level="project" />
+     <orderEntry type="library" exported="" name="mongo-java-driver-2.10.1" level="project" />
+     <orderEntry type="library" exported="" name="seeds-functional-16.0.1" level="project" />
+     <orderEntry type="library" exported="" name="seeds-strings-16.0.1" level="project" />
+@@ -110,13 +109,13 @@
+     <orderEntry type="library" exported="" name="retrofit-1.9.0" level="project" />
+     <orderEntry type="library" exported="" name="support-annotations-22.1.1" level="project" />
+     <orderEntry type="library" exported="" name="beta-1.1.2" level="project" />
+-    <orderEntry type="library" exported="" name="gson-2.3.1" level="project" />
+     <orderEntry type="library" exported="" name="slf4j-api-1.7.7" level="project" />
++    <orderEntry type="library" exported="" name="gson-2.3.1" level="project" />
+     <orderEntry type="library" exported="" name="appcompat-v7-22.1.1" level="project" />
+     <orderEntry type="library" exported="" name="snackbar-2.10.8" level="project" />
+     <orderEntry type="library" exported="" name="seeds-primitives-16.0.1" level="project" />
+-    <orderEntry type="library" exported="" name="pebblekit-2.6.0" level="project" />
+-    <orderEntry type="library" exported="" name="hellocharts-library-1.1" level="project" />
++    <orderEntry type="library" exported="" name="pebblekit-3.0.0" level="project" />
+     <orderEntry type="library" exported="" name="support-v4-22.1.1" level="project" />
++    <orderEntry type="library" exported="" name="hellocharts-android-v1.5.5" level="project" />
+   </component>
+ </module>
+\ No newline at end of file
+diff --git a/app/build.gradle b/app/build.gradle
+index 5c146ee..ae57d4c 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -101,7 +101,7 @@ dependencies {
+     compile 'com.squareup.retrofit:retrofit:1.9.0'
+     compile 'com.getpebble:pebblekit:3.0.0'
+     compile 'io.reactivex:rxjava:1.0.0'
+-    compile 'ch.acra:acra:4.5.0'
++    compile 'com.github.lecho:hellocharts-android:v1.5.5'
+ 
+     compile('com.github.nightscout:android-uploader:CORE_FOR_XDRIP') {
+         transitive = false;
+diff --git a/app/libs/hellocharts-library-1.1.jar b/app/libs/hellocharts-library-1.1.jar
+deleted file mode 100644
+index 85b2651..0000000
+Binary files a/app/libs/hellocharts-library-1.1.jar and /dev/null differ
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java b/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
+index 8b567f8..de38b73 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
+@@ -41,7 +41,7 @@
+ import java.util.ArrayList;
+ import java.util.List;
+ 
+-import lecho.lib.hellocharts.util.Utils;
++import lecho.lib.hellocharts.util.ChartUtils;
+ 
+ @TargetApi(android.os.Build.VERSION_CODES.JELLY_BEAN_MR2)
+ public class BluetoothScan extends ListActivityWithMenu {
+@@ -116,23 +116,27 @@ public boolean onCreateOptionsMenu(Menu menu) {
+     public boolean onOptionsItemSelected(MenuItem item) {
+         switch (item.getItemId()) {
+             case R.id.menu_scan:
+-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+-                    scanLeDeviceLollipop(true);
+-                } else
+-                    scanLeDevice(true);
+                 BluetoothManager bluetooth_manager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+                 Toast.makeText(this, "Scanning", Toast.LENGTH_LONG).show();
+                 if(bluetooth_manager == null) {
+                     Toast.makeText(this, "This device does not seem to support bluetooth", Toast.LENGTH_LONG).show();
++                    return true;
+                 } else {
+                     if(!bluetooth_manager.getAdapter().isEnabled()) {
+                         Toast.makeText(this, "Bluetooth is turned off on this device currently", Toast.LENGTH_LONG).show();
++                        return true;
+                     } else {
+-                        if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2){
++                        if(android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2){
+                             Toast.makeText(this, "The android version of this device is not compatible with Bluetooth Low Energy", Toast.LENGTH_LONG).show();
++                            return true;
+                         }
+                     }
+                 }
++                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
++                    scanLeDeviceLollipop(true);
++                } else {
++                    scanLeDevice(true);
++                }
+                 return true;
+ //            case R.id.menu_stop:
+ //                Intent tableIntent = new Intent(this, RawDataTable.class);
+@@ -208,22 +212,29 @@ private void scanLeDeviceLollipop(final boolean enable) {
+             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                 lollipopScanner = bluetooth_adapter.getBluetoothLeScanner();
+             }
+-
+-            Log.d(TAG, "Starting scanner 21");
+-            // Stops scanning after a pre-defined scan period.
+-            mHandler.postDelayed(new Runnable() {
+-                @Override
+-                public void run() {
+-                    is_scanning = false;
+-                    lollipopScanner.stopScan(mScanCallback);
+-                    invalidateOptionsMenu();
++            if(lollipopScanner != null) {
++                Log.d(TAG, "Starting scanner 21");
++                // Stops scanning after a pre-defined scan period.
++                mHandler.postDelayed(new Runnable() {
++                    @Override
++                    public void run() {
++                        is_scanning = false;
++                        lollipopScanner.stopScan(mScanCallback);
++                        invalidateOptionsMenu();
++                    }
++                }, SCAN_PERIOD);
++                ScanSettings settings = new ScanSettings.Builder()
++                        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
++                        .build();
++                is_scanning = true;
++                lollipopScanner.startScan(null, settings, mScanCallback);
++            } else {
++                try {
++                    scanLeDevice(true);
++                } catch (Exception e) {
++                    Log.e(TAG, "Failed to scan for ble device", e);
+                 }
+-            }, SCAN_PERIOD);
+-            ScanSettings settings = new ScanSettings.Builder()
+-                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+-                    .build();
+-            is_scanning = true;
+-            lollipopScanner.startScan(null, settings, mScanCallback);
++            }
+         } else {
+             is_scanning = false;
+             lollipopScanner.stopScan(mScanCallback);
+@@ -363,8 +374,8 @@ public View getView(int i, View view, ViewGroup viewGroup) {
+             final String deviceName = device.getName();
+             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+             if(prefs.getString("last_connected_device_address", "").compareTo(device.getAddress()) == 0) {
+-                viewHolder.deviceName.setTextColor(Utils.COLOR_BLUE);
+-                viewHolder.deviceAddress.setTextColor(Utils.COLOR_BLUE);
++                viewHolder.deviceName.setTextColor(ChartUtils.COLOR_BLUE);
++                viewHolder.deviceAddress.setTextColor(ChartUtils.COLOR_BLUE);
+             }
+             viewHolder.deviceName.setText(deviceName);
+             viewHolder.deviceAddress.setText(device.getAddress());
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationGraph.java b/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationGraph.java
+index 19036d3..a2bd8b4 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationGraph.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationGraph.java
+@@ -1,15 +1,9 @@
+ package com.eveningoutpost.dexdrip;
+ 
+-import android.app.Activity;
+ import android.os.Bundle;
+-import android.support.v4.widget.DrawerLayout;
+-import android.view.Menu;
+-import android.view.MenuItem;
+-import android.widget.EditText;
+ import android.widget.TextView;
+ 
+ import com.eveningoutpost.dexdrip.Models.Calibration;
+-import com.eveningoutpost.dexdrip.UtilityModels.Constants;
+ import com.eveningoutpost.dexdrip.utils.ActivityWithMenu;
+ 
+ import java.text.DateFormat;
+@@ -22,7 +16,7 @@
+ import lecho.lib.hellocharts.model.Line;
+ import lecho.lib.hellocharts.model.LineChartData;
+ import lecho.lib.hellocharts.model.PointValue;
+-import lecho.lib.hellocharts.util.Utils;
++import lecho.lib.hellocharts.util.ChartUtils;
+ import lecho.lib.hellocharts.view.LineChartView;
+ 
+ 
+@@ -65,7 +59,7 @@ public void setupCharts() {
+         }
+ 
+         Line line = new Line(values);
+-        line.setColor(Utils.COLOR_BLUE);
++        line.setColor(ChartUtils.COLOR_BLUE);
+         line.setHasLines(false);
+         line.setPointRadius(4);
+         line.setHasPoints(true);
+@@ -84,7 +78,7 @@ public void setupCharts() {
+             GraphHeader.setText(Header);
+         }
+         Line calibrationLine = new Line(lineValues);
+-        calibrationLine.setColor(Utils.COLOR_RED);
++        calibrationLine.setColor(ChartUtils.COLOR_RED);
+         calibrationLine.setHasLines(true);
+         calibrationLine.setHasPoints(false);
+         Axis axisX = new Axis();
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index cfd7454..636fdf1 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -12,11 +12,11 @@
+ import android.os.Bundle;
+ import android.preference.PreferenceManager;
+ import android.support.v4.widget.DrawerLayout;
++import android.util.Log;
+ import android.view.Menu;
+ import android.view.MenuItem;
+ import android.view.View;
+ import android.view.ViewGroup;
+-import android.view.ViewGroup.LayoutParams;
+ import android.widget.TextView;
+ import android.widget.Toast;
+ 
+@@ -30,17 +30,16 @@
+ import com.eveningoutpost.dexdrip.UtilityModels.Intents;
+ import com.eveningoutpost.dexdrip.utils.ActivityWithMenu;
+ import com.eveningoutpost.dexdrip.utils.DatabaseUtil;
++import com.nispok.snackbar.Snackbar;
++import com.nispok.snackbar.SnackbarManager;
++import com.nispok.snackbar.enums.SnackbarType;
++import com.nispok.snackbar.listeners.ActionClickListener;
+ 
+ import java.io.File;
+ import java.text.DecimalFormat;
+ import java.util.Date;
+ import java.util.List;
+ 
+-import com.nispok.snackbar.Snackbar;
+-import com.nispok.snackbar.SnackbarManager;
+-import com.nispok.snackbar.enums.SnackbarType;
+-import com.nispok.snackbar.listeners.ActionClickListener;
+-
+ import lecho.lib.hellocharts.ViewportChangeListener;
+ import lecho.lib.hellocharts.gesture.ZoomType;
+ import lecho.lib.hellocharts.model.Viewport;
+@@ -49,6 +48,7 @@
+ 
+ 
+ public class Home extends ActivityWithMenu {
++    static String TAG = Home.class.getName();
+     public static String menu_name = "xDrip";
+     private boolean updateStuff;
+     private boolean updatingPreviewViewport = false;
+@@ -175,11 +175,19 @@ public void setViewport() {
+     @Override
+     public void onPause() {
+         super.onPause();
+-        if (_broadcastReceiver != null) {
+-            unregisterReceiver(_broadcastReceiver);
++        if (_broadcastReceiver != null ) {
++            try {
++                unregisterReceiver(_broadcastReceiver);
++            } catch (IllegalArgumentException e) {
++                Log.e(TAG, "_broadcast_receiver not registered", e);
++            }
+         }
+         if (newDataReceiver != null) {
+-            unregisterReceiver(newDataReceiver);
++            try {
++                unregisterReceiver(newDataReceiver);
++            } catch (IllegalArgumentException e) {
++                Log.e(TAG, "newDataReceiver not registered", e);
++            }
+         }
+     }
+ 
+@@ -232,7 +240,7 @@ private void updateCurrentBgInfoForBtBasedWixel(TextView notificationText) {
+         }
+         updateCurrentBgInfoCommon(notificationText);
+     }
+-    
++
+     private void updateCurrentBgInfoCommon(TextView notificationText) {
+         final boolean isSensorActive = Sensor.isActive();
+         if(!isSensorActive){
+@@ -266,7 +274,7 @@ private void updateCurrentBgInfoCommon(TextView notificationText) {
+                     notificationText.setText("Please enter two calibrations to get started!");
+                 }
+             }
+-        }        
++        }
+     }
+ 
+     private void updateCurrentBgInfoForBtShare(TextView notificationText) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+index 6ba5291..628a0cd 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+@@ -24,7 +24,7 @@
+ import lecho.lib.hellocharts.model.LineChartData;
+ import lecho.lib.hellocharts.model.PointValue;
+ import lecho.lib.hellocharts.model.Viewport;
+-import lecho.lib.hellocharts.util.Utils;
++import lecho.lib.hellocharts.util.ChartUtils;
+ import lecho.lib.hellocharts.view.Chart;
+ 
+ /**
+@@ -103,7 +103,7 @@ public LineChartData previewLineData() {
+ 
+     public Line highValuesLine() {
+         Line highValuesLine = new Line(highValues);
+-        highValuesLine.setColor(Utils.COLOR_ORANGE);
++        highValuesLine.setColor(ChartUtils.COLOR_ORANGE);
+         highValuesLine.setHasLines(false);
+         highValuesLine.setPointRadius(pointSize);
+         highValuesLine.setHasPoints(true);
+@@ -121,7 +121,7 @@ public Line lowValuesLine() {
+ 
+     public Line inRangeValuesLine() {
+         Line inRangeValuesLine = new Line(inRangeValues);
+-        inRangeValuesLine.setColor(Utils.COLOR_BLUE);
++        inRangeValuesLine.setColor(ChartUtils.COLOR_BLUE);
+         inRangeValuesLine.setHasLines(false);
+         inRangeValuesLine.setPointRadius(pointSize);
+         inRangeValuesLine.setHasPoints(true);
+@@ -161,7 +161,7 @@ public Line highLine() {
+         Line highLine = new Line(highLineValues);
+         highLine.setHasPoints(false);
+         highLine.setStrokeWidth(1);
+-        highLine.setColor(Utils.COLOR_ORANGE);
++        highLine.setColor(ChartUtils.COLOR_ORANGE);
+         return highLine;
+     }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/xdrip.java b/app/src/main/java/com/eveningoutpost/dexdrip/xdrip.java
+index ca17fb8..491b59b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/xdrip.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/xdrip.java
+@@ -2,37 +2,9 @@
+ 
+ import android.app.Application;
+ 
+-import com.crashlytics.android.Crashlytics;
+-import io.fabric.sdk.android.Fabric;
+-import org.acra.ACRA;
+-import org.acra.ReportField;
+-import org.acra.ReportingInteractionMode;
+-import org.acra.annotation.ReportsCrashes;
+-import org.acra.sender.HttpSender;
+-
+ /**
+  * Created by stephenblack on 3/21/15.
+  */
+-@ReportsCrashes(
+-        formUri = "https://yoursolace.cloudant.com/acra-xdrip/_design/acra-storage/_update/report",
+-        reportType = HttpSender.Type.JSON,
+-        httpMethod = HttpSender.Method.POST,
+-        formUriBasicAuthLogin = "nateriverldstiondrephery",
+-        formUriBasicAuthPassword = "GEK5Nv7NtMkloAkufNvFgast",
+-        formKey = "", // This is required for backward compatibility but not used
+-        customReportContent = {
+-                ReportField.APP_VERSION_CODE,
+-                ReportField.APP_VERSION_NAME,
+-                ReportField.ANDROID_VERSION,
+-                ReportField.PACKAGE_NAME,
+-                ReportField.REPORT_ID,
+-                ReportField.BUILD,
+-                ReportField.STACK_TRACE
+-        },
+-        mode = ReportingInteractionMode.TOAST,
+-        logcatArguments = {"-t", "500", "-v", "time"},
+-        resToastText = R.string.toast_crash
+-)
+ 
+ public class xdrip extends Application {
+ 
+@@ -40,7 +12,5 @@
+     public void onCreate() {
+         super.onCreate();
+         //Fabric.with(this, new Crashlytics());
+-        // The following line triggers the initialization of ACRA
+-        //ACRA.init(this);
+     }
+ }
+diff --git a/build.gradle b/build.gradle
+index 04e3b67..9783c15 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -9,8 +9,6 @@ buildscript {
+         classpath 'com.android.tools.build:gradle:1.1.3'
+         apply plugin: 'java'
+         apply plugin: 'maven'
+-//        compile 'com.mcxiaoke.volley:library:1.0.+'
+-
+         // NOTE: Do not place your application dependencies here; they belong
+         // in the individual module build.gradle files
+     }

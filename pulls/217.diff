@@ -1,0 +1,78 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index da4a304..4af8cc0 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -460,6 +460,17 @@ private void displayCurrentInfoFromReading(BgReading lastBgReading, boolean pred
+     @Override
+     public boolean onCreateOptionsMenu(Menu menu) {
+         getMenuInflater().inflate(R.menu.menu_home, menu);
++        MenuItem menuItem =  menu.findItem(R.id.action_toggle_speakreadings);
++        if(prefs.getBoolean("bg_to_speech_shortcut", false)){
++            menuItem.setVisible(true);
++            if(prefs.getBoolean("bg_to_speech", false)){
++                menuItem.setChecked(true);
++            } else {
++                menuItem.setChecked(false);
++            }
++        } else {
++            menuItem.setVisible(false);
++        }
+         return super.onCreateOptionsMenu(menu);
+     }
+ 
+@@ -538,6 +549,11 @@ protected void onPostExecute(String filename) {
+             return true;
+         }
+ 
++        if (item.getItemId() == R.id.action_toggle_speakreadings) {
++            prefs.edit().putBoolean("bg_to_speech", !prefs.getBoolean("bg_to_speech", false)).commit();
++            invalidateOptionsMenu();
++            return true;
++        }
+ 
+         return super.onOptionsItemSelected(item);
+     }
+diff --git a/app/src/main/res/menu/menu_home.xml b/app/src/main/res/menu/menu_home.xml
+index e6927da..1cfec86 100644
+--- a/app/src/main/res/menu/menu_home.xml
++++ b/app/src/main/res/menu/menu_home.xml
+@@ -18,4 +18,10 @@
+         android:orderInCategory="1"
+         android:showAsAction="never"/>
+ 
++    <item android:id="@+id/action_toggle_speakreadings"
++        android:title="@string/menu_toggle_speakreadings"
++        android:checkable="true"
++        android:orderInCategory="2"
++        android:visible="false"
++        android:showAsAction="never"/>
+ </menu>
+\ No newline at end of file
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 8bf8b44..d8a1b3a 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -14,6 +14,7 @@
+     <string name="menu_refresh">Refresh</string>
+     <string name="menu_export_database">Export database</string>
+     <string name="menu_export_csv_sidiary">Export CSV (SiDiary format)</string>
++    <string name="menu_toggle_speakreadings">Speak-Readings</string>
+     <string name="menu_import_db">Import database</string>
+     <string name="error_bluetooth_not_supported">Error: Bluetooth not supported by this device</string>
+     <string name="unknown_device">Unrecognized Device</string>
+diff --git a/app/src/main/res/xml/pref_advanced_settings.xml b/app/src/main/res/xml/pref_advanced_settings.xml
+index 7f9e363..64606d2 100644
+--- a/app/src/main/res/xml/pref_advanced_settings.xml
++++ b/app/src/main/res/xml/pref_advanced_settings.xml
+@@ -31,6 +31,11 @@
+             android:summary="If the phone has text-to-speech capabilities it will read new readings out loud."
+             android:defaultValue="false" />
+         <CheckBoxPreference
++            android:key="bg_to_speech_shortcut"
++            android:title="Speak Readings Shortcut"
++            android:summary="Show a shortcut in the \u2630 menu to toggle Speak Readings"
++            android:defaultValue="false" />
++        <CheckBoxPreference
+             android:key="store_logs"
+             android:title="Store logs for troubleshooting"
+             android:summary="Only enable if you are having trouble with the app."

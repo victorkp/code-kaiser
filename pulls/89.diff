@@ -1,0 +1,17 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+index 93ae357..aa96e5a 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+@@ -228,6 +228,12 @@ public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState
+             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                 mConnectionState = STATE_DISCONNECTED;
+                 ActiveBluetoothDevice.disconnected();
++                if(mBluetoothGatt != null) {
++                    Log.w(TAG, "onConnectionStateChange: mBluetoothGatt is not null, closing.");
++                    mBluetoothGatt.close();
++                    mBluetoothGatt = null;
++                    mCharacteristic = null;
++                }
+                 lastdata = null;
+                 Log.w(TAG, "onConnectionStateChange: Disconnected from GATT server.");
+                 setRetryTimer();

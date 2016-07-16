@@ -1,0 +1,374 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index 4a09b01..cd93d2d 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -18,6 +18,7 @@
+ import android.os.PowerManager;
+ import android.preference.PreferenceManager;
+ import android.provider.Settings;
++import android.support.annotation.NonNull;
+ import android.support.v4.app.ActivityCompat;
+ import android.support.v4.content.ContextCompat;
+ import android.support.v4.widget.DrawerLayout;
+@@ -40,6 +41,7 @@
+ import com.eveningoutpost.dexdrip.UtilityModels.BgGraphBuilder;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.Intents;
++import com.eveningoutpost.dexdrip.stats.StatsResult;
+ import com.eveningoutpost.dexdrip.utils.ActivityWithMenu;
+ import com.eveningoutpost.dexdrip.utils.DatabaseUtil;
+ import com.eveningoutpost.dexdrip.wearintegration.WatchUpdaterService;
+@@ -165,30 +167,6 @@ private void setupCharts() {
+         bgGraphBuilder = new BgGraphBuilder(this);
+         updateStuff = false;
+         chart = (LineChartView) findViewById(R.id.chart);
+-        
+-        boolean displayExtraLine = prefs.getBoolean("extra_status_line",false);
+-        if(BgGraphBuilder.isXLargeTablet(getApplicationContext())) {
+-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) chart.getLayoutParams();
+-            params.topMargin = 130;
+-            if(displayExtraLine) {
+-                params.topMargin += 55;
+-            }
+-            chart.setLayoutParams(params);
+-        } else if(BgGraphBuilder.isLargeTablet(getApplicationContext())) {
+-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) chart.getLayoutParams();
+-            params.topMargin = 130;
+-            if(displayExtraLine) {
+-                params.topMargin += 45;
+-            }
+-            chart.setLayoutParams(params);
+-        } else {
+-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) chart.getLayoutParams();
+-            params.topMargin = 165;
+-            if(displayExtraLine) {
+-                params.topMargin += 35;
+-            }
+-            chart.setLayoutParams(params);
+-        }
+ 
+         chart.setZoomType(ZoomType.HORIZONTAL);
+ 
+@@ -443,30 +421,9 @@ private void displayCurrentInfo() {
+         if (lastBgReading != null) {
+             displayCurrentInfoFromReading(lastBgReading, predictive);
+         }
+-        
+-        boolean displayExtraLine = prefs.getBoolean("extra_status_line",false);
+-        Calibration lastCalibration = Calibration.last();
+-        if(displayExtraLine && lastCalibration != null) {
+-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+-            String time = "";
+-            if(BgGraphBuilder.isXLargeTablet(getApplicationContext()) || 
+-               BgGraphBuilder.isLargeTablet(getApplicationContext()) ||
+-               BgGraphBuilder.isSmallTablet(getApplicationContext())) {
+-                time = sdf.format(new Date());
+-            }
+-            
+-            String SLOPE = "slope = ";
+-            String INTERCEPT= "inter = ";
+-            
+-            if(BgGraphBuilder.isSmallTablet(getApplicationContext())) {
+-                SLOPE = "s:";
+-                INTERCEPT = "i:";
+-            }
+-            
+-            String Extraline = SLOPE + String.format("%.2f",lastCalibration.slope) + " " +
+-                    INTERCEPT + String.format("%.2f",lastCalibration.intercept) + 
+-                    " " + time;
+-            extraStatusLineText.setText(Extraline);
++
++        if(prefs.getBoolean("extra_status_line", false)) {
++            extraStatusLineText.setText(extraStatusLine());
+             extraStatusLineText.setVisibility(View.VISIBLE);
+         } else {
+             extraStatusLineText.setText("");
+@@ -474,6 +431,70 @@ private void displayCurrentInfo() {
+         }
+     }
+ 
++    @NonNull
++    private String extraStatusLine() {
++        StringBuilder extraline = new StringBuilder();
++        Calibration lastCalibration = Calibration.last();
++        if (prefs.getBoolean("status_line_calibration_long", true) && lastCalibration != null){
++            if(extraline.length()!=0) extraline.append(' ');
++            extraline.append("slope = ");
++            extraline.append(String.format("%.2f",lastCalibration.slope));
++            extraline.append(' ');
++            extraline.append("inter = ");
++            extraline.append(String.format("%.2f",lastCalibration.intercept));
++        }
++
++        if(prefs.getBoolean("status_line_calibration_short", false) && lastCalibration != null) {
++            if(extraline.length()!=0) extraline.append(' ');
++            extraline.append("s:");
++            extraline.append(String.format("%.2f",lastCalibration.slope));
++            extraline.append(' ');
++            extraline.append("i:");
++            extraline.append(String.format("%.2f",lastCalibration.intercept));
++        }
++
++        if(prefs.getBoolean("status_line_avg", false)
++                || prefs.getBoolean("status_line_a1c_dcct", false)
++                || prefs.getBoolean("status_line_a1c_ifcc", false
++                || prefs.getBoolean("status_line_in", false))
++                || prefs.getBoolean("status_line_high", false)
++                || prefs.getBoolean("status_line_low", false)){
++
++            StatsResult statsResult = new StatsResult(prefs);
++
++            if(prefs.getBoolean("status_line_avg", false)) {
++                if(extraline.length()!=0) extraline.append(' ');
++                extraline.append(statsResult.getAverageUnitised());
++            }
++            if(prefs.getBoolean("status_line_a1c_dcct", false)) {
++                if(extraline.length()!=0) extraline.append(' ');
++                extraline.append(statsResult.getA1cDCCT());
++            }
++            if(prefs.getBoolean("status_line_a1c_ifcc", false)) {
++                if(extraline.length()!=0) extraline.append(' ');
++                extraline.append(statsResult.getA1cIFCC());
++            }
++            if(prefs.getBoolean("status_line_in", false)) {
++                if(extraline.length()!=0) extraline.append(' ');
++                extraline.append(statsResult.getInPercentage());
++            }
++            if(prefs.getBoolean("status_line_high", false)) {
++                if(extraline.length()!=0) extraline.append(' ');
++                extraline.append(statsResult.getHighPercentage());
++            }
++            if(prefs.getBoolean("status_line_low", false)) {
++                if(extraline.length()!=0) extraline.append(' ');
++                extraline.append(statsResult.getLowPercentage());
++            }
++        }
++        if(prefs.getBoolean("status_line_time", false)) {
++            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
++            if(extraline.length()!=0) extraline.append(' ');
++            extraline.append(sdf.format(new Date()));
++        }
++        return extraline.toString();
++    }
++
+     private void displayCurrentInfoFromReading(BgReading lastBgReading, boolean predictive) {
+         double estimate = 0;
+         if ((new Date().getTime()) - (60000 * 11) - lastBgReading.timestamp > 0) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/stats/StatsResult.java b/app/src/main/java/com/eveningoutpost/dexdrip/stats/StatsResult.java
+new file mode 100644
+index 0000000..6a11618
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/stats/StatsResult.java
+@@ -0,0 +1,113 @@
++package com.eveningoutpost.dexdrip.stats;
++
++import android.content.Context;
++import android.content.SharedPreferences;
++import android.database.Cursor;
++import android.database.sqlite.SQLiteDatabase;
++import android.preference.PreferenceManager;
++
++import com.activeandroid.Cache;
++import com.eveningoutpost.dexdrip.UtilityModels.Constants;
++
++import java.text.DecimalFormat;
++
++/**
++ * Created by adrian on 23/01/16.
++ */
++public class StatsResult {
++
++    private final int in;
++    private final int below;
++    private final int above;
++    private final double avg;
++    private final boolean mgdl;
++
++    public StatsResult(SharedPreferences settings){
++
++        mgdl = "mgdl".equals(settings.getString("units", "mgdl"));
++
++        double high = Double.parseDouble(settings.getString("highValue", "170"));
++        double low = Double.parseDouble(settings.getString("lowValue", "70"));
++        if (!mgdl) {
++            high *= Constants.MMOLL_TO_MGDL;
++            low *= Constants.MMOLL_TO_MGDL;
++        }
++        long today = DBSearchUtil.getTodayTimestamp();
++        SQLiteDatabase db = Cache.openDatabase();
++
++        Cursor cursor= db.rawQuery("select count(*) from bgreadings  where timestamp >= " + today + " AND calculated_value >= " + low + " AND calculated_value <= " + high, null);
++        cursor.moveToFirst();
++        in = cursor.getInt(0);
++        cursor.close();
++
++        cursor= db.rawQuery("select count(*) from bgreadings  where timestamp >= " + today + " AND calculated_value > " + DBSearchUtil.CUTOFF + " AND calculated_value < " + low, null);
++        cursor.moveToFirst();
++        below = cursor.getInt(0);
++        cursor.close();
++
++        cursor= db.rawQuery("select count(*) from bgreadings  where timestamp >= " + today + " AND calculated_value > " + high, null);
++        cursor.moveToFirst();
++        above = cursor.getInt(0);
++        cursor.close();
++
++        if(getTotalReadings() > 0){
++            cursor= db.rawQuery("select avg(calculated_value) from bgreadings  where timestamp >= " + today + " AND calculated_value > " + DBSearchUtil.CUTOFF, null);
++            cursor.moveToFirst();
++            avg = cursor.getDouble(0);
++            cursor.close();
++        } else {
++            avg = 0;
++        }
++
++
++    }
++
++    public int getAbove() {
++        return above;
++    }
++
++    public double getAvg() {
++        return avg;
++    }
++
++    public int getBelow() {
++        return below;
++    }
++
++    public int getIn() {
++        return in;
++    }
++
++    public int getTotalReadings(){
++        return in + above + below;
++    }
++
++    public String getInPercentage(){
++        return "in:" +  ((getTotalReadings()>0)?(in*100/getTotalReadings()) + "%":"-%");
++    }
++
++    public String getLowPercentage(){
++        return "lo:" +  ((getTotalReadings()>0)?(below*100/getTotalReadings()) + "%":"-%");
++    }
++
++    public String getHighPercentage(){
++        return "hi:" +  ((getTotalReadings()>0)?(above*100/getTotalReadings()) + "%":"-%");
++    }
++
++    public String getA1cDCCT(){
++        if(getTotalReadings()==0) return "A1c:?%";
++        return "A1c:" + (Math.round(10 * (avg + 46.7) / 28.7) / 10d) + "%";
++    }
++
++    public String getA1cIFCC(){
++        if(getTotalReadings()==0) return "A1c:?%";
++        return "A1c:" + ((int) Math.round(((avg + 46.7) / 28.7 - 2.15) * 10.929));
++    }
++
++    public String getAverageUnitised(){
++        if(getTotalReadings()==0) return "Avg:?";
++        if(mgdl) return "Avg:" + Math.round(avg);
++        return "Avg:" + (new DecimalFormat("#.0")).format(avg*Constants.MGDL_TO_MMOLL);
++    }
++
++}
+diff --git a/app/src/main/res/layout/activity_home.xml b/app/src/main/res/layout/activity_home.xml
+index e99c0bb..d435fdd 100644
+--- a/app/src/main/res/layout/activity_home.xml
++++ b/app/src/main/res/layout/activity_home.xml
+@@ -31,7 +31,7 @@
+                     android:layout_alignParentStart="false"
+                     android:layout_alignParentEnd="true"
+                     android:layout_height="match_parent"
+-                    android:layout_marginTop="55dp"/>
++                    android:layout_below="@+id/extraStatusLine"/>
+ 
+                 <TextView
+                     android:layout_width="900dp"
+diff --git a/app/src/main/res/xml/pref_advanced_settings.xml b/app/src/main/res/xml/pref_advanced_settings.xml
+index 36bfb2c..ea068ce 100644
+--- a/app/src/main/res/xml/pref_advanced_settings.xml
++++ b/app/src/main/res/xml/pref_advanced_settings.xml
+@@ -61,11 +61,76 @@
+             android:title="Disable Battery Warning"
+             android:summary="Disable the warning for low transmitter battery state on the home screen. (Only relevant for DIY receivers.)"
+             android:defaultValue="false" />
+-        <CheckBoxPreference
+-            android:key="extra_status_line"
+-            android:title="Show advanced alogorithm paramerters"
+-            android:summary="Show slope and intercept"
+-            android:defaultValue="false" />
++
++        <PreferenceScreen
++            android:key="extra_status_line_preferencescreen"
++            android:title="Extra Status Line"
++            android:summary="Advanced Calibration Data and/or Statistics">
++            <SwitchPreference
++                android:key="extra_status_line"
++                android:title="Show Extra Line"
++                android:summary="Show Extra Line"
++                android:defaultValue="false" />
++            <CheckBoxPreference
++                android:key="status_line_calibration_long"
++                android:title="Calibration Data (long)"
++                android:summary="Show slope and intercept in long form."
++                android:dependency="extra_status_line"
++                android:defaultValue="true"/>
++            <CheckBoxPreference
++                android:key="status_line_calibration_short"
++                android:title="Calibration Data (short)"
++                android:summary="Show slope and intercept in short form."
++                android:dependency="extra_status_line"
++                android:defaultValue="false"/>
++            <CheckBoxPreference
++                android:key="status_line_avg"
++                android:title="Average"
++                android:summary="Today's average value."
++                android:dependency="extra_status_line"
++                android:defaultValue="false"/>
++            <CheckBoxPreference
++                android:key="status_line_a1c_dcct"
++                android:title="A1c DCCT"
++                android:summary="A1c estimation in DCCT format (%)"
++                android:dependency="extra_status_line"
++                android:defaultValue="false"/>
++            <CheckBoxPreference
++                android:key="status_line_a1c_ifcc"
++                android:title="A1c IFCC"
++                android:summary="A1c estimation in IFCC format (mmol/mol)"
++                android:dependency="extra_status_line"
++                android:defaultValue="false"/>
++            <CheckBoxPreference
++                android:key="status_line_in"
++                android:title="In Percentage"
++                android:summary="Percentage of values in range."
++                android:dependency="extra_status_line"
++                android:defaultValue="false"/>
++            <CheckBoxPreference
++                android:key="status_line_high"
++                android:title="High Percentage"
++                android:summary="Percentage of values above range."
++                android:dependency="extra_status_line"
++                android:defaultValue="false"/>
++            <CheckBoxPreference
++                android:key="status_line_low"
++                android:title="Low Percentage"
++                android:summary="Percentage of values below range."
++                android:dependency="extra_status_line"
++                android:defaultValue="false"/>
++            <CheckBoxPreference
++                android:key="status_line_time"
++                android:title="Time"
++                android:summary="The current time."
++                android:dependency="extra_status_line"
++                android:defaultValue="false"/>
++
++        </PreferenceScreen>
++
++
++
++
+         <CheckBoxPreference
+             android:key="xDripViewer_upload_mode"
+             android:title="xDripViewer upload mode"

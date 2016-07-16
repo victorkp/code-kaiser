@@ -1,0 +1,19 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
+index 5fc1f35..1376fce 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
+@@ -89,8 +89,12 @@ private void migrateToNewStyleRestUris() {
+             if (i.hasNext())
+                 newUris.append(" ");
+         }
+-
+-        prefs.edit().putString("cloud_storage_api_base", newUris.toString()).apply();
++        if (newUris.length() != 0) {
++            prefs.edit().putString("cloud_storage_api_base", newUris.toString()).apply();
++        } else {
++            // instead of an empty string: delete the setting to show (but later not read) default string
++            prefs.edit().remove("cloud_storage_api_base").apply();
++        }
+     }
+ 
+ }

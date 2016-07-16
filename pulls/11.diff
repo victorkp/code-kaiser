@@ -1,0 +1,1978 @@
+diff --git a/app/app.iml b/app/app.iml
+index f266c9d..b592401 100644
+--- a/app/app.iml
++++ b/app/app.iml
+@@ -92,17 +92,19 @@
+     <orderEntry type="library" exported="" name="crashlytics-2.2.3" level="project" />
+     <orderEntry type="library" exported="" name="answers-1.1.2" level="project" />
+     <orderEntry type="library" exported="" name="retrofit-1.9.0" level="project" />
+-    <orderEntry type="library" exported="" name="acra-4.5.0" level="project" />
+     <orderEntry type="library" exported="" name="rxjava-1.0.0" level="project" />
++    <orderEntry type="library" exported="" name="acra-4.5.0" level="project" />
+     <orderEntry type="library" exported="" name="support-annotations-22.1.1" level="project" />
+     <orderEntry type="library" exported="" name="beta-1.1.2" level="project" />
+-    <orderEntry type="library" exported="" name="gson-2.3.1" level="project" />
+     <orderEntry type="library" exported="" name="appcompat-v7-22.1.1" level="project" />
++    <orderEntry type="library" exported="" name="gson-2.3.1" level="project" />
+     <orderEntry type="library" exported="" name="mongo-java-driver-2.10.1" level="project" />
++    <orderEntry type="library" exported="" name="snackbar-2.10.8" level="project" />
+     <orderEntry type="library" exported="" name="usb-serial-for-android-v010" level="project" />
+     <orderEntry type="library" exported="" name="pebblekit-2.6.0" level="project" />
+     <orderEntry type="library" exported="" name="fabric-1.3.0" level="project" />
+-    <orderEntry type="library" exported="" name="hellocharts-library-1.1" level="project" />
+     <orderEntry type="library" exported="" name="support-v4-22.1.1" level="project" />
++    <orderEntry type="library" exported="" name="hellocharts-library-1.1" level="project" />
++    <orderEntry type="library" exported="" name="recyclerview-v7-22.0.0" level="project" />
+   </component>
+ </module>
+\ No newline at end of file
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index deb0066..bc5dc08 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -32,7 +32,7 @@
+             android:value="DexDrip.db" />
+         <meta-data
+             android:name="AA_DB_VERSION"
+-            android:value="29" />
++            android:value="32" />
+ 
+         <provider
+             android:name="com.activeandroid.content.ContentProvider"
+@@ -186,12 +186,6 @@
+             android:name="io.fabric.ApiKey"
+             android:value="193dbc121e25e5f3e71bb98164ec074378e339df" />
+ 
+-        <receiver android:name=".UtilityModels.NotificationsReceiver" >
+-            <intent-filter>
+-                <action android:name="com.eveningoutpost.dexdrip.UtilityModels.Notifications" />
+-            </intent-filter>
+-        </receiver>
+-
+         <activity
+             android:name=".AlertList"
+             android:label="@string/title_activity_alert_list" >
+@@ -206,10 +200,20 @@
+             android:enabled="true"
+             android:exported="true" >
+         </service>
++
++        <service
++            android:name=".UtilityModels.Notifications"
++            android:exported="false" >
++        </service>
+         <service
+             android:name=".Services.MissedReadingIntentService"
+             android:exported="false" >
+         </service>
++        <service
++            android:name=".UtilityModels.PebbleSync"
++            android:enabled="true"
++            android:exported="true" >
++        </service>
+     </application>
+ 
+ </manifest>
+diff --git a/app/src/main/assets/migrations/27.sql b/app/src/main/assets/migrations/27.sql
+new file mode 100644
+index 0000000..2692b18
+--- /dev/null
++++ b/app/src/main/assets/migrations/27.sql
+@@ -0,0 +1,3 @@
++ALTER TABLE TransmitterData ADD COLUMN filtered_data DOUBLE;
++ALTER TABLE BgReadings ADD COLUMN filtered_data DOUBLE;
++ALTER TABLE BgReadings ADD COLUMN selected_filtered_data BOOLEAN;
+diff --git a/app/src/main/assets/migrations/31.sql b/app/src/main/assets/migrations/31.sql
+new file mode 100644
+index 0000000..c631d40
+--- /dev/null
++++ b/app/src/main/assets/migrations/31.sql
+@@ -0,0 +1 @@
++ALTER TABLE TransmitterData ADD COLUMN filtered_data REAL DEFAULT 0;
+diff --git a/app/src/main/assets/migrations/32.sql b/app/src/main/assets/migrations/32.sql
+new file mode 100644
+index 0000000..2eaae1d
+--- /dev/null
++++ b/app/src/main/assets/migrations/32.sql
+@@ -0,0 +1 @@
++ALTER TABLE BgReadings ADD COLUMN selected_filtered_data BOOLEAN;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index 6953428..ce7a4cf 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -19,6 +19,7 @@
+ import android.support.v4.widget.DrawerLayout;
+ import android.view.Menu;
+ import android.view.MenuItem;
++import android.view.View;
+ import android.widget.TextView;
+ import android.widget.Toast;
+ 
+@@ -27,6 +28,7 @@
+ import com.eveningoutpost.dexdrip.Models.AlertType;
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.eveningoutpost.dexdrip.Models.Calibration;
++import com.eveningoutpost.dexdrip.Services.DexCollectionService;
+ import com.eveningoutpost.dexdrip.Services.WixelReader;
+ import com.eveningoutpost.dexdrip.UtilityModels.BgGraphBuilder;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+@@ -67,6 +69,7 @@
+     public boolean updatingPreviewViewport = false;
+     public boolean updatingChartViewport = false;
+     boolean isBTWixel;
++    boolean isDexbridgeWixel;
+     boolean isBTShare;
+     boolean isWifiWixel;
+ 
+@@ -79,6 +82,8 @@ protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         CollectionServiceStarter collectionServiceStarter = new CollectionServiceStarter(getApplicationContext());
+         collectionServiceStarter.start(getApplicationContext());
++        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
++        PreferenceManager.setDefaultValues(this, R.xml.pref_data_sync, false);
+         PreferenceManager.setDefaultValues(this, R.xml.pref_notifications, false);
+         PreferenceManager.setDefaultValues(this, R.xml.pref_data_source, false);
+         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+@@ -167,7 +172,7 @@ public void onViewportChanged(Viewport newViewport) {
+                 tempViewport = newViewport;
+                 updatingPreviewViewport = false;
+             }
+-            if (updateStuff == true) {
++            if (updateStuff) {
+                 holdViewport.set(newViewport.left, newViewport.top, newViewport.right, newViewport.bottom);
+             }
+         }
+@@ -202,6 +207,7 @@ public void updateCurrentBgInfo() {
+         final TextView notificationText = (TextView)findViewById(R.id.notices);
+         notificationText.setText("");
+         isBTWixel = CollectionServiceStarter.isBTWixel(getApplicationContext());
++        isDexbridgeWixel = CollectionServiceStarter.isDexbridgeWixel(getApplicationContext());
+         isBTShare = CollectionServiceStarter.isBTShare(getApplicationContext());
+         isWifiWixel = CollectionServiceStarter.isWifiWixel(getApplicationContext());
+         if(isBTShare) {
+@@ -228,7 +234,7 @@ public void updateCurrentBgInfo() {
+                 }
+             }
+         }
+-        if(isBTWixel) {
++        if(isBTWixel || isDexbridgeWixel) {
+             if ((android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+                 notificationText.setText("Unfortunately your android version does not support Bluetooth Low Energy");
+             } else {
+@@ -302,10 +308,27 @@ public void displayCurrentInfo() {
+         DecimalFormat df = new DecimalFormat("#");
+         df.setMaximumFractionDigits(0);
+ 
++        boolean isDexbridge = CollectionServiceStarter.isDexbridgeWixel(getApplicationContext());
++        int bridgeBattery = prefs.getInt("bridge_battery", 0);
++
++        final TextView dexbridgeBattery = (TextView)findViewById(R.id.textBridgeBattery);
++        if(isDexbridge) {
++            if(bridgeBattery == 0){
++                dexbridgeBattery.setText("Waiting for packet");
++            } else {
++                dexbridgeBattery.setText("Bridge Battery: " + bridgeBattery + "%");
++            }
++            if(bridgeBattery < 50) dexbridgeBattery.setTextColor(Color.YELLOW);
++            if(bridgeBattery < 25) dexbridgeBattery.setTextColor(Color.RED); else dexbridgeBattery.setTextColor(Color.GREEN);
++            dexbridgeBattery.setVisibility(View.VISIBLE);
++        } else {
++            dexbridgeBattery.setVisibility(View.INVISIBLE);
++        }
+         final TextView currentBgValueText = (TextView)findViewById(R.id.currentBgValueRealTime);
+         final TextView notificationText = (TextView)findViewById(R.id.notices);
+         if ((currentBgValueText.getPaintFlags() & Paint.STRIKE_THRU_TEXT_FLAG) > 0) {
+             currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
++            dexbridgeBattery.setPaintFlags(dexbridgeBattery.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+         }
+         BgReading lastBgreading = BgReading.lastNoSenssor();
+         boolean predictive = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("predictive_bg", false);
+@@ -321,6 +344,7 @@ public void displayCurrentInfo() {
+                 }
+                 currentBgValueText.setText(bgGraphBuilder.unitized_string(estimate));
+                 currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
++                dexbridgeBattery.setPaintFlags(dexbridgeBattery.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+             } else {
+                 if(!predictive){
+                     estimate=lastBgreading.calculated_value;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBluetoothDevice.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBluetoothDevice.java
+index 336a4c8..a3fcbb3 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBluetoothDevice.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBluetoothDevice.java
+@@ -53,10 +53,7 @@ public static void disconnected() {
+ 
+     public static boolean is_connected() {
+         ActiveBluetoothDevice activeBluetoothDevice = ActiveBluetoothDevice.first();
+-        if(activeBluetoothDevice != null) {
+-            return activeBluetoothDevice.connected;
+-        }
+-        return false;
++        return (activeBluetoothDevice != null && activeBluetoothDevice.connected);
+     }
+ 
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+index c60e921..79e0400 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+@@ -123,7 +123,7 @@ public static AlertType get_highest_active_alert(Context context, double bg) {
+         AlertType at;
+         if (UnclearTime >= UnclearTimeSetting && bg_unclear_readings_alerts ) {
+             Log.w("NOTIFICATIONS", "Readings have been unclear for too long!!");
+-            Notifications.getInstance(context).bgUnclearAlert(context);
++            Notifications.bgUnclearAlert(context);
+         }
+         if (UnclearTime > 0) {
+             Log.e(TAG_ALERT, "We are in an clear state, but not for too long. Alerts are disabled");
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+index 2c44d03..217e5c1 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+@@ -16,6 +16,7 @@
+ import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.records.SensorRecord;
+ import com.eveningoutpost.dexdrip.Sensor;
+ import com.eveningoutpost.dexdrip.Services.DexShareCollectionService;
++import com.eveningoutpost.dexdrip.Services.MissedReadingService;
+ import com.eveningoutpost.dexdrip.UtilityModels.BgSendQueue;
+ import com.eveningoutpost.dexdrip.UtilityModels.Constants;
+ import com.eveningoutpost.dexdrip.UtilityModels.Notifications;
+@@ -32,8 +33,9 @@
+ 
+ @Table(name = "BgReadings", id = BaseColumns._ID)
+ public class BgReading extends Model {
++    private static boolean predictBG;
+     private final static String TAG = BgReading.class.getSimpleName();
+-    private final static String TAG_ALERT = "AlertBg";
++    private final static String TAG_ALERT = TAG +" AlertBg";
+     //TODO: Have these as adjustable settings!!
+     public final static double BESTOFFSET = (60000 * 0); // Assume readings are about x minutes off from actual!
+ 
+@@ -182,7 +184,7 @@ public static void create(SensorRecord[] sensorRecords, long addativeOffset, Con
+     }
+ 
+     public static void create(SensorRecord sensorRecord, long addativeOffset, Context context) {
+-        Log.w(TAG, "gonna make some sensor records: " + sensorRecord.getUnfiltered());
++        Log.w(TAG, "create: gonna make some sensor records: " + sensorRecord.getUnfiltered());
+         if(BgReading.is_new(sensorRecord, addativeOffset)) {
+             BgReading bgReading = new BgReading();
+             Sensor sensor = Sensor.currentSensor();
+@@ -207,7 +209,7 @@ public static void create(SensorRecord sensorRecord, long addativeOffset, Contex
+ 
+     public static void create(EGVRecord egvRecord, long addativeOffset, Context context) {
+         BgReading bgReading = BgReading.getForTimestamp(egvRecord.getSystemTime().getTime() + addativeOffset);
+-        Log.w(TAG, "Looking for BG reading to tag this thing to: " + egvRecord.getBGValue());
++        Log.w(TAG, "create: Looking for BG reading to tag this thing to: " + egvRecord.getBGValue());
+         if(bgReading != null) {
+             bgReading.calculated_value = egvRecord.getBGValue();
+             if (egvRecord.getBGValue() <= 13) {
+@@ -218,7 +220,7 @@ public static void create(EGVRecord egvRecord, long addativeOffset, Context cont
+                 bgReading.raw_calculated = (((calSlope * bgReading.raw_data) + calIntercept) - 5);
+                 bgReading.noise = egvRecord.noiseValue();
+             }
+-            Log.w(TAG, "NEW VALUE CALCULATED AT: " + bgReading.calculated_value);
++            Log.w(TAG, "create: NEW VALUE CALCULATED AT: " + bgReading.calculated_value);
+             bgReading.calculated_value_slope = bgReading.slopefromName(egvRecord.getTrend().friendlyTrendName());
+             if(egvRecord.getTrend().friendlyTrendName().compareTo("NOT_COMPUTABLE") == 0 || egvRecord.getTrend().friendlyTrendName().compareTo("OUT_OF_RANGE") == 0) {
+                 bgReading.hide_slope = true;
+@@ -227,7 +229,7 @@ public static void create(EGVRecord egvRecord, long addativeOffset, Context cont
+             bgReading.save();
+             bgReading.find_new_curve();
+             bgReading.find_new_raw_curve();
+-            Notifications.getInstance(context).notificationSetter(context);
++            context.startService(new Intent(context, Notifications.class));
+             BgSendQueue.addToQueue(bgReading, "create", context);
+         }
+     }
+@@ -244,11 +246,11 @@ public static BgReading getForTimestamp(double timestamp) {
+                     .orderBy("timestamp desc")
+                     .executeSingle();
+             if(bgReading != null && Math.abs(bgReading.timestamp - timestamp) < (3*60*1000)) { //cool, so was it actually within 4 minutes of that bg reading?
+-                Log.w(TAG, "Found a BG timestamp match");
++                Log.w(TAG, "getForTimestamp: Found a BG timestamp match");
+                 return bgReading;
+             }
+         }
+-        Log.w(TAG, "No luck finding a BG timestamp match");
++        Log.w(TAG, "getForTimestamp: No luck finding a BG timestamp match");
+         return null;
+     }
+ 
+@@ -263,11 +265,11 @@ public static boolean is_new(SensorRecord sensorRecord, long addativeOffset) {
+                     .orderBy("timestamp desc")
+                     .executeSingle();
+             if(bgReading != null && Math.abs(bgReading.timestamp - timestamp) < (3*60*1000)) { //cool, so was it actually within 4 minutes of that bg reading?
+-                Log.w(TAG, "Old Reading");
++                Log.w(TAG, "isNew; Old Reading");
+                 return false;
+             }
+         }
+-        Log.w(TAG, "New Reading");
++        Log.w(TAG, "isNew: New Reading");
+         return true;
+     }
+ 
+@@ -277,6 +279,7 @@ public static BgReading create(double raw_data, double filtered_data, Context co
+         if (sensor != null) {
+             Calibration calibration = Calibration.last();
+             if (calibration == null) {
++                Log.d(TAG,"create: No calibration yet");
+                 bgReading.sensor = sensor;
+                 bgReading.sensor_uuid = sensor.uuid;
+                 bgReading.raw_data = (raw_data / 1000);
+@@ -292,7 +295,7 @@ public static BgReading create(double raw_data, double filtered_data, Context co
+                 bgReading.save();
+                 bgReading.perform_calculations();
+             } else {
+-
++                Log.d(TAG,"Calibrations, so doing everything");
+                 bgReading.sensor = sensor;
+                 bgReading.sensor_uuid = sensor.uuid;
+                 bgReading.calibration = calibration;
+@@ -327,7 +330,7 @@ public static BgReading create(double raw_data, double filtered_data, Context co
+ 
+                 bgReading.save();
+                 bgReading.perform_calculations();
+-                Notifications.getInstance(context).notificationSetter(context);
++                context.startService(new Intent(context, Notifications.class));
+                 BgSendQueue.addToQueue(bgReading, "create", context);
+             }
+         }
+@@ -559,12 +562,12 @@ public void find_new_curve() {
+             b = (-y1*(x2+x3)/((x1-x2)*(x1-x3))-y2*(x1+x3)/((x2-x1)*(x2-x3))-y3*(x1+x2)/((x3-x1)*(x3-x2)));
+             c = (y1*x2*x3/((x1-x2)*(x1-x3))+y2*x1*x3/((x2-x1)*(x2-x3))+y3*x1*x2/((x3-x1)*(x3-x2)));
+ 
+-            Log.w(TAG, "BG PARABOLIC RATES: "+a+"x^2 + "+b+"x + "+c);
++            Log.w(TAG, "find_new_curve: BG PARABOLIC RATES: "+a+"x^2 + "+b+"x + "+c);
+ 
+             save();
+         } else if (last_3.size() == 2) {
+ 
+-            Log.w(TAG, "Not enough data to calculate parabolic rates - assume Linear");
++            Log.w(TAG, "find_new_curve: Not enough data to calculate parabolic rates - assume Linear");
+                 BgReading latest = last_3.get(0);
+                 BgReading second_latest = last_3.get(1);
+ 
+@@ -584,7 +587,7 @@ public void find_new_curve() {
+             Log.w(TAG, ""+latest.a+"x^2 + "+latest.b+"x + "+latest.c);
+                 save();
+             } else {
+-            Log.w(TAG, "Not enough data to calculate parabolic rates - assume static data");
++            Log.w(TAG, "find_new_curve: Not enough data to calculate parabolic rates - assume static data");
+             a = 0;
+             b = 0;
+             c = calculated_value;
+@@ -598,7 +601,7 @@ public void calculateAgeAdjustedRawValue(){
+         double adjust_for = (86400000 * 1.9) - time_since_sensor_started;
+         if (adjust_for > 0) {
+             age_adjusted_raw_value = (((.45) * (adjust_for / (86400000 * 1.9))) * raw_data) + raw_data;
+-            Log.w("RAW VALUE ADJUSTMENT: ", "FROM:" + raw_data + " TO: " + age_adjusted_raw_value);
++            Log.w(TAG, "calculateAgeAdjustedRawValue: RAW VALUE ADJUSTMENT FROM:" + raw_data + " TO: " + age_adjusted_raw_value);
+         } else {
+             age_adjusted_raw_value = raw_data;
+         }
+@@ -621,7 +624,7 @@ public void find_new_raw_curve() {
+             rb = (-y1*(x2+x3)/((x1-x2)*(x1-x3))-y2*(x1+x3)/((x2-x1)*(x2-x3))-y3*(x1+x2)/((x3-x1)*(x3-x2)));
+             rc = (y1*x2*x3/((x1-x2)*(x1-x3))+y2*x1*x3/((x2-x1)*(x2-x3))+y3*x1*x2/((x3-x1)*(x3-x2)));
+ 
+-            Log.w(TAG, "RAW PARABOLIC RATES: "+ra+"x^2 + "+rb+"x + "+rc);
++            Log.w(TAG, "find_new_raw_curve: RAW PARABOLIC RATES: "+ra+"x^2 + "+rb+"x + "+rc);
+             save();
+         } else if (last_3.size() == 2) {
+             BgReading latest = last_3.get(0);
+@@ -639,12 +642,12 @@ public void find_new_raw_curve() {
+             ra = 0;
+             rc = -1 * ((latest.rb * x1) - y1);
+ 
+-            Log.w(TAG, "Not enough data to calculate parabolic rates - assume Linear data");
++            Log.w(TAG, "find_new_raw_curve: Not enough data to calculate parabolic rates - assume Linear data");
+ 
+             Log.w(TAG, "RAW PARABOLIC RATES: "+ra+"x^2 + "+rb+"x + "+rc);
+             save();
+         } else {
+-            Log.w(TAG, "Not enough data to calculate parabolic rates - assume static data");
++            Log.w(TAG, "find_new_raw_curve: Not enough data to calculate parabolic rates - assume static data");
+             BgReading latest_entry = BgReading.lastNoSenssor();
+             ra = 0;
+             rb = 0;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+index 926d4b5..86276ad 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+@@ -1,6 +1,7 @@
+ package com.eveningoutpost.dexdrip.Models;
+ 
+ import android.content.Context;
++import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.preference.PreferenceManager;
+ import android.provider.BaseColumns;
+@@ -228,7 +229,7 @@ public static void initialCalibration(double bg1, double bg2, Context context) {
+         }
+         adjustRecentBgReadings(5);
+         CalibrationRequest.createOffset(lowerCalibration.bg, 35);
+-        Notifications.getInstance(context).notificationSetter(context);
++        context.startService(new Intent(context, Notifications.class));
+     }
+ 
+     //Create Calibration Checkin
+@@ -292,7 +293,7 @@ public static void create(CalRecord[] calRecords, Context context, boolean overr
+                     Calibration.create(calRecords, context, true, 0);
+                 }
+             }
+-            Notifications.getInstance(context).notificationSetter(context);
++            context.startService(new Intent(context, Notifications.class));
+         }
+     }
+ 
+@@ -369,7 +370,7 @@ public static Calibration create(double bg, Context context) {
+                 calculate_w_l_s();
+                 adjustRecentBgReadings();
+                 CalibrationSendQueue.addToQueue(calibration, context);
+-                Notifications.getInstance(context).notificationSetter(context);
++                context.startService(new Intent(context, Notifications.class));
+                 Calibration.requestCalibrationIfRangeTooNarrow();
+             }
+         } else {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/TransmitterData.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/TransmitterData.java
+index 31af819..b35acd4 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/TransmitterData.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/TransmitterData.java
+@@ -8,6 +8,8 @@
+ import com.activeandroid.annotation.Table;
+ import com.activeandroid.query.Select;
+ 
++import java.nio.ByteBuffer;
++import java.nio.ByteOrder;
+ import java.util.Date;
+ import java.util.UUID;
+ 
+@@ -17,16 +19,16 @@
+ 
+ @Table(name = "TransmitterData", id = BaseColumns._ID)
+ public class TransmitterData extends Model {
+-    private final static String TAG = BgReading.class.getSimpleName();
++    private final static String TAG = TransmitterData.class.getSimpleName();
+ 
+     @Column(name = "timestamp", index = true)
+     public long timestamp;
+ 
+     @Column(name = "raw_data")
+     public double raw_data;
+-//
+-//    @Column(name = "filtered_data")
+-//    public double filtered_data;
++
++    @Column(name = "filtered_data")
++    public double filtered_data;
+ 
+     @Column(name = "sensor_battery_level")
+     public int sensor_battery_level;
+@@ -35,29 +37,36 @@
+     public String uuid;
+ 
+     public static TransmitterData create(byte[] buffer, int len, Long timestamp) {
+-                StringBuilder data_string = new StringBuilder();
+-        if (len < 6) { return null; };
+-
+-        for (int i = 0; i < len; ++i) {
+-            data_string.append((char) buffer[i]);
+-        }
+-        String[] data = data_string.toString().split("\\s+");
+-
+-        randomDelay(100, 2000);
+-        TransmitterData lastTransmitterData = TransmitterData.last();
+-        if (lastTransmitterData != null && lastTransmitterData.raw_data == Integer.parseInt(data[0]) && Math.abs(lastTransmitterData.timestamp - timestamp) < (10000)) { //Stop allowing duplicate data, its bad!
+-            return null;
+-        }
+-
++        if (len < 6) { return null; }
+         TransmitterData transmitterData = new TransmitterData();
+-        if(data.length > 1) {
+-            transmitterData.sensor_battery_level = Integer.parseInt(data[1]);
++        if (buffer[0] == 0x11 && buffer[1] == 0x00) {
++            //this is a dexbridge packet.  Process accordingly.
++            Log.w(TAG, "create Processing a Dexbridge packet");
++            ByteBuffer txData = ByteBuffer.allocate(len);
++            txData.order(ByteOrder.LITTLE_ENDIAN);
++            txData.put(buffer, 0, len);
++            transmitterData.raw_data = txData.getInt(2);
++            transmitterData.filtered_data = txData.getInt(6);
++            transmitterData.sensor_battery_level = txData.get(10);
++            Log.w(TAG, "Created transmitterData record with Raw value of " + transmitterData.raw_data + " and Filtered value of " + transmitterData.filtered_data + " at " + transmitterData.timestamp);
++        } else { //this is NOT a dexbridge packet.  Process accordingly.
++            Log.w(TAG, "create Processing a BTWixel or IPWixel packet");
++            StringBuilder data_string = new StringBuilder();
++            for (int i = 0; i < len; ++i) { data_string.append((char) buffer[i]); }
++            String[] data = data_string.toString().split("\\s+");
++
++            randomDelay(100, 2000);
++            TransmitterData lastTransmitterData = TransmitterData.last();
++            if (lastTransmitterData != null && lastTransmitterData.raw_data == Integer.parseInt(data[0]) && Math.abs(lastTransmitterData.timestamp - timestamp) < (10000)) { //Stop allowing duplicate data, its bad!
++                return null;
++            }
++            if (data.length > 1) { transmitterData.sensor_battery_level = Integer.parseInt(data[1]); }
++            if (Integer.parseInt(data[0]) < 1000) { return null; }
++            transmitterData.raw_data = Integer.parseInt(data[0]);
++            transmitterData.filtered_data = Integer.parseInt(data[0]);
+         }
+-        if (Integer.parseInt(data[0]) < 1000) { return null; } // Sometimes the HM10 sends the battery level and readings in separate transmissions, filter out these incomplete packets!
+-        transmitterData.raw_data = Integer.parseInt(data[0]);
+         transmitterData.timestamp = timestamp;
+         transmitterData.uuid = UUID.randomUUID().toString();
+-
+         transmitterData.save();
+         return transmitterData;
+     }
+@@ -88,10 +97,10 @@ public static TransmitterData last() {
+     public static void randomDelay(float min, float max){
+         int random = (int)(max * Math.random() + min);
+         try {
+-            Log.d("Sleeping ", "for " + random + "ms");
++            Log.d(TAG, "randomDelay: Sleeping for " + random + "ms");
+             Thread.sleep(random);
+         } catch (InterruptedException e) {
+-            Log.e("Random Delay ", "INTERUPTED");
++            Log.e(TAG, "randomDelay: INTERUPTED");
+         }
+     }
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java b/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
+index 105a071..d2c9477 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
+@@ -79,7 +79,7 @@ public NavDrawerBuilder(Context aContext) {
+             options.add("Stop Sensor");
+         } else { options.add("Start Sensor"); }
+         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+-            if(CollectionServiceStarter.isBTWixel(context) || CollectionServiceStarter.isBTShare(context)) {
++            if(CollectionServiceStarter.isBTWixel(context) || CollectionServiceStarter.isDexbridgeWixel(context)|| CollectionServiceStarter.isBTShare(context)) {
+                 options.add("Scan for BT");
+             }
+         }
+@@ -136,7 +136,7 @@ public NavDrawerBuilder(Context aContext) {
+             options.add(new Intent(context, StopSensor.class));
+         } else { options.add(new Intent(context, StartNewSensor.class)); }
+         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+-            if(CollectionServiceStarter.isBTWixel(context) || CollectionServiceStarter.isBTShare(context)) {
++            if(CollectionServiceStarter.isBTWixel(context) || CollectionServiceStarter.isDexbridgeWixel(context)|| CollectionServiceStarter.isBTShare(context)) {
+                 options.add(new Intent(context, BluetoothScan.class));
+             }
+         }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+index 5d42ba8..4573b7c 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+@@ -38,7 +38,6 @@
+ import android.preference.PreferenceManager;
+ import android.util.Log;
+ 
+-import com.activeandroid.query.Select;
+ import com.eveningoutpost.dexdrip.Models.ActiveBluetoothDevice;
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.eveningoutpost.dexdrip.Sensor;
+@@ -48,42 +47,44 @@
+ import com.eveningoutpost.dexdrip.Models.TransmitterData;
+ 
+ import java.nio.charset.Charset;
++import java.nio.ByteBuffer;
++import java.nio.ByteOrder;
++import java.util.Arrays;
+ import java.util.Calendar;
+ import java.util.Date;
++import java.util.LinkedList;
++import java.util.Queue;
+ import java.util.UUID;
+-
+ import static com.activeandroid.ActiveAndroid.beginTransaction;
+ import static com.activeandroid.ActiveAndroid.endTransaction;
+ import static com.activeandroid.ActiveAndroid.setTransactionSuccessful;
++import com.activeandroid.query.Select;
+ 
+ @TargetApi(Build.VERSION_CODES.KITKAT)
+ public class DexCollectionService extends Service {
+     private final static String TAG = DexCollectionService.class.getSimpleName();
+-    private String mDeviceName;
+     private String mDeviceAddress;
+-    private boolean is_connected = false;
+     SharedPreferences prefs;
+ 
+     public DexCollectionService dexCollectionService;
+ 
+     private BluetoothManager mBluetoothManager;
+     private BluetoothAdapter mBluetoothAdapter;
+-    private String mBluetoothDeviceAddress;
+     private BluetoothGatt mBluetoothGatt;
+     private ForegroundServiceStarter foregroundServiceStarter;
+-    private int mConnectionState = STATE_DISCONNECTED;
++    private int mConnectionState = BluetoothProfile.STATE_DISCONNECTING;
+     private BluetoothDevice device;
++    private BluetoothGattCharacteristic mCharacteristic;
++    long lastPacketTime;
++    private byte[] lastdata = null;
++    private Context mContext;
++    private final int STATE_DISCONNECTED = BluetoothProfile.STATE_DISCONNECTED;
++    private final int STATE_DISCONNECTING = BluetoothProfile.STATE_DISCONNECTING;
++    private final int STATE_CONNECTING = BluetoothProfile.STATE_CONNECTING;
++    private final int STATE_CONNECTED = BluetoothProfile.STATE_CONNECTED;
+ 
+-    private Context mContext = null;
+-
+-    private static final int STATE_DISCONNECTED = BluetoothProfile.STATE_DISCONNECTED;
+-    private static final int STATE_DISCONNECTING = BluetoothProfile.STATE_DISCONNECTING;
+-    private static final int STATE_CONNECTING = BluetoothProfile.STATE_CONNECTING;
+-    private static final int STATE_CONNECTED = BluetoothProfile.STATE_CONNECTED;
+-
+-    public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
+-    public final static UUID xDripDataService = UUID.fromString(HM10Attributes.HM_10_SERVICE);
+-    public final static UUID xDripDataCharacteristic = UUID.fromString(HM10Attributes.HM_RX_TX);
++    public final UUID xDripDataService = UUID.fromString(HM10Attributes.HM_10_SERVICE);
++    public final UUID xDripDataCharacteristic = UUID.fromString(HM10Attributes.HM_RX_TX);
+ 
+     @Override
+     public IBinder onBind(Intent intent) {
+@@ -98,6 +99,7 @@ public void onCreate() {
+         dexCollectionService = this;
+         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+         listenForChangeInSettings();
++        Log.w(TAG, "onCreate: STARTING SERVICE");
+     }
+ 
+     @Override
+@@ -106,7 +108,7 @@ public int onStartCommand(Intent intent, int flags, int startId) {
+             stopSelf();
+             return START_NOT_STICKY;
+         }
+-        if (CollectionServiceStarter.isBTWixel(getApplicationContext())) {
++        if (CollectionServiceStarter.isBTWixel(getApplicationContext()) || CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
+             setFailoverTimer();
+         } else {
+             stopSelf();
+@@ -119,14 +121,16 @@ public int onStartCommand(Intent intent, int flags, int startId) {
+     @Override
+     public void onDestroy() {
+         super.onDestroy();
++        Log.w(TAG, "onDestroy entered");
+         close();
+         foregroundServiceStarter.stop();
+         setRetryTimer();
+         Log.w(TAG, "SERVICE STOPPED");
+     }
++
+     public SharedPreferences.OnSharedPreferenceChangeListener prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+-            if(key.compareTo("run_service_in_foreground") == 0) {
++            if (key.compareTo("run_service_in_foreground") == 0) {
+                 Log.e("FOREGROUND", "run_service_in_foreground changed!");
+                 if (prefs.getBoolean("run_service_in_foreground", false)) {
+                     foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), dexCollectionService);
+@@ -145,29 +149,27 @@ public void listenForChangeInSettings() {
+     }
+ 
+     public void setRetryTimer() {
+-        if (CollectionServiceStarter.isBTWixel(getApplicationContext())) {
+-            long retry_in = (1000 * 60 * 2);
+-            Log.d(TAG, "Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
++        if (CollectionServiceStarter.isBTWixel(getApplicationContext()) || CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
++            long retry_in = (1000 * 65);
++            Log.d(TAG, "setRetryTimer: Restarting in: " + (retry_in/1000)  + " seconds");
+             Calendar calendar = Calendar.getInstance();
+             AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+             alarm.setExact(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, DexCollectionService.class), 0));
+         }
+     }
+ 
+-    public void setFailoverTimer() { //Sometimes it gets stuck in limbo on 4.4, this should make it try again
+-        if (CollectionServiceStarter.isBTWixel(getApplicationContext())) {
+-            long retry_in = (1000 * 60 * 5);
+-            Log.d(TAG, "Fallover Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
++    public void setFailoverTimer() {
++        if (CollectionServiceStarter.isBTWixel(getApplicationContext())|| CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
++            long retry_in = (1000 * 60 * 6);
++            Log.d(TAG, "setFailoverTimer: Fallover Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
+             Calendar calendar = Calendar.getInstance();
+             AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-            alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, DexCollectionService.class), 0));
++            alarm.setExact(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, DexCollectionService.class), 0));
+         } else {
+             stopSelf();
+         }
+     }
+ 
+-
+-
+     public void attemptConnection() {
+         mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+         if (mBluetoothManager != null) {
+@@ -182,11 +184,10 @@ public void attemptConnection() {
+                     }
+                 }
+ 
+-                Log.w(TAG, "Connection state: " + mConnectionState);
++                Log.w(TAG, "attemptConnection: Connection state: " + mConnectionState);
+                 if (mConnectionState == STATE_DISCONNECTED || mConnectionState == STATE_DISCONNECTING) {
+                     ActiveBluetoothDevice btDevice = ActiveBluetoothDevice.first();
+                     if (btDevice != null) {
+-                        mDeviceName = btDevice.name;
+                         mDeviceAddress = btDevice.address;
+                         if (mBluetoothAdapter.isEnabled() && mBluetoothAdapter.getRemoteDevice(mDeviceAddress) != null) {
+                             connect(mDeviceAddress);
+@@ -194,7 +195,7 @@ public void attemptConnection() {
+                         }
+                     }
+                 } else if (mConnectionState == STATE_CONNECTED) { //WOOO, we are good to go, nothing to do here!
+-                    Log.w(TAG, "Looks like we are already connected, going to read!");
++                    Log.w(TAG, "attemptConnection: Looks like we are already connected, going to read!");
+                     return;
+                 }
+             }
+@@ -208,12 +209,12 @@ public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState
+             if (newState == BluetoothProfile.STATE_CONNECTED) {
+                 mConnectionState = STATE_CONNECTED;
+                 ActiveBluetoothDevice.connected();
+-                Log.w(TAG, "Connected to GATT server.");
++                Log.w(TAG, "onConnectionStateChange: Connected to GATT server.");
+                 mBluetoothGatt.discoverServices();
+             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                 mConnectionState = STATE_DISCONNECTED;
+                 ActiveBluetoothDevice.disconnected();
+-                Log.w(TAG, "Disconnected from GATT server.");
++                Log.w(TAG, "onConnectionStateChange: Disconnected from GATT server.");
+                 setRetryTimer();
+             }
+         }
+@@ -224,39 +225,95 @@ public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                 BluetoothGattService gattService = mBluetoothGatt.getService(xDripDataService);
+                 if (gattService != null) {
+                     BluetoothGattCharacteristic gattCharacteristic = gattService.getCharacteristic(xDripDataCharacteristic);
+-                    if (gattCharacteristic != null ) {
++                    if (gattCharacteristic != null) {
++                        mCharacteristic = gattCharacteristic;
+                         final int charaProp = gattCharacteristic.getProperties();
+-
+                         if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+                             mBluetoothGatt.setCharacteristicNotification(gattCharacteristic, true);
+                         } else {
+-                            Log.e(TAG, "characteristic " + gattCharacteristic.getUuid() + " doesn't have notify properties");
++                            Log.w(TAG, "onServicesDiscovered: characteristic " + xDripDataCharacteristic + " not found");
+                         }
+                     } else {
+-                        Log.e(TAG, "characteristic " + xDripDataCharacteristic + " not found");
++                        Log.w(TAG, "onServicesDiscovered: service " + xDripDataService + " not found");
+                     }
+-                } else {
+-                    Log.e(TAG, "service " + xDripDataCharacteristic + " not found");
++                    Log.d(TAG, "onServicesDiscovered received success: " + status);
+                 }
++            } else {
++                Log.d(TAG, "onServicesDiscovered received: " + status);
+             }
+         }
+ 
+         @Override
+         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
++            Log.w(TAG, "onCharacteristicChanged entered");
+             final byte[] data = characteristic.getValue();
+-            if (data != null && data.length > 0) { setSerialDataToTransmitterRawData(data, data.length); }
++            if (lastdata != null && data != null && data.length > 0) {
++                if (!Arrays.equals(lastdata, data)) {
++                    Log.v(TAG, "broadcastUpdate: new data.");
++                    setSerialDataToTransmitterRawData(data, data.length);
++                } else if (Arrays.equals(lastdata, data)) {
++                    Log.v(TAG, "broadcastUpdate: duplicate data, ignoring");
++                }
++            } else if (data != null && data.length > 0) {
++                setSerialDataToTransmitterRawData(data, data.length);
++            }
++            lastdata = data;
++        }
++
++        @Override
++        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor,
++                                      int status) {
++            if (status == BluetoothGatt.GATT_SUCCESS) {
++                Log.d(TAG, "onDescriptorWrite: Wrote GATT Descriptor successfully.");
++            } else {
++                Log.d(TAG, "onDescriptorWrite: Error writing GATT Descriptor: " + status);
++            }
+         }
+     };
+ 
++    private boolean sendBtMessage(final ByteBuffer message) {
++        //check mBluetoothGatt is available
++        Log.w(TAG, "sendBtMessage: entered");
++        if (mBluetoothGatt == null) {
++            Log.e(TAG, "sendBtMessage: lost connection");
++            return false;
++        }
++
++        byte[] value = message.array();
++        Log.w(TAG, "sendBtMessage: sending message");
++        mCharacteristic.setValue(value);
++
++        return mBluetoothGatt.writeCharacteristic(mCharacteristic);
++    }
++
++    private Integer convertSrc(final String Src) {
++        Integer res = 0;
++        res |= getSrcValue(Src.charAt(0)) << 20;
++        res |= getSrcValue(Src.charAt(1)) << 15;
++        res |= getSrcValue(Src.charAt(2)) << 10;
++        res |= getSrcValue(Src.charAt(3)) << 5;
++        res |= getSrcValue(Src.charAt(4));
++        return res;
++    }
++
++    private int getSrcValue(char ch) {
++        int i;
++        char[] cTable = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y'};
++        for (i = 0; i < cTable.length; i++) {
++            if (cTable[i] == ch) break;
++        }
++        return i;
++    }
++
+     public boolean connect(final String address) {
+-        Log.w(TAG, "going to connect to device at address" + address);
++        Log.w(TAG, "connect: going to connect to device at address" + address);
+         if (mBluetoothAdapter == null || address == null) {
+-            Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
++            Log.w(TAG, "connect: BluetoothAdapter not initialized or unspecified address.");
+             setRetryTimer();
+             return false;
+         }
+         if (mBluetoothGatt != null) {
+-            Log.w(TAG, "BGatt isnt null, Closing.");
++            Log.w(TAG, "connect: mBluetoothGatt isnt null, Closing.");
+             mBluetoothGatt.close();
+             mBluetoothGatt = null;
+         }
+@@ -266,61 +323,104 @@ public boolean connect(final String address) {
+             setRetryTimer();
+             return false;
+         }
+-        Log.w(TAG, "Trying to create a new connection.");
++        Log.w(TAG, "connect: Trying to create a new connection.");
+         mBluetoothGatt = device.connectGatt(getApplicationContext(), true, mGattCallback);
+         mConnectionState = STATE_CONNECTING;
+         return true;
+     }
+ 
+-    public void disconnect() {
+-        if ( mBluetoothGatt == null) { return; }
+-        mBluetoothGatt.disconnect();
+-        Log.d(TAG, "Gatt Disconnect");
+-    }
+     public void close() {
++        Log.w(TAG, "close: Closing Connection");
+         if (mBluetoothGatt == null) {
+             return;
+         }
+         mBluetoothGatt.close();
+         setRetryTimer();
+         mBluetoothGatt = null;
++        mCharacteristic = null;
+         mConnectionState = STATE_DISCONNECTED;
+     }
+ 
+     public void setSerialDataToTransmitterRawData(byte[] buffer, int len) {
+-        try {
+-            Log.w(TAG, "received some data: " + new String(buffer, 0, len, Charset.forName("ISO-8859-1")));
+-        } catch (Exception ex) {
+-            Log.w(TAG, "received some data!");
+-        }
+-
+-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+-        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+-                "ReceivedReading");
+-        wakeLock.acquire();
+-        try {
+-            beginTransaction();
+-            try {
+-                long timestamp = new Date().getTime();
+-                TransmitterData transmitterData = TransmitterData.create(buffer, len, timestamp);
+-                if (transmitterData != null) {
+-                    Sensor sensor = Sensor.currentSensor();
+-                    if (sensor != null) {
+-                        sensor.latest_battery_level = transmitterData.sensor_battery_level;
+-                        sensor.save();
+-
+-                        BgReading.create(transmitterData.raw_data, transmitterData.raw_data, this, timestamp);
+-                    } else {
+-                        Log.w(TAG, "No Active Sensor, Data only stored in Transmitter Data");
++        long timestamp = new Date().getTime();
++        if (CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
++            Log.w(TAG, "setSerialDataToTransmitterRawData: Dealing with Dexbridge packet!");
++            int DexSrc;
++            int TransmitterID;
++            String TxId;
++            Calendar c = Calendar.getInstance();
++            long secondsNow = c.getTimeInMillis();
++            ByteBuffer tmpBuffer = ByteBuffer.allocate(len);
++            tmpBuffer.order(ByteOrder.LITTLE_ENDIAN);
++            tmpBuffer.put(buffer, 0, len);
++            ByteBuffer txidMessage = ByteBuffer.allocate(6);
++            txidMessage.order(ByteOrder.LITTLE_ENDIAN);
++            if (buffer[0] == 0x07 && buffer[1] == -15) {
++                //We have a Beacon packet.  Get the TXID value and compare with dex_txid
++                Log.w(TAG, "setSerialDataToTransmitterRawData: Received Beacon packet.");
++                //DexSrc starts at Byte 2 of a Beacon packet.
++                DexSrc = tmpBuffer.getInt(2);
++                TxId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("dex_txid", "00000");
++                TransmitterID = convertSrc(TxId);
++                if (TxId.compareTo("00000") != 0 && Integer.compare(DexSrc, TransmitterID) != 0) {
++                    Log.w(TAG, "setSerialDataToTransmitterRawData: TXID wrong.  Expected " + TransmitterID + " but got " + DexSrc);
++                    txidMessage.put(0, (byte) 0x06);
++                    txidMessage.put(1, (byte) 0x01);
++                    txidMessage.putInt(2, TransmitterID);
++                    sendBtMessage(txidMessage);
++                }
++                return;
++            }
++            if (buffer[0] == 0x11 && buffer[1] == 0x00) {
++                //we have a data packet.  Check to see if the TXID is what we are expecting.
++                Log.w(TAG, "setSerialDataToTransmitterRawData: Received Data packet");
++                //make sure we are not processing a packet we already have
++                if (secondsNow - lastPacketTime < 60000) {
++                    Log.v(TAG, "setSerialDataToTransmitterRawData: Received Duplicate Packet.  Exiting.");
++                    return;
++                } else {
++                    lastPacketTime = secondsNow;
++                }
++                if (len >= 0x11) {
++                    //DexSrc starts at Byte 12 of a data packet.
++                    DexSrc = tmpBuffer.getInt(12);
++                    TxId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("dex_txid", "00000");
++                    TransmitterID = convertSrc(TxId);
++                    if (Integer.compare(DexSrc, TransmitterID) != 0) {
++                        Log.w(TAG, "TXID wrong.  Expected " + TransmitterID + " but got " + DexSrc);
++                        txidMessage.put(0, (byte) 0x06);
++                        txidMessage.put(1, (byte) 0x01);
++                        txidMessage.putInt(2, TransmitterID);
++                        sendBtMessage(txidMessage);
+                     }
++                    PreferenceManager.getDefaultSharedPreferences(mContext).edit().putInt("bridge_battery", ByteBuffer.wrap(buffer).get(11)).apply();
++                    //All is OK, so process it.
++                    //first, tell the wixel it is OK to sleep.
++                    Log.d(TAG, "setSerialDataToTransmitterRawData: Sending Data packet Ack, to put wixel to sleep");
++                    ByteBuffer ackMessage = ByteBuffer.allocate(2);
++                    ackMessage.put(0, (byte) 0x02);
++                    ackMessage.put(1, (byte) 0xF0);
++                    sendBtMessage(ackMessage);
++                    Log.v(TAG, "setSerialDataToTransmitterRawData: Creating TransmitterData at " + timestamp);
++                    ProcessNewTransmitterData(TransmitterData.create(buffer, len, timestamp), timestamp);
+                 }
+-                setTransactionSuccessful();
+-            } finally {
+-                endTransaction();
+             }
+-        } finally {
+-            wakeLock.release();
++        } else {
++            ProcessNewTransmitterData(TransmitterData.create(buffer, len, timestamp), timestamp);
+         }
++    }
++
++    private void ProcessNewTransmitterData(TransmitterData transmitterData, long timestamp) {
++        if (transmitterData != null) {
++            Sensor sensor = Sensor.currentSensor();
++            if (sensor != null) {
++                sensor.latest_battery_level = transmitterData.sensor_battery_level;
++                sensor.save();
+ 
++                BgReading.create(transmitterData.raw_data, transmitterData.filtered_data, this, timestamp);
++            } else {
++                Log.w(TAG, "setSerialDataToTransmitterRawData: No Active Sensor, Data only stored in Transmitter Data");
++            }
++        }
+     }
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/MongoWrapper.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/MongoWrapper.java
+index 96019ba..0a83674 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/MongoWrapper.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/MongoWrapper.java
+@@ -132,13 +132,13 @@ public boolean WriteToMongo(BasicDBObject bdbo)
+              }
+ 
+         } catch (UnknownHostException e) {
+-            Log.e(TAG, "ReadFromMongo: cought UnknownHostException! ", e);
++            Log.e(TAG, "ReadFromMongo: caught UnknownHostException! ", e);
+             return null;
+         } catch (MongoException e) {
+-            Log.e(TAG, "ReadFromMongo: cought MongoException! " , e);
++            Log.e(TAG, "ReadFromMongo: caught MongoException! " , e);
+             return trd_list;
+         } catch (Exception e) {
+-  		      Log.e(TAG, "ReadFromMongo: cought Exception! " , e);
++  		      Log.e(TAG, "ReadFromMongo: caught Exception! " , e);
+   		      closeMongoDb();
+  			return null;
+  		}finally {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/SyncService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/SyncService.java
+index 691464d..dbc93ac 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/SyncService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/SyncService.java
+@@ -1,6 +1,7 @@
+ package com.eveningoutpost.dexdrip.Services;
+ 
+ import android.app.AlarmManager;
++import android.app.IntentService;
+ import android.app.PendingIntent;
+ import android.app.Service;
+ import android.content.Context;
+@@ -23,33 +24,22 @@
+ import java.util.Calendar;
+ import java.util.List;
+ 
+-public class SyncService extends Service {
++public class SyncService extends IntentService {
+     int mStartMode;
+     private Context mContext;
+     private Boolean enableRESTUpload;
+     private Boolean enableMongoUpload;
+     private SharedPreferences prefs;
+ 
+-    @Override
+-    public void onCreate() {
+-        Log.w("SYNC SERVICE:", "STARTING SERVICE");
+-    }
+-
+-    @Override
+-    public int onStartCommand(Intent intent, int flags, int startId) {
+-        attemptSend();
+-        return START_STICKY;
++    public SyncService() {
++        super("SyncService");
+     }
+ 
+     @Override
+-    public void onDestroy() {
++    protected void onHandleIntent(Intent intent) {
++        Log.w("SYNC SERVICE:", "STARTING INTENT SERVICE");
+         setRetryTimer();
+-        Log.w("SYNC SERVICE", "SERVICE STOPPED");
+-    }
+-
+-    @Override
+-    public IBinder onBind(Intent intent) {
+-        throw new UnsupportedOperationException("Not yet implemented");
++        attemptSend();
+     }
+ 
+     public void attemptSend() {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+index 2c41323..3438025 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+@@ -297,6 +297,8 @@ public String unitized_string(double value) {
+                 return df.format(value);
+             } else {
+                 df.setMaximumFractionDigits(1);
++                //next line ensures mmol/l value is XX.x always.  Required by PebbleSync, and probably not a bad idea.
++                df.setMinimumFractionDigits(1);
+                 return df.format(mmolConvert(value));
+             }
+         } else if (value > 12) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java
+index 11824fd..d733bff 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java
+@@ -113,9 +113,8 @@ public static void addToQueue(BgReading bgReading, String operation_type, Contex
+                 context.sendBroadcast(intent, Intents.RECEIVER_PERMISSION);
+             }
+ 
+-            if (prefs.getBoolean("broadcast_to_pebble", false)) {
+-                PebbleSync pebbleSync = new PebbleSync();
+-                pebbleSync.sendData(context, bgReading);
++            if(prefs.getBoolean("broadcast_to_pebble", false)) {
++                context.startService(new Intent(context, PebbleSync.class));
+             }
+ 
+             if (prefs.getBoolean("share_upload", false)) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
+index 1e09358..d3d6a19 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
+@@ -19,7 +19,7 @@
+  */
+ public class CollectionServiceStarter {
+     private Context mContext;
+-    
++
+     private final static String TAG = CollectionServiceStarter.class.getSimpleName();
+ 
+     public static boolean isBTWixel(Context context) {
+@@ -30,6 +30,14 @@ public static boolean isBTWixel(Context context) {
+         }
+         return false;
+     }
++    public static boolean isDexbridgeWixel(Context context) {
++        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
++        String collection_method = prefs.getString("dex_collection_method", "DexbridgeWixel");
++        if(collection_method.compareTo("DexbridgeWixel") == 0) {
++            return true;
++        }
++        return false;
++    }
+     public static boolean isBTShare(Context context) {
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+         String collection_method = prefs.getString("dex_collection_method", "BluetoothWixel");
+@@ -57,7 +65,7 @@ public void start(Context context) {
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+         String collection_method = prefs.getString("dex_collection_method", "BluetoothWixel");
+ 
+-        if(isBTWixel(context)) {
++        if(isBTWixel(context)||isDexbridgeWixel(context)) {
+             Log.d("DexDrip", "Starting bt wixel collector");
+             stopWifWixelThread();
+             stopBtShareService();
+@@ -73,19 +81,22 @@ public void start(Context context) {
+             stopWifWixelThread();
+             startBtShareService();
+         }
++        if(prefs.getBoolean("broadcast_to_pebble", false)){
++            startPebbleSyncService();
++        }
+         Log.d(TAG, collection_method);
+-        
++
+        // Start logging to logcat
+-        String filePath = Environment.getExternalStorageDirectory() + "/xdriplogcat.txt";
+-        try {
+-            String[] cmd = { "/system/bin/sh", "-c", "ps | grep logcat  || logcat -f " + filePath + 
+-                    " -v threadtime AlertPlayer:V com.eveningoutpost.dexdrip.Services.WixelReader:V *:E " };
+-            Runtime.getRuntime().exec(cmd);
+-        } catch (IOException e2) {
+-            Log.e(TAG, "running logcat failed, is the device rooted?", e2);
++        if(prefs.getBoolean("store_logs",false)) {
++            String filePath = Environment.getExternalStorageDirectory() + "/xdriplogcat.txt";
++            try {
++                String[] cmd = {"/system/bin/sh", "-c", "ps | grep logcat  || logcat -f " + filePath +
++                        " -v threadtime AlertPlayer:V com.eveningoutpost.dexdrip.Services.WixelReader:V *:E "};
++                Runtime.getRuntime().exec(cmd);
++            } catch (IOException e2) {
++                Log.e(TAG, "running logcat failed, is the device rooted?", e2);
++            }
+         }
+-        // Make sure that we have the 55 low allert.
+-        AlertType.CreateStaticAlerts();
+     }
+ 
+     public CollectionServiceStarter(Context context) {
+@@ -110,12 +121,17 @@ private void stopBtWixelService() {
+         Log.d(TAG, "stopping bt wixel service");
+         mContext.stopService(new Intent(mContext, DexCollectionService.class));
+     }
++
+     private void startBtShareService() {
+         Log.d(TAG, "starting bt share service");
+         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+             mContext.startService(new Intent(mContext, DexShareCollectionService.class));
+         }
+     }
++    private void startPebbleSyncService() {
++        Log.d(TAG, "starting PebbleSync service");
++        mContext.startService(new Intent(mContext, PebbleSync.class));
++    }
+     private void stopBtShareService() {
+         Log.d(TAG, "stopping bt share service");
+         mContext.stopService(new Intent(mContext, DexShareCollectionService.class));
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/ForegroundServiceStarter.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/ForegroundServiceStarter.java
+index 7ffc1c7..2ac6441 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/ForegroundServiceStarter.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/ForegroundServiceStarter.java
+@@ -2,6 +2,7 @@
+ 
+ import android.app.Service;
+ import android.content.Context;
++import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.os.Handler;
+ import android.os.Looper;
+@@ -32,9 +33,7 @@ public void start() {
+             mHandler.post(new Runnable() {
+                 @Override
+                 public void run() {
+-                    Notifications notification = Notifications.getInstance(mContext);
+-                    notification.ReadPerfs(mContext);
+-                    mService.startForeground(notification.ongoingNotificationId, notification.createOngoingNotification(new BgGraphBuilder(mContext)));
++                    mService.startForeground(new Notifications().ongoingNotificationId, new Notifications().createOngoingNotification(new BgGraphBuilder(mContext), mContext));
+                 }
+             });
+         }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
+index 2be0ddf..790f123 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
+@@ -24,6 +24,7 @@ public void performAll() {
+ 
+     private void migrateBGAlerts() {
+         // Migrate away from old style notifications to Tzachis new Alert system
++        AlertType.CreateStaticAlerts();
+         if(prefs.getBoolean("bg_notifications", true)){
+             double highMark = Double.parseDouble(prefs.getString("highValue", "170"));
+             double lowMark = Double.parseDouble(prefs.getString("lowValue", "70"));
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+index 5f8feb1..c26e2d7 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+@@ -2,6 +2,7 @@
+ 
+ import android.app.AlarmManager;
+ import android.annotation.TargetApi;
++import android.app.IntentService;
+ import android.app.Notification;
+ import android.app.NotificationManager;
+ import android.app.PendingIntent;
+@@ -35,6 +36,7 @@
+ import com.eveningoutpost.dexdrip.Models.UserNotification;
+ import com.eveningoutpost.dexdrip.R;
+ import com.eveningoutpost.dexdrip.Sensor;
++import com.eveningoutpost.dexdrip.Services.MissedReadingService;
+ 
+ import java.util.Date;
+ import java.util.List;
+@@ -42,7 +44,7 @@
+ /**
+  * Created by stephenblack on 11/28/14.
+  */
+-public class Notifications {
++public class Notifications extends IntentService {
+     public static final long[] vibratePattern = {0,1000,300,1000,300,1000};
+     public static boolean bg_notifications;
+     public static boolean bg_ongoing;
+@@ -76,22 +78,22 @@
+     public static final int exportAlertNotificationId = 006;
+     public static final int uncleanAlertNotificationId = 007;
+     public static final int missedAlertNotificationId = 010;
+-    final static int callbackPeriod = 60000;
++    final static int callbackPeriod = 60000 * 1;
+ 
+     SharedPreferences prefs;
+ 
+-    private static Notifications instance = null;
+-    protected Notifications() {
+-       // Exists only to defeat instantiation.
+-    }
+-    public static Notifications getInstance(Context context) {
+-       if(instance == null) {
+-          instance = new Notifications();
+-          instance.ArmTimer(context, callbackPeriod);
+-       }
+-       return instance;
++    public Notifications() {
++        super("Notifications");
++        Log.w("Notifications", "Running Notifications Intent Service");
+     }
+ 
++    @Override
++    protected void onHandleIntent(Intent intent) {
++        Log.d("Notifications", "Running Notifications Intent Service");
++        ReadPerfs(getApplicationContext());
++        notificationSetter(getApplicationContext());
++        periodicTimer(getApplicationContext());
++    }
+ 
+     public void ReadPerfs(Context context) {
+         mContext = context;
+@@ -119,8 +121,6 @@ public void ReadPerfs(Context context) {
+ 
+     public void FileBasedNotifications(Context context) {
+         ReadPerfs(context);
+-
+-        BgGraphBuilder bgGraphBuilder = new BgGraphBuilder(context);
+         Sensor sensor = Sensor.currentSensor();
+ 
+         BgReading bgReading = BgReading.last();
+@@ -191,7 +191,6 @@ public void FileBasedNotifications(Context context) {
+         } else {
+             AlertPlayer.getPlayer().stopAlert(context, true, false);
+         }
+-
+     }
+ /*
+  * *****************************************************************************************************************
+@@ -207,8 +206,6 @@ public void notificationSetter(Context context) {
+         FileBasedNotifications(context);
+ 
+         BgGraphBuilder bgGraphBuilder = new BgGraphBuilder(context);
+-        double high = bgGraphBuilder.highMark;
+-        double low = bgGraphBuilder.lowMark;
+         Sensor sensor = Sensor.currentSensor();
+ 
+         List<BgReading> bgReadings = BgReading.latest(3);
+@@ -219,21 +216,6 @@ public void notificationSetter(Context context) {
+         if (bg_ongoing && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)) {
+             bgOngoingNotification(bgGraphBuilder);
+         }
+-        if (bg_notifications && sensor != null) {
+-            if (bgGraphBuilder.unitized(bgReading.calculated_value) >= high || bgGraphBuilder.unitized(bgReading.calculated_value) <= low) {
+-                if(bgReading.calculated_value > 14) {
+-                    if (bgReading.hide_slope) {
+-                        bgAlert(bgReading.displayValue(mContext), "");
+-                    } else {
+-                        bgAlert(bgReading.displayValue(mContext), BgReading.slopeArrow(bgReading.calculated_value_slope));
+-                    }
+-                }
+-            } else {
+-                clearBgAlert();
+-            }
+-        } else {
+-            clearAllBgNotifications();
+-        }
+ 
+         if (calibration_notifications) {
+             if (bgReadings.size() >= 3) {
+@@ -243,14 +225,11 @@ public void notificationSetter(Context context) {
+                     } else { clearDoubleCalibrationRequest(); }
+                 } else { clearDoubleCalibrationRequest(); }
+             } else { clearDoubleCalibrationRequest(); }
+-
+             if (CalibrationRequest.shouldRequestCalibration(bgReading) && (new Date().getTime() - bgReadings.get(2).timestamp <= (60000 * 24))) {
+                 extraCalibrationRequest();
+             } else { clearExtraCalibrationRequest(); }
+-
+             if (calibrations.size() >= 1 && Math.abs((new Date().getTime() - calibrations.get(0).timestamp))/(1000*60*60) > 12) {
+                 Log.e("NOTIFICATIONS", "Calibration difference in hours: " + ((new Date().getTime() - calibrations.get(0).timestamp))/(1000*60*60));
+-
+                 calibrationRequest();
+             } else { clearCalibrationRequest(); }
+ 
+@@ -268,23 +247,15 @@ public void periodicTimer(Context context) {
+ 
+     private void  ArmTimer(Context context, int time) {
+         Log.e(TAG, "ArmTimer called");
+-        Intent intent = new Intent();
+-        intent.setAction("com.eveningoutpost.dexdrip.UtilityModels.Notifications");
+-
+-        AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+-        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+-
+-        alarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+-                SystemClock.elapsedRealtime() +
+-                        time, alarmIntent);
+-    }
+-
+-    // TODO: Need to understand when we are calling this...
+-    private void ClearTimer(Context context) {
+-        Intent intent = new Intent();
+-        intent.setAction("com.eveningoutpost.dexdrip.UtilityModels.Notifications");
+-        PendingIntent.getBroadcast(context, 0, intent,
+-                PendingIntent.FLAG_UPDATE_CURRENT).cancel();
++        if(ActiveBgAlert.getOnly() != null) {
++            Intent intent = new Intent(context, Notifications.class);
++            AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
++            PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
++
++            alarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
++                    SystemClock.elapsedRealtime() +
++                            time, alarmIntent);
++        }
+     }
+ 
+     private Bitmap createWearBitmap(long start, long end) {
+@@ -316,7 +287,9 @@ private Notification createExtensionPage(long hours) {
+     }
+ 
+     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+-    public Notification createOngoingNotification(BgGraphBuilder bgGraphBuilder) {
++    public Notification createOngoingNotification(BgGraphBuilder bgGraphBuilder, Context context) {
++        mContext = context;
++        ReadPerfs(mContext);
+         Intent intent = new Intent(mContext, Home.class);
+         List<BgReading> lastReadings = BgReading.latest(2);
+         BgReading lastReading = null;
+@@ -367,20 +340,20 @@ public Notification createOngoingNotification(BgGraphBuilder bgGraphBuilder) {
+         return b.build();
+     }
+ 
+-    public void bgOngoingNotification(final BgGraphBuilder bgGraphBuilder) {
++    private void bgOngoingNotification(final BgGraphBuilder bgGraphBuilder) {
+         mHandler.post(new Runnable() {
+             @Override
+             public void run() {
+                 NotificationManagerCompat
+                         .from(mContext)
+-                        .notify(ongoingNotificationId, createOngoingNotification(bgGraphBuilder));
++                        .notify(ongoingNotificationId, createOngoingNotification(bgGraphBuilder, mContext));
+                 iconBitmap.recycle();
+                 notifiationBitmap.recycle();
+             }
+         });
+     }
+ 
+-    public void soundAlert(String soundUri) {
++    private void soundAlert(String soundUri) {
+         manager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+         int maxVolume = manager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+         currentVolume = manager.getStreamVolume(AudioManager.STREAM_MUSIC);
+@@ -397,27 +370,12 @@ public void onCompletion(MediaPlayer mp) {
+         player.start();
+     }
+ 
+-    private void clearAllBgNotifications() {
+-        notificationDismiss(BgNotificationId);
+-    }
+-
+     private void clearAllCalibrationNotifications() {
+         notificationDismiss(calibrationNotificationId);
+         notificationDismiss(extraCalibrationNotificationId);
+         notificationDismiss(doubleCalibrationNotificationId);
+     }
+ 
+-    private void bgNotificationCreate(String title, String content, Intent intent, int notificationId) {
+-        NotificationCompat.Builder mBuilder = notificationBuilder(title, content, intent);
+-        if (bg_vibrate) { mBuilder.setVibrate(vibratePattern);}
+-        if (bg_lights) { mBuilder.setLights(0xff00ff00, 300, 1000);}
+-        if (bg_sound && !bg_sound_in_silent) { mBuilder.setSound(Uri.parse(bg_notification_sound), AudioAttributes.USAGE_ALARM);}
+-        if (bg_sound && bg_sound_in_silent) { soundAlert(bg_notification_sound);}
+-        NotificationManager mNotifyMgr = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+-        mNotifyMgr.cancel(notificationId);
+-        mNotifyMgr.notify(notificationId, mBuilder.build());
+-    }
+-
+     private void calibrationNotificationCreate(String title, String content, Intent intent, int notificationId) {
+         NotificationCompat.Builder mBuilder = notificationBuilder(title, content, intent);
+         mBuilder.setVibrate(vibratePattern);
+@@ -428,12 +386,6 @@ private void calibrationNotificationCreate(String title, String content, Intent
+         mNotifyMgr.notify(notificationId, mBuilder.build());
+     }
+ 
+-    private void notificationUpdate(String title, String content, Intent intent, int notificationId) {
+-        NotificationCompat.Builder mBuilder = notificationBuilder(title, content, intent);
+-        NotificationManager mNotifyMgr = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+-        mNotifyMgr.notify(notificationId, mBuilder.build());
+-    }
+-
+     private NotificationCompat.Builder notificationBuilder(String title, String content, Intent intent) {
+         return new NotificationCompat.Builder(mContext)
+                 .setSmallIcon(R.drawable.ic_action_communication_invert_colors_on)
+@@ -444,7 +396,6 @@ private void notificationUpdate(String title, String content, Intent intent, int
+ 
+     private PendingIntent notificationIntent(Intent intent){
+         return PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+-
+     }
+ 
+     private void notificationDismiss(int notificationId) {
+@@ -452,31 +403,11 @@ private void notificationDismiss(int notificationId) {
+         mNotifyMgr.cancel(notificationId);
+     }
+ 
+-
+-    private void bgAlert(String value, String slopeArrow) {
+-        UserNotification userNotification = UserNotification.lastBgAlert();
+-
+-        if ((userNotification == null) || (userNotification.timestamp <= ((new Date().getTime()) - (60000 * bg_snooze)))) {
+-            if (userNotification != null) { userNotification.delete(); }
+-            UserNotification newUserNotification = UserNotification.create(value + " " + slopeArrow, "bg_alert");
+-            String title = value + " " + slopeArrow;
+-            String content = "BG LEVEL ALERT: " + value + " " + slopeArrow;
+-            Intent intent = new Intent(mContext, Home.class);
+-            bgNotificationCreate(title, content, intent, BgNotificationId);
+-
+-        } else if ((userNotification != null) && (userNotification.timestamp >= ((new Date().getTime()) - (60000 * bg_snooze))))  {
+-            String title = value + " " + slopeArrow;
+-            String content = "BG LEVEL ALERT: " + value + " " + slopeArrow;
+-            Intent intent = new Intent(mContext, Home.class);
+-            notificationUpdate(title, content, intent, BgNotificationId);
+-        }
+-    }
+-
+     private void calibrationRequest() {
+         UserNotification userNotification = UserNotification.lastCalibrationAlert();
+         if ((userNotification == null) || (userNotification.timestamp <= ((new Date().getTime()) - (60000 * calibration_snooze)))) {
+             if (userNotification != null) { userNotification.delete(); }
+-            UserNotification newUserNotification = UserNotification.create("12 hours since last Calibration", "calibration_alert");
++            UserNotification.create("12 hours since last Calibration", "calibration_alert");
+             String title = "Calibration Needed";
+             String content = "12 hours since last calibration";
+             Intent intent = new Intent(mContext, AddCalibration.class);
+@@ -488,7 +419,7 @@ private void doubleCalibrationRequest() {
+         UserNotification userNotification = UserNotification.lastDoubleCalibrationAlert();
+         if ((userNotification == null) || (userNotification.timestamp <= ((new Date().getTime()) - (60000 * calibration_snooze)))) {
+             if (userNotification != null) { userNotification.delete(); }
+-            UserNotification newUserNotification = UserNotification.create("Double Calibration", "double_calibration_alert");
++            UserNotification.create("Double Calibration", "double_calibration_alert");
+             String title = "Sensor is ready";
+             String content = "Sensor is ready, please enter a double calibration";
+             Intent intent = new Intent(mContext, DoubleCalibrationActivity.class);
+@@ -500,7 +431,7 @@ private void extraCalibrationRequest() {
+         UserNotification userNotification = UserNotification.lastExtraCalibrationAlert();
+         if ((userNotification == null) || (userNotification.timestamp <= ((new Date().getTime()) - (60000 * calibration_snooze)))) {
+             if (userNotification != null) { userNotification.delete(); }
+-            UserNotification newUserNotification = UserNotification.create("Extra Calibration Requested", "extra_calibration_alert");
++            UserNotification.create("Extra Calibration Requested", "extra_calibration_alert");
+             String title = "Calibration Needed";
+             String content = "A calibration entered now will GREATLY increase performance";
+             Intent intent = new Intent(mContext, AddCalibration.class);
+@@ -516,7 +447,7 @@ public static void bgUnclearAlert(Context context) {
+         UserNotification userNotification = UserNotification.lastUnclearReadingsAlert();
+         if ((userNotification == null) || (userNotification.timestamp <= ((new Date().getTime()) - (60000 * otherAlertSnooze)))) {
+             if (userNotification != null) { userNotification.delete(); }
+-            UserNotification newUserNotification = UserNotification.create("Unclear Sensor Readings", "bg_unclear_readings_alert");
++            UserNotification.create("Unclear Sensor Readings", "bg_unclear_readings_alert");
+             Intent intent = new Intent(context, Home.class);
+             NotificationCompat.Builder mBuilder =
+                     new NotificationCompat.Builder(context)
+@@ -542,7 +473,7 @@ public static void bgMissedAlert(Context context) {
+             if (userNotification != null) {
+                 userNotification.delete();
+             }
+-            UserNotification newUserNotification = UserNotification.create("BG Readings Missed", "missing_readings_alert");
++            UserNotification.create("BG Readings Missed", "missing_readings_alert");
+             Intent intent = new Intent(context, Home.class);
+             NotificationCompat.Builder mBuilder =
+                     new NotificationCompat.Builder(context)
+@@ -581,12 +512,4 @@ private void clearExtraCalibrationRequest() {
+             notificationDismiss(extraCalibrationNotificationId);
+         }
+     }
+-
+-    private void clearBgAlert() {
+-        UserNotification userNotification = UserNotification.lastBgAlert();
+-        if (userNotification != null) {
+-            userNotification.delete();
+-            notificationDismiss(BgNotificationId);
+-        }
+-    }
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NotificationsReceiver.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NotificationsReceiver.java
+deleted file mode 100644
+index a04f95c..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NotificationsReceiver.java
++++ /dev/null
+@@ -1,25 +0,0 @@
+-package com.eveningoutpost.dexdrip.UtilityModels;
+-
+-
+-
+-
+-import android.content.BroadcastReceiver;
+-import android.content.Context;
+-import android.content.Intent;
+-import android.util.Log;
+-
+-public class NotificationsReceiver extends BroadcastReceiver {
+-
+-    private final static String TAG = Notifications.class.getSimpleName();
+-    
+-    @Override
+-    public void onReceive(Context context, Intent intent) {
+-
+-        Log.e(TAG, "New onRecieve called Threadid " + Thread.currentThread().getId());
+-
+-        Notifications notifications = Notifications.getInstance(context);
+-        notifications.periodicTimer(context);
+-        Notifications.getInstance(context).FileBasedNotifications(context);
+-
+-    }
+-}
+\ No newline at end of file
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
+index e829e7f..ea9ebd2 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/PebbleSync.java
+@@ -1,22 +1,27 @@
+ package com.eveningoutpost.dexdrip.UtilityModels;
+ 
++import android.app.Service;
++import android.content.BroadcastReceiver;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.content.IntentFilter;
+ import android.os.BatteryManager;
++import android.os.IBinder;
++import android.preference.PreferenceManager;
+ import android.util.Log;
+-
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.getpebble.android.kit.PebbleKit;
+ import com.getpebble.android.kit.util.PebbleDictionary;
+ 
+ import java.util.Date;
++import java.util.TimeZone;
+ import java.util.UUID;
+ 
+ /**
+  * Created by THE NIGHTSCOUT PROJECT CONTRIBUTORS (and adapted to fit the needs of this project)
+  */
+-public class PebbleSync {
++public class PebbleSync extends Service {
++    private final static String TAG = PebbleSync.class.getSimpleName();
+     //    CGM_ICON_KEY = 0x0,		// TUPLE_CSTRING, MAX 2 BYTES (10)
+     //    CGM_BG_KEY = 0x1,		// TUPLE_CSTRING, MAX 4 BYTES (253 OR 22.2)
+     //    CGM_TCGM_KEY = 0x2,		// TUPLE_INT, 4 BYTES (CGM TIME)
+@@ -36,24 +41,89 @@
+     private Context mContext;
+     private BgGraphBuilder bgGraphBuilder;
+     private BgReading mBgReading;
++    private static int lastTransactionId;
++    BroadcastReceiver newSavedBgReceiver;
++
++    @Override
++    public void onCreate() {
++        super.onCreate();
++        mContext = getApplicationContext();
++        bgGraphBuilder = new BgGraphBuilder(mContext);
++        mBgReading = BgReading.last();
++        init();
++    }
++
++    @Override
++    public int onStartCommand(Intent intent, int flags, int startId) {
++        if(!PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("broadcast_to_pebble", false)) {
++            stopSelf();
++            return START_NOT_STICKY;
++        }
++        Log.w(TAG, "STARTING SERVICE");
++        sendData();
++        return START_STICKY;
++    }
++    @Override
++    public void onDestroy() {
++        Log.d(TAG,"onDestroy called");
++        super.onDestroy();
++        if(newSavedBgReceiver != null) {
++            unregisterReceiver(newSavedBgReceiver);
++        }
++    }
++    @Override
++    public IBinder onBind(Intent intent) {
++        throw new UnsupportedOperationException("Not yet implemented");
++    }
++
++    private void init() {
++        Log.i(TAG, "Initialising...");
++        Log.i(TAG, "configuring PebbleDataReceiver");
++
++        PebbleKit.registerReceivedDataHandler(mContext, new PebbleKit.PebbleDataReceiver(PEBBLEAPP_UUID) {
++            @Override
++            public void receiveData(final Context context, final int transactionId, final PebbleDictionary data) {
++                Log.d(TAG, "receiveData: transactionId is " + String.valueOf(transactionId));
++                if (lastTransactionId == 0 || transactionId != lastTransactionId) {
++                    lastTransactionId = transactionId;
++                    Log.d(TAG, "Received Query. data: " + data.size());
++                    PebbleKit.sendAckToPebble(context, transactionId);
++                    sendData();
++                }
++            }
++        });
++    }
+ 
+     public PebbleDictionary buildDictionary() {
+         PebbleDictionary dictionary = new PebbleDictionary();
++        TimeZone tz = TimeZone.getDefault();
++        Date now = new Date();
++        int offsetFromUTC = tz.getOffset(now.getTime());
++        Log.v(TAG, "buildDictionary: slopeOrdinal-" + slopeOrdinal() + " bgReading-" + bgReading() + " now-"+ (int) now.getTime()/1000 + " bgTime-" + (int) (mBgReading.timestamp / 1000) + " phoneTime-" + (int) (new Date().getTime() / 1000) + " bgDelta-" + bgDelta());
+         dictionary.addString(ICON_KEY, slopeOrdinal());
+         dictionary.addString(BG_KEY, bgReading());
+-        dictionary.addUint32(RECORD_TIME_KEY, (int) (mBgReading.timestamp / 1000));
+-        dictionary.addUint32(PHONE_TIME_KEY, (int) (new Date().getTime() / 1000));
++        dictionary.addUint32(RECORD_TIME_KEY, (int) (((mBgReading.timestamp + offsetFromUTC) / 1000)));
++        dictionary.addUint32(PHONE_TIME_KEY, (int) ((new Date().getTime() + offsetFromUTC) / 1000));
+         dictionary.addString(BG_DELTA_KEY, bgDelta());
+-        dictionary.addString(UPLOADER_BATTERY_KEY, phoneBattery());
+-        dictionary.addString(NAME_KEY, "xDrip");
++        if(PreferenceManager.getDefaultSharedPreferences(mContext).getString("dex_collection_method", "DexbridgeWixel").compareTo("DexbridgeWixel")==0) {
++            dictionary.addString(UPLOADER_BATTERY_KEY, bridgeBatteryString());
++            dictionary.addString(NAME_KEY, "Bridge");
++        } else {
++            dictionary.addString(UPLOADER_BATTERY_KEY, phoneBattery());
++            dictionary.addString(NAME_KEY, "Phone");
++        }
+         return dictionary;
+     }
+ 
+-    public void sendData(Context context, BgReading bgReading){
+-        mContext = context;
+-        bgGraphBuilder = new BgGraphBuilder(mContext);
++    public String bridgeBatteryString() {
++        return String.format("%d", PreferenceManager.getDefaultSharedPreferences(mContext).getInt("bridge_battery", 0));
++    }
++
++    public void sendData(){
+         mBgReading = BgReading.last();
+-        sendDownload(buildDictionary());
++        if(mBgReading != null) {
++            sendDownload(buildDictionary());
++        }
+     }
+ 
+     public String bgReading() {
+@@ -61,11 +131,15 @@ public String bgReading() {
+     }
+ 
+     public String bgDelta() {
+-        String deltaString = bgGraphBuilder.unitized_string((int)(mBgReading.calculated_value_slope * (5 * 60 * 1000)));
+-        if(mBgReading.calculated_value_slope > 0.1) {
++        String deltaString;
++        if((PreferenceManager.getDefaultSharedPreferences(mContext).getString("units","mg/dl").compareTo("mg/dl") == 0)) {
++            deltaString = String.format("%.0f", mBgReading.calculated_value_slope * 360000);
++        } else {
++            deltaString = String.format("%.1f", (mBgReading.calculated_value_slope * 360000)*Constants.MGDL_TO_MMOLL);
++        }
++        Log.v(TAG,"bgDelta: "+ deltaString);
++        if(Float.valueOf(deltaString) > 0) {
+             return ("+"+deltaString);
+-        } else if(mBgReading.calculated_value_slope > -0.1 && mBgReading.calculated_value_slope < 0.1) {
+-            return "0";
+         } else {
+             return deltaString;
+         }
+@@ -82,7 +156,7 @@ public String bgUnit() {
+     public void sendDownload(PebbleDictionary dictionary) {
+         if (PebbleKit.isWatchConnected(mContext)) {
+             if (dictionary != null && mContext != null) {
+-                Log.d("PEBBLE PUSHER", "Sending data to pebble");
++                Log.d(TAG, "sendDownload: Sending data to pebble");
+                 PebbleKit.sendDataToPebble(mContext, PEBBLEAPP_UUID, dictionary);
+             }
+         }
+@@ -92,9 +166,7 @@ public int getBatteryLevel() {
+         Intent batteryIntent = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+         int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+         int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+-        if(level == -1 || scale == -1) {
+-            return 50;
+-        }
++        if(level == -1 || scale == -1) { return 50; }
+         return (int)(((float)level / (float)scale) * 100.0f);
+     }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+index ca4ee22..ed7ba9d 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+@@ -1,6 +1,7 @@
+ package com.eveningoutpost.dexdrip.utils;
+ 
+ import android.content.Context;
++import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.content.res.Configuration;
+ import android.media.Ringtone;
+@@ -22,6 +23,7 @@
+ import com.eveningoutpost.dexdrip.R;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.ForegroundServiceStarter;
++import com.eveningoutpost.dexdrip.UtilityModels.PebbleSync;
+ 
+ import java.util.List;
+ 
+@@ -152,23 +154,22 @@ public void onCreate(Bundle savedInstanceState) {
+             bindPreferenceSummaryToValue(findPreference("cloud_storage_mongodb_device_status_collection"));
+             bindPreferenceSummaryToValue(findPreference("cloud_storage_api_base"));
+ 
+-
+             addPreferencesFromResource(R.xml.pref_advanced_settings);
+ 
+-
+             final Preference collectionMethod = findPreference("dex_collection_method");
+             final Preference runInForeground = findPreference("run_service_in_foreground");
+             final Preference wifiRecievers = findPreference("wifi_recievers_addresses");
+             final Preference predictiveBG = findPreference("predictive_bg");
+             final Preference interpretRaw = findPreference("interpret_raw");
+             final Preference shareKey = findPreference("share_key");
++            final Preference transmitterId = findPreference("dex_txid");
++            final Preference pebbleSync = findPreference("broadcast_to_pebble");
+             final PreferenceCategory collectionCategory = (PreferenceCategory) findPreference("collection_category");
+             final PreferenceCategory otherCategory = (PreferenceCategory) findPreference("other_category");
+             final PreferenceScreen calibrationAlertsScreen = (PreferenceScreen) findPreference("calibration_alerts_screen");
+             final PreferenceCategory alertsCategory = (PreferenceCategory) findPreference("alerts_category");
+             prefs =  getPreferenceManager().getDefaultSharedPreferences(getActivity());
+             Log.d("PREF", prefs.getString("dex_collection_method", "BluetoothWixel"));
+-
+             if(prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("DexcomShare") != 0) {
+                 collectionCategory.removePreference(shareKey);
+                 otherCategory.removePreference(interpretRaw);
+@@ -178,12 +179,30 @@ public void onCreate(Bundle savedInstanceState) {
+                 alertsCategory.removePreference(calibrationAlertsScreen);
+                 prefs.edit().putBoolean("calibration_notifications", false).apply();
+             }
+-            if(prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("BluetoothWixel") != 0 && prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("DexcomShare") != 0) {
++
++            if(prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("BluetoothWixel") != 0 && prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("DexcomShare") != 0 && prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("DexbridgeWixel") != 0) {
+                 collectionCategory.removePreference(runInForeground);
+             }
++
+             if(prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("WifiWixel") != 0) {
+                 collectionCategory.removePreference(wifiRecievers);
+             }
++
++            if(prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("DexbridgeWixel") != 0) {
++                collectionCategory.removePreference(transmitterId);
++            }
++            pebbleSync.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
++                @Override
++                public boolean onPreferenceChange(Preference preference, Object newValue) {
++                    Context context = preference.getContext();
++                    if ((Boolean) newValue) {
++                        context.startService(new Intent(context, PebbleSync.class));
++                    } else {
++                        context.stopService(new Intent(context, PebbleSync.class));
++                    }
++                    return true;
++                }
++            });
+             bindPreferenceSummaryToValue(collectionMethod);
+             bindPreferenceSummaryToValue(shareKey);
+             bindPreferenceSummaryToValue(wifiRecievers);
+@@ -202,16 +221,25 @@ public boolean onPreferenceChange(Preference preference, Object newValue) {
+                         alertsCategory.removePreference(calibrationAlertsScreen);
+                         prefs.edit().putBoolean("calibration_notifications", false).apply();
+                     }
+-                    if(((String) newValue).compareTo("BluetoothWixel") != 0 && ((String) newValue).compareTo("DexcomShare") != 0) {
++
++                    if(((String) newValue).compareTo("BluetoothWixel") != 0 && ((String) newValue).compareTo("DexcomShare") != 0 && ((String) newValue).compareTo("DexbridgeWixel") != 0) {
+                         collectionCategory.removePreference(runInForeground);
+                     } else {
+                         collectionCategory.addPreference(runInForeground);
+                     }
++
+                     if(((String) newValue).compareTo("WifiWixel") != 0) {
+                         collectionCategory.removePreference(wifiRecievers);
+                     } else {
+                         collectionCategory.addPreference(wifiRecievers);
+                     }
++
++                    if(((String) newValue).compareTo("DexbridgeWixel") != 0) {
++                        collectionCategory.removePreference(transmitterId);
++                    } else {
++                        collectionCategory.addPreference(transmitterId);
++                    }
++
+                     String stringValue = newValue.toString();
+                     if (preference instanceof ListPreference) {
+                         ListPreference listPreference = (ListPreference) preference;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/widgetUpdateService.java b/app/src/main/java/com/eveningoutpost/dexdrip/widgetUpdateService.java
+index d941ffb..43d0296 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/widgetUpdateService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/widgetUpdateService.java
+@@ -68,6 +68,8 @@ public void setFailoverTimer() { //Keep it alive!
+             Calendar calendar = Calendar.getInstance();
+             AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+             alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, widgetUpdateService.class), 0));
++        } else {
++            stopSelf();
+         }
+     }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/xdrip.java b/app/src/main/java/com/eveningoutpost/dexdrip/xdrip.java
+index 8f91b80..ca17fb8 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/xdrip.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/xdrip.java
+@@ -41,6 +41,6 @@ public void onCreate() {
+         super.onCreate();
+         //Fabric.with(this, new Crashlytics());
+         // The following line triggers the initialization of ACRA
+-        // ACRA.init(this);
++        //ACRA.init(this);
+     }
+ }
+diff --git a/app/src/main/res/layout/activity_home.xml b/app/src/main/res/layout/activity_home.xml
+index db2a857..db0deeb 100644
+--- a/app/src/main/res/layout/activity_home.xml
++++ b/app/src/main/res/layout/activity_home.xml
+@@ -58,6 +58,18 @@
+                     android:paddingEnd="20dp"
+                     android:textSize="50dp"
+                     android:paddingTop="0dp" />
++
++                <TextView
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:textAppearance="?android:attr/textAppearanceSmall"
++                    android:text="100%"
++                    android:id="@+id/textBridgeBattery"
++                    android:textStyle="normal"
++                    android:textSize="12sp"
++                    android:inputType="none"
++                    android:layout_below="@+id/notices"
++                    android:layout_alignParentStart="true" />
+             </RelativeLayout>
+ 
+             <lecho.lib.hellocharts.view.PreviewLineChartView
+diff --git a/app/src/main/res/values/arrays.xml b/app/src/main/res/values/arrays.xml
+index 664513a..ce7717a 100644
+--- a/app/src/main/res/values/arrays.xml
++++ b/app/src/main/res/values/arrays.xml
+@@ -2,12 +2,14 @@
+ <resources>
+     <string-array name="DexCollectionMethods">
+         <item>Bluetooth Wixel</item>
++        <item>Dexbridge</item>
+         <item>Wifi Wixel</item>
+         <item>DexcomShare</item>
+     </string-array>
+ 
+     <string-array name="DexCollectionMethodValues">
+         <item>BluetoothWixel</item>
++        <item>DexbridgeWixel</item>
+         <item>WifiWixel</item>
+         <item>DexcomShare</item>
+     </string-array>
+diff --git a/app/src/main/res/xml/pref_advanced_settings.xml b/app/src/main/res/xml/pref_advanced_settings.xml
+index 48ab827..4a4de5b 100644
+--- a/app/src/main/res/xml/pref_advanced_settings.xml
++++ b/app/src/main/res/xml/pref_advanced_settings.xml
+@@ -9,12 +9,12 @@
+             android:summary="@string/pref_summary_broadcast_enabled"
+             android:defaultValue="false" >
+         </SwitchPreference>
+-        <!--<SwitchPreference-->
+-            <!--android:title="Send to Pebble"-->
+-            <!--android:key="broadcast_to_pebble"-->
+-            <!--android:summary="If you have a pebble watch you can send bg data straight to it"-->
+-            <!--android:defaultValue="false" >-->
+-        <!--</SwitchPreference>-->
++        <SwitchPreference
++            android:title="Send to Pebble"
++            android:key="broadcast_to_pebble"
++            android:summary="If you have a pebble watch you can send bg data straight to it"
++            android:defaultValue="false">
++        </SwitchPreference>
+         <CheckBoxPreference
+             android:key="predictive_bg"
+             android:title="Display Predictive Values"
+@@ -25,5 +25,10 @@
+             android:title="Interpret Raw Values"
+             android:summary="If using Share, DexDrip will show values when they are normally hidden on the receiver."
+             android:defaultValue="false" />
++        <CheckBoxPreference
++            android:key="store_logs"
++            android:title="Store logs for troubleshooting"
++            android:summary="Only enable if you are having trouble with the app."
++            android:defaultValue="false" />
+     </PreferenceCategory>
+ </PreferenceScreen>
+diff --git a/app/src/main/res/xml/pref_data_source.xml b/app/src/main/res/xml/pref_data_source.xml
+index 13ed671..be895cb 100644
+--- a/app/src/main/res/xml/pref_data_source.xml
++++ b/app/src/main/res/xml/pref_data_source.xml
+@@ -21,6 +21,11 @@
+             android:summary="Running in foreground prevents android from killing the service and creates a notification with a trend line."
+             android:defaultValue="false" />
+         <EditTextPreference
++            android:key="dex_txid"
++            android:title="Dexcom Transmitter ID"
++            android:summary="ID of your Dexcom Transmitter, eg 12AB3"
++            android:defaultValue="00000" />
++        <EditTextPreference
+             android:title="List of recievers"
+             android:key="wifi_recievers_addresses"
+             android:dialogTitle="@string/wifi_recievers_dialog_title"
+diff --git a/xDrip-Experimental.iml b/xDrip-Experimental.iml
+index 5669e97..4384bd9 100644
+--- a/xDrip-Experimental.iml
++++ b/xDrip-Experimental.iml
+@@ -14,8 +14,8 @@
+     <exclude-output />
+     <content url="file://$MODULE_DIR$">
+       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+-      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
+       <excludeFolder url="file://$MODULE_DIR$/.gradle" />
+     </content>

@@ -1,0 +1,90 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index c760661..839bb99 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -1,9 +1,5 @@
+ package com.eveningoutpost.dexdrip;
+ 
+-import android.app.Activity;
+-import android.app.NotificationManager;
+-import android.app.PendingIntent;
+-import android.app.Service;
+ import android.content.BroadcastReceiver;
+ import android.content.Context;
+ import android.content.Intent;
+@@ -15,38 +11,32 @@
+ import android.os.AsyncTask;
+ import android.os.Bundle;
+ import android.preference.PreferenceManager;
+-import android.support.v4.app.NotificationCompat;
+ import android.support.v4.widget.DrawerLayout;
+ import android.view.Menu;
+ import android.view.MenuItem;
+ import android.view.View;
+ import android.widget.TextView;
+-import android.widget.Toast;
+ 
+-import com.eveningoutpost.dexdrip.UtilityModels.Constants;
+ import com.eveningoutpost.dexdrip.Models.ActiveBluetoothDevice;
+-import com.eveningoutpost.dexdrip.Models.AlertType;
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.eveningoutpost.dexdrip.Models.Calibration;
+-import com.eveningoutpost.dexdrip.Services.DexCollectionService;
+ import com.eveningoutpost.dexdrip.Services.WixelReader;
+ import com.eveningoutpost.dexdrip.UtilityModels.BgGraphBuilder;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.IdempotentMigrations;
+ import com.eveningoutpost.dexdrip.UtilityModels.Intents;
+-import com.eveningoutpost.dexdrip.UtilityModels.Notifications;
+ import com.eveningoutpost.dexdrip.utils.ActivityWithMenu;
+ import com.eveningoutpost.dexdrip.utils.DatabaseUtil;
++import com.nispok.snackbar.Snackbar;
++import com.nispok.snackbar.SnackbarManager;
++import com.nispok.snackbar.enums.SnackbarType;
++import com.nispok.snackbar.listeners.ActionClickListener;
+ 
+ import java.io.File;
+ import java.text.DecimalFormat;
+ import java.util.Date;
+ import java.util.List;
+ 
+-import com.nispok.snackbar.Snackbar;
+-import com.nispok.snackbar.SnackbarManager;
+-import com.nispok.snackbar.enums.SnackbarType;
+-import com.nispok.snackbar.listeners.ActionClickListener;
+ import lecho.lib.hellocharts.ViewportChangeListener;
+ import lecho.lib.hellocharts.gesture.ZoomType;
+ import lecho.lib.hellocharts.model.Viewport;
+@@ -205,6 +195,7 @@ public void onPause() {
+     public void updateCurrentBgInfo() {
+         final TextView notificationText = (TextView)findViewById(R.id.notices);
+         notificationText.setText("");
++        notificationText.setTextColor(Color.RED);
+         isBTWixel = CollectionServiceStarter.isBTWixel(getApplicationContext());
+         isDexbridgeWixel = CollectionServiceStarter.isDexbridgeWixel(getApplicationContext());
+         isBTShare = CollectionServiceStarter.isBTShare(getApplicationContext());
+@@ -345,6 +336,9 @@ public void displayCurrentInfo() {
+                 currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                 dexbridgeBattery.setPaintFlags(dexbridgeBattery.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+             } else {
++                if (notificationText.getText().length()==0){
++                    notificationText.setTextColor(Color.WHITE);
++                }
+                 if(!predictive){
+                     estimate=lastBgreading.calculated_value;
+                     String stringEstimate = bgGraphBuilder.unitized_string(estimate);
+@@ -359,6 +353,14 @@ public void displayCurrentInfo() {
+                     currentBgValueText.setText( stringEstimate + " " + BgReading.slopeArrow());
+                 }
+             }
++            int minutes = (int)(System.currentTimeMillis() - lastBgreading.timestamp) / (60 * 1000);
++            notificationText.append("\n" + minutes + ((minutes==1)?" Minute ago":" Minutes ago"));
++            List<BgReading> bgReadingList = BgReading.latest(2);
++            if(bgReadingList != null && bgReadingList.size() == 2) {
++                // same logic as in xDripWidget (refactor that to BGReadings to avoid redundancy / later inconsistencies)?
++                notificationText.append("\n"
++                        + bgGraphBuilder.unitizedDeltaString(lastBgreading.calculated_value - bgReadingList.get(1).calculated_value));
++            }
+             if(bgGraphBuilder.unitized(estimate) <= bgGraphBuilder.lowMark) {
+                 currentBgValueText.setTextColor(Color.parseColor("#C30909"));
+             } else if(bgGraphBuilder.unitized(estimate) >= bgGraphBuilder.highMark) {

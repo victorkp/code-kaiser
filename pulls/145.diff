@@ -1,0 +1,50 @@
+diff --git a/app/src/main/res/layout/activity_home.xml b/app/src/main/res/layout/activity_home.xml
+index 0d549e1..9e08ced 100644
+--- a/app/src/main/res/layout/activity_home.xml
++++ b/app/src/main/res/layout/activity_home.xml
+@@ -25,13 +25,23 @@
+                 android:paddingBottom="0dp" tools:context=".Home"
+                 android:layout_marginTop="0dp">
+ 
++
++                <lecho.lib.hellocharts.view.LineChartView
++                    android:id="@+id/chart"
++                    android:layout_width="match_parent"
++                    android:layout_alignParentStart="false"
++                    android:layout_alignParentEnd="true"
++                    android:layout_height="match_parent"
++                    android:layout_marginTop="55dp">
++                </lecho.lib.hellocharts.view.LineChartView>
++
+                 <TextView
+                     android:layout_width="900dp"
+                     android:layout_height="wrap_content"
+                     android:textAppearance="?android:attr/textAppearanceSmall"
+                     android:textColor="#C30909"
+                     android:id="@+id/notices"
+-                    android:background="#212121"
++                    android:background="#40212121"
+                     android:paddingEnd="10dp"
+                     android:paddingStart="10dp"
+                     android:gravity="left|top"
+@@ -39,19 +49,10 @@
+                     android:layout_alignParentTop="true"
+                     android:text="Alerts and messages" />
+ 
+-                <lecho.lib.hellocharts.view.LineChartView
+-                    android:id="@+id/chart"
+-                    android:layout_width="match_parent"
+-                    android:layout_alignParentStart="false"
+-                    android:layout_alignParentEnd="true"
+-                    android:layout_height="match_parent"
+-                    android:layout_marginTop="55dp">
+-                </lecho.lib.hellocharts.view.LineChartView>
+-
+                 <TextView
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+-                    android:background="#212121"
++                    android:background="#40212121"
+                     android:id="@+id/currentBgValueRealTime"
+                     android:gravity="right"
+                     android:layout_alignParentEnd="true"

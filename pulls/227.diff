@@ -1,0 +1,700 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index 988ab9d..44bd68c 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -80,7 +80,7 @@ android {
+     buildToolsVersion "22.0.1"
+ 
+     defaultConfig {
+-        applicationId "com.eveningoutpost.dexdrip"
++        applicationId "com.eveningoutpost.dexdrip2"
+         minSdkVersion 17
+         targetSdkVersion 23
+         versionCode 2
+@@ -92,13 +92,14 @@ android {
+ 
+ dependencies {
+     compile fileTree(dir: 'libs', include: ['*.jar'])
+-    testCompile 'com.squareup.okhttp:mockwebserver:2.5.0'
++    testCompile 'com.squareup.okhttp:mockwebserver:2.6.0'
+     compile 'com.nispok:snackbar:2.10.8'
+     compile 'com.android.support:appcompat-v7:23.1.0'
+-    compile 'com.squareup.okhttp:okhttp:2.5.0'
++    compile 'com.squareup.okhttp:okhttp:2.6.0'
+     compile 'com.google.code.gson:gson:2.3'
+     compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
+     compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
++    compile 'com.squareup.okhttp:logging-interceptor:2.6.0' 
+     compile 'com.getpebble:pebblekit:3.0.0'
+     compile 'io.reactivex:rxjava:1.0.0'
+     compile 'com.github.lecho:hellocharts-android:v1.5.5'
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 3a8e00b..268d127 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -38,7 +38,7 @@
+ 
+         <provider
+             android:name="com.activeandroid.content.ContentProvider"
+-            android:authorities="com.example"
++            android:authorities="com.example1"
+             android:exported="false" />
+ 
+         <activity
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+index b88c99e..510b6dd 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+@@ -370,6 +370,66 @@ public static BgReading create(double raw_data, double filtered_data, Context co
+ 
+         return bgReading;
+     }
++    
++    public static void create(Context context, double raw_data, double filtered_data, Long timestamp, double calculated_bg) {
++        BgReading bgReading = new BgReading();
++        Sensor sensor = Sensor.currentSensor();
++        if (sensor == null) {
++            Log.w(TAG, "No sensor, ignoring this bg reading");
++            return ;
++        }
++
++        Calibration calibration = Calibration.last();
++        if (calibration == null) {
++            Log.d(TAG, "create: No calibration yet");
++            bgReading.sensor = sensor;
++            bgReading.sensor_uuid = sensor.uuid;
++            bgReading.raw_data = (raw_data / 1000);
++            bgReading.filtered_data = (filtered_data / 1000);
++            bgReading.timestamp = timestamp;
++            bgReading.uuid = UUID.randomUUID().toString();
++            bgReading.calculated_value = calculated_bg;
++            //bgReading.time_since_sensor_started = bgReading.timestamp - sensor.started_at;
++            //bgReading.synced = false;
++            //bgReading.calibration_flag = false;
++
++            bgReading.calculateAgeAdjustedRawValue();
++
++            bgReading.save();
++            bgReading.perform_calculations();
++        } else {
++            Log.d(TAG,"Calibrations, so doing everything bgReading = " + bgReading);
++            bgReading.sensor = sensor;
++            bgReading.sensor_uuid = sensor.uuid;
++            bgReading.calibration = calibration;
++            bgReading.calibration_uuid = calibration.uuid;
++            bgReading.raw_data = (raw_data/1000);
++            bgReading.filtered_data = (filtered_data/1000);
++            bgReading.timestamp = timestamp;
++            bgReading.uuid = UUID.randomUUID().toString();
++            bgReading.calculated_value = calculated_bg;
++            //bgReading.time_since_sensor_started = bgReading.timestamp - sensor.started_at;
++            //bgReading.synced = false;
++
++            bgReading.calculateAgeAdjustedRawValue();
++
++            if (bgReading.calculated_value < 10) {
++                bgReading.calculated_value = 9;
++                bgReading.hide_slope = true;
++            } else {
++                bgReading.calculated_value = Math.min(400, Math.max(39, bgReading.calculated_value));
++            }
++            Log.i(TAG, "NEW VALUE CALCULATED AT: " + bgReading.calculated_value);
++
++            bgReading.save();
++            bgReading.perform_calculations();
++            context.startService(new Intent(context, Notifications.class));
++            BgSendQueue.handleNewBgReading(bgReading, "create", context);
++        }
++
++        Log.i("BG GSON: ",bgReading.toS());
++
++    }
+ 
+     public static String activeSlopeArrow() {
+         double slope = (float) (BgReading.activeSlope() * 60000);
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+index 97be135..b15bd17 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+@@ -380,6 +380,29 @@ public static Calibration create(double bg, Context context) {
+         return Calibration.last();
+     }
+ 
++    public static void create(Context context, double bg, long timeStamp, double intercept, double slope, 
++            double estimate_raw_at_time_of_calibration, double slope_confidence , double sensor_confidence, 
++            double raw_timestamp) {
++        Calibration calibration = new Calibration();
++        Sensor sensor = Sensor.currentSensor();
++
++        if (sensor != null) {
++            calibration.sensor = sensor;
++            calibration.bg = bg;
++            calibration.timestamp = timeStamp;
++            calibration.sensor_uuid = sensor.uuid;
++            calibration.uuid = UUID.randomUUID().toString();
++            calibration.intercept = intercept;
++            calibration.slope = slope;
++            calibration.estimate_raw_at_time_of_calibration = estimate_raw_at_time_of_calibration;
++            calibration.slope_confidence = slope_confidence;
++            calibration.sensor_confidence = sensor_confidence;
++            calibration.raw_timestamp = raw_timestamp;
++            calibration.check_in = true;
++            calibration.save();
++        }
++    }
++    
+     public static List<Calibration> allForSensorInLastFiveDays() {
+         Sensor sensor = Sensor.currentSensor();
+         if (sensor == null) { return null; }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/INsRestApi.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/INsRestApi.java
+new file mode 100644
+index 0000000..a3ce75e
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/INsRestApi.java
+@@ -0,0 +1,39 @@
++package com.eveningoutpost.dexdrip.Services;
++
++import java.util.List;
++
++import retrofit.Call;
++import retrofit.http.GET;
++import retrofit.http.Query;
++import retrofit.http.Headers;
++import retrofit.http.Header;
++
++
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutBg;
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutMbg;
++
++public interface INsRestApi {
++    
++    // gets all sgvs
++    @GET("/api/v1/entries.json?find[type][$eq]=sgv")
++    Call<List<NightscoutBg>> getSgv(
++            @Header("Accept") String Accept,
++            @Query("find[date][$gt]") long date,
++            @Query("count") long count
++    );
++    
++    @GET("/api/v1/entries.json?find[type][$eq]=cal")
++    Call<List<NightscoutBg>> getCal(
++            @Header("Accept") String Accept,
++            @Query("find[date][$gt]") long date,
++            @Query("count") long count
++    );
++    
++    @GET("/api/v1/entries.json?find[type][$eq]=mbg")
++    Call<List<NightscoutMbg>> getMbg(
++            //@Header("Authorization") String authorization
++            @Header("Accept") String Accept,
++            @Query("find[date][$gt]") long date,
++            @Query("count") long count
++    );
++}    
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/NsRestApiReader.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/NsRestApiReader.java
+new file mode 100644
+index 0000000..3ed8dcf
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/NsRestApiReader.java
+@@ -0,0 +1,137 @@
++package com.eveningoutpost.dexdrip.Services;
++
++import java.io.IOException;
++import java.util.List;
++
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
++
++import com.google.gson.Gson;
++import com.google.gson.GsonBuilder;
++
++import retrofit.Call;
++import retrofit.Response;
++import retrofit.http.GET;
++import retrofit.http.Query;
++import retrofit.Retrofit;
++import retrofit.GsonConverterFactory;
++
++import com.squareup.okhttp.logging.HttpLoggingInterceptor;
++import com.squareup.okhttp.OkHttpClient;
++
++
++public class NsRestApiReader {
++
++	class NightscoutBg {
++	    double xDrip_raw; // raw_data
++	    double xDrip_filtered; // filtered_data;
++	    Long date; // timestamp
++	    double sgv; // calculated_bg
++	}
++
++	class NightscoutMbg {
++	    Long date; // timestamp
++	    double mbg; // calculated_bg
++	    double xDrip_slope;
++	    double xDrip_intercept;
++	    double xDrip_estimate_raw_at_time_of_calibration;
++	    double xDrip_slope_confidence;
++	    double xDrip_sensor_confidence;
++	    double xDrip_raw_timestamp;
++	}
++	
++	
++    private final static String TAG = NsRestApiReader.class.getName();
++
++	
++	private INsRestApi CreateNsMethods(String baseUrl) {
++        Retrofit retrofit;
++
++        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();  
++        // set your desired log level
++        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
++
++        OkHttpClient httpClient = new OkHttpClient();  
++        // add your other interceptors ...
++
++        // add logging as last interceptor
++        httpClient.interceptors().add(logging);  // <-- this is the important line for logging
++
++        Gson gson = new GsonBuilder().create();
++        retrofit = new Retrofit.Builder()
++        .baseUrl(baseUrl)
++        .addConverterFactory(GsonConverterFactory.create(gson))
++        .client(httpClient)
++        .build();
++
++        return retrofit.create(INsRestApi.class);
++    }
++    
++    
++
++
++    public List<NightscoutMbg> readCalDataFromNs(String baseUrl, String key, long startTime, long maxCount) {
++        INsRestApi methods = CreateNsMethods(baseUrl);
++        List<NightscoutMbg> nightscoutMbgs = null;
++        try {
++        
++            Call<List<NightscoutMbg>> call = methods.getMbg(key,startTime, maxCount); 
++            
++            Response<List<NightscoutMbg>> response = call.execute();
++            if(response == null) {
++                Log.e(TAG,"readBgData  call.execute returned null");
++                return null;
++            }
++            // http://stackoverflow.com/questions/32517114/how-is-error-handling-done-in-retrofit-2-i-can-not-find-the-retrofiterror-clas
++            if(!response.isSuccess() && response.errorBody() != null) {
++                Log.e(TAG,"readBgData  call.execute returned with error " + response.errorBody());
++                return null;
++            }
++            nightscoutMbgs = response.body();
++            //
++        } catch (IOException e ) {
++            Log.e(TAG,"RetrofitError exception was cought", e);
++            return null;
++        }
++        
++        if(nightscoutMbgs == null) {
++            Log.e(TAG,"readBgData returned null");
++            return null;
++        }
++        return nightscoutMbgs;
++    }
++
++    public List<NightscoutBg> readBgDataFromNs(String baseUrl, String key, long startTime, long maxCount) {
++        Log.e(TAG,"readBgData Starting to read from retrofit");
++        INsRestApi methods = CreateNsMethods(baseUrl);
++        List<NightscoutBg> nightscoutBgs = null;
++        try {
++        
++            Call<List<NightscoutBg>> call = methods.getSgv(key, startTime, maxCount); 
++            
++            Response<List<NightscoutBg>> response = call.execute();
++            if(response == null) {
++                Log.e(TAG,"readBgData  call.execute returned null");
++                return null;
++            }
++            // http://stackoverflow.com/questions/32517114/how-is-error-handling-done-in-retrofit-2-i-can-not-find-the-retrofiterror-clas
++            if(!response.isSuccess() && response.errorBody() != null) {
++                Log.e(TAG,"readBgData  call.execute returned with error " + response.errorBody());
++                return null;
++            }
++            nightscoutBgs = response.body();
++            //
++        } catch (IOException e ) {
++            Log.e(TAG,"RetrofitError exception was cought", e);
++            return null;
++        }
++        
++        
++        if(nightscoutBgs == null) {
++            Log.e(TAG,"readBgData returned null");
++            return null;
++        }
++        Log.e(TAG,"retrofit returning a list, size = " + nightscoutBgs.size());
++        return nightscoutBgs;
++    }
++
++}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+index f11f496..12b2bca 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+@@ -10,6 +10,9 @@
+ import com.eveningoutpost.dexdrip.Models.Calibration;
+ import com.eveningoutpost.dexdrip.Models.TransmitterData;
+ import com.eveningoutpost.dexdrip.Models.UserError.Log;
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutBg;
++import com.eveningoutpost.dexdrip.Services.NsRestApiReader.NightscoutMbg;
++import com.eveningoutpost.dexdrip.ShareModels.DexcomShare;
+ import com.eveningoutpost.dexdrip.Sensor;
+ import com.eveningoutpost.dexdrip.utils.BgToSpeech;
+ import com.google.gson.Gson;
+@@ -25,10 +28,22 @@
+ import java.net.InetSocketAddress;
+ import java.net.Socket;
+ import java.net.SocketTimeoutException;
++import java.util.ArrayList;
+ import java.util.Date;
+ import java.util.LinkedList;
+ import java.util.List;
+ import java.util.concurrent.TimeUnit;
++import java.util.ListIterator;
++
++
++import com.google.gson.Gson;
++import com.google.gson.GsonBuilder;
++
++import com.squareup.okhttp.Interceptor;
++import com.squareup.okhttp.logging.HttpLoggingInterceptor;
++import com.squareup.okhttp.OkHttpClient;
++
++
+ 
+ 
+ // Important note, this class is based on the fact that android will always run it one thread, which means it does not
+@@ -432,8 +447,11 @@ public Void doInBackground(String... urls) {
+     }
+     
+     
+-    public void readData()
++    public void readData1()
+     {
++        if(!WixelReader.IsConfigured(mContext)) {
++            return;
++        }
+         Long LastReportedTime = 0L;
+     	TransmitterData lastTransmitterData = TransmitterData.last();
+     	if(lastTransmitterData != null) {
+@@ -453,9 +471,7 @@ public void readData()
+     	Log.d(TAG, "Starting... LastReportedReading " + LastReportedReading);
+     	// try to read one object...
+         TransmitterRawData[] LastReadingArr = null;
+-        if(!WixelReader.IsConfigured(mContext)) {
+-            return;
+-        }
++
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+         String recieversIpAddresses = prefs.getString("wifi_recievers_addresses", "");
+         
+@@ -533,4 +549,115 @@ void readDataFake()
+         setSerialDataToTransmitterRawData(fakedRaw, fakedRaw ,215, new Date().getTime());
+         Log.d(TAG, "returned from setSerialDataToTransmitterRawData " + fakedRaw);
+     }
++    
++    
++    
++    
++    
++
++    public void readData() {
++        final String API_KEY = "application/json api-secret: 6aaafe81264eb79d079caa91bbf25dba379ff6e2"; // probably we can do without the josn. if url contains it
++        final String API_URL = "https://snirdar3.azurewebsites.net";
++        
++        
++        verifySensor();
++        readCalData(API_URL, API_KEY);
++        readBgData(API_URL, API_KEY);
++        
++    }
++    
++    void verifySensor() {
++        Sensor sensor = Sensor.currentSensor();
++        if(sensor != null) {
++            return;
++        }
++        Sensor.create(new Date().getTime());
++    }
++    
++
++
++    private void readCalData(String baseUrl, String key) {
++
++    	NsRestApiReader nsRestApiReader = new NsRestApiReader();
++      Long LastReportedTime = 0L;
++      
++      Calibration lastCalibration = Calibration.last();
++      
++      if(lastCalibration != null) {
++          LastReportedTime = (long)lastCalibration.timestamp;
++      }
++      Log.e(TAG, "readBgData  LastReportedTime = " + LastReportedTime);
++      
++      List<NightscoutMbg> nightscoutMbgs = nsRestApiReader.readCalDataFromNs(baseUrl, key, LastReportedTime, 10 );
++      if(nightscoutMbgs == null) {
++          Log.e(TAG, "readBgDataFromNs returned null");
++          return;
++      }
++      
++      ListIterator<NightscoutMbg> li = nightscoutMbgs.listIterator(nightscoutMbgs.size());
++      long lastInserted = 0;
++      while(li.hasPrevious()) {
++          NightscoutMbg nightscoutMbg = li.previous();
++          Log.e(TAG, "NightscoutMbg " + nightscoutMbg.mbg + " " + nightscoutMbg.date);
++          if(nightscoutMbg.date == lastInserted) {
++            Log.w(TAG, "not inserting calibration, since it seems duplicate ");
++            continue;
++          }
++          if(nightscoutMbg.date < lastInserted) {
++            Log.e(TAG, "not inserting calibratoin, since order is wrong. ");
++            continue;
++          }
++          Calibration.create(mContext, nightscoutMbg.mbg, nightscoutMbg.date, nightscoutMbg.xDrip_intercept, nightscoutMbg.xDrip_slope, nightscoutMbg.xDrip_estimate_raw_at_time_of_calibration,
++                  nightscoutMbg.xDrip_slope_confidence , nightscoutMbg.xDrip_sensor_confidence, nightscoutMbg.xDrip_raw_timestamp);
++          lastInserted = nightscoutMbg.date;
++      }
++  }    
++    
++    
++    private void readBgData(String baseUrl, String key) {
++        
++    	NsRestApiReader nsRestApiReader = new NsRestApiReader();
++        Long LastReportedTime = 0L;
++        TransmitterData lastTransmitterData = TransmitterData.last();
++        if(lastTransmitterData != null) {
++            LastReportedTime = lastTransmitterData.timestamp;
++        }
++        Log.e(TAG, "readBgData  LastReportedTime = " + LastReportedTime);
++        
++        List<NightscoutBg> nightscoutBgs = nsRestApiReader.readBgDataFromNs(baseUrl,key, LastReportedTime, 12 * 24 );
++        if(nightscoutBgs == null) {
++            Log.e(TAG, "readBgDataFromNs returned null");
++            return;
++        }
++        
++        ListIterator<NightscoutBg> li = nightscoutBgs.listIterator(nightscoutBgs.size());
++        long lastInserted = 0;
++        while(li.hasPrevious()) {
++            // also load to other table !!!
++            NightscoutBg nightscoutBg = li.previous();
++            Log.e(TAG, "nightscoutBg " + nightscoutBg.sgv + " " + nightscoutBg.xDrip_raw + " " + mContext);
++            if(nightscoutBg.date == lastInserted) {
++              Log.w(TAG, "not inserting packet, since it seems duplicate ");
++              continue;
++            }
++            if(nightscoutBg.date < lastInserted) {
++              Log.e(TAG, "not inserting packet, since order is wrong. ");
++              continue;
++            }
++            BgReading.create(mContext, nightscoutBg.xDrip_raw * 1000, nightscoutBg.xDrip_filtered * 1000, nightscoutBg.date, nightscoutBg.sgv);
++            TransmitterData.create((int)nightscoutBg.xDrip_raw, 100 /* ??????? */, nightscoutBg.date);
++            lastInserted = nightscoutBg.date;
++        }
++    }
++    
++/*
++ * curl examples
++ * curl -X GET --header "Accept: application/json api-secret: 6aaafe81264eb79d079caa91bbf25dba379ff6e2" "https://snirdar.azurewebsites.net/api/v1/entries/cal?count=122" -k
++ * curl -X GET --header "Accept: application/json api-secret: 6aaafe81264eb79d079caa91bbf25dba379ff6e2" "https://snirdar.azurewebsites.net/api/v1/entries.json?find%5Btype%5D%5B%24eq%5D=cal&count=1" -k 
++ * 
++ * 
++ *
++ */
++    
+ }
++
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java b/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java
+index 843e8e6..c4e6d3b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java
+@@ -229,18 +229,6 @@ public void onClick(View v) {
+                                 :
+                                  + (SnoozeActivity.getTimeFromSnoozeValue(snoozeValue.getValue()))) * 1000 * 60;
+                         prefs.edit().putLong(disableType, disableUntil).apply();
+-                        //check if active bg alert exists and delete it depending on type of alert
+-                        ActiveBgAlert aba = ActiveBgAlert.getOnly();
+-                        if (aba != null) {
+-                            AlertType activeBgAlert = ActiveBgAlert.alertTypegetOnly();
+-                            if (disableType.equalsIgnoreCase("alerts_disabled_until")
+-                                    || (activeBgAlert.above && disableType.equalsIgnoreCase("high_alerts_disabled_until"))
+-                                    || (!activeBgAlert.above && disableType.equalsIgnoreCase("low_alerts_disabled_until"))
+-                                    ) {
+-                                //active bg alert exists which is a type that is being disabled so let's remove it completely from the database
+-                                ActiveBgAlert.ClearData();
+-                            }
+-                        }
+ 
+                         if (disableType.equalsIgnoreCase("alerts_disabled_until")) {
+                             //disabling all , after the Snooze time set, all alarms will be re-enabled, inclusive low and high bg alarms
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+index d83925e..1f846c6 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+@@ -295,29 +295,73 @@ public void notificationSetter(Context context) {
+         }
+     }
+ 
++    private long CalcuatleArmTime(Context ctx, long now) {
++
++      Long wakeTime = Long.MAX_VALUE; // This is the absalute time, not time from now.
++      ActiveBgAlert activeBgAlert = ActiveBgAlert.getOnly();
++      if (activeBgAlert != null) {
++          AlertType alert = AlertType.get_alert(activeBgAlert.alert_uuid);
++          if (alert != null) {
++              wakeTime = activeBgAlert.next_alert_at ;
++              Log.d(TAG , "ArmTimer waking at: "+ new Date(wakeTime) +" in " +  (wakeTime - now)/60000d + " minutes");
++          }
++      }
++      
++      // check snooze ending values
++      long alerts_disabled_until = prefs.getLong("alerts_disabled_until", 0);
++      if (alerts_disabled_until != 0) {
++        wakeTime = Math.min(wakeTime, alerts_disabled_until);
++      }
++      long high_alerts_disabled_until = prefs.getLong("high_alerts_disabled_until", 0);
++      if (high_alerts_disabled_until != 0) {
++        wakeTime = Math.min(wakeTime, high_alerts_disabled_until);
++      }
++
++      long low_alerts_disabled_until = prefs.getLong("low_alerts_disabled_until", 0);
++      if (low_alerts_disabled_until != 0) {
++        wakeTime = Math.min(wakeTime, low_alerts_disabled_until);
++      }
++      
++      // All this requires listeners on snooze changes...
++
++      // check when the first alert should be fired. take care of that ???
++      
++      
++      return wakeTime - now;
++    }
++    
+     private void ArmTimer(Context ctx) {
++        Calendar calendar = Calendar.getInstance();
++        final long now = calendar.getTimeInMillis();
+         Log.d(TAG, "ArmTimer called");
+-        ActiveBgAlert activeBgAlert = ActiveBgAlert.getOnly();
+-        if (activeBgAlert != null) {
+-            AlertType alert = AlertType.get_alert(activeBgAlert.alert_uuid);
+-            if (alert != null) {
+-                Calendar calendar = Calendar.getInstance();
+-                AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-                // sleep longer if the alert is snoozed.
+-                long wakeTime = activeBgAlert.next_alert_at;
+-                Log.d(TAG , "ArmTimer waking at: "+ new Date(wakeTime) +" in " +  (wakeTime - calendar.getTimeInMillis())/60000d + " minutes");
+-                if (wakeIntent != null)
+-                    alarm.cancel(wakeIntent);
+-                wakeIntent = PendingIntent.getService(this, 0, new Intent(this, this.getClass()), 0);
+-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+-                    alarm.setAlarmClock(new AlarmManager.AlarmClockInfo(wakeTime, wakeIntent), wakeIntent);
+-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+-                    alarm.setExact(AlarmManager.RTC_WAKEUP, wakeTime, wakeIntent);
+-                } else
+-                    alarm.set(AlarmManager.RTC_WAKEUP, wakeTime, wakeIntent);
+-            }
++
++        long wakeTime = CalcuatleArmTime(ctx, now);
++        if(wakeTime == Long.MAX_VALUE) {
++          Log.d(TAG , "ArmTimer timer will not br armed");
++          return;
+         }
+-    }
++        
++        if(wakeTime < now ) {
++          Log.e(TAG , "ArmTimer recieved a negative time, will fire in 6 minutes");
++          wakeTime = now + 6 * 60000;
++        }
++        
++        AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
++
++        
++        Log.d(TAG , "ArmTimer waking at: "+ new Date(wakeTime ) +" in " +
++            (wakeTime - now) /60000d + " minutes");
++        if (wakeIntent != null)
++            alarm.cancel(wakeIntent);
++        wakeIntent = PendingIntent.getService(this, 0, new Intent(this, this.getClass()), 0);
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
++            alarm.setAlarmClock(new AlarmManager.AlarmClockInfo(wakeTime, wakeIntent), wakeIntent);
++        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
++            alarm.setExact(AlarmManager.RTC_WAKEUP, wakeTime, wakeIntent);
++        } else {
++            alarm.set(AlarmManager.RTC_WAKEUP, wakeTime, wakeIntent);
++        }
++    }   
+ 
+     private Bitmap createWearBitmap(long start, long end) {
+         return new BgSparklineBuilder(mContext)
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+index e568220..3667fe2 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+@@ -27,6 +27,7 @@
+ import com.eveningoutpost.dexdrip.Services.MissedReadingService;
+ import com.eveningoutpost.dexdrip.R;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
++import com.eveningoutpost.dexdrip.UtilityModels.Notifications;
+ import com.eveningoutpost.dexdrip.UtilityModels.PebbleSync;
+ import com.google.zxing.integration.android.IntentIntegrator;
+ import com.google.zxing.integration.android.IntentResult;
+@@ -470,20 +471,25 @@ public void onClick(DialogInterface dialog, int which) {
+             });
+         }
+ 
+-        private static Preference.OnPreferenceChangeListener sBgMissedAlertsHandler = new Preference.OnPreferenceChangeListener() {
++        private static Preference.OnPreferenceChangeListener sAlertsPreferanceHandler = new Preference.OnPreferenceChangeListener() {
+             @Override
+             public boolean onPreferenceChange(Preference preference, Object newValue) {
++            	// some of the alerts parameters have changed, let's make sure that we don't need to alert.
+                 Context context = preference.getContext();
+                 context.startService(new Intent(context, MissedReadingService.class));
++                context.startService(new Intent(context, Notifications.class));
+                 return true;
+             }
+         };
+ 
+         
+         private void bindBgMissedAlertsListener(){
+-          findPreference("bg_missed_alerts").setOnPreferenceChangeListener(sBgMissedAlertsHandler);
+-          findPreference("bg_missed_minutes").setOnPreferenceChangeListener(sBgMissedAlertsHandler);
+-          findPreference("other_alerts_snooze").setOnPreferenceChangeListener(sBgMissedAlertsHandler);
++          findPreference("bg_missed_alerts").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
++          findPreference("bg_missed_minutes").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
++          findPreference("other_alerts_snooze").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
++          findPreference("alerts_disabled_until").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
++          findPreference("high_alerts_disabled_until").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
++          findPreference("low_alerts_disabled_until").setOnPreferenceChangeListener(sAlertsPreferanceHandler);
+         }
+ 
+     }
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 237d161..5c45523 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -3,7 +3,7 @@
+ 
+     <string name="pref_I_understand_title"> I UNDERSTAND AND AGREE</string>
+     <string name="pref_I_understand_summery">xDrip MUST NOT BE USED TO MAKE MEDICAL DECISIONS. THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. </string>
+-    <string name="app_name">xDrip</string>
++    <string name="app_name">NightwatchPro</string>
+     <string name="hello_world">Hello world!</string>
+     <string name="action_settings">Settings</string>
+     <string name="title_activity_bluetooth_scan">BluetoothScan</string>
+diff --git a/app/src/main/res/xml/pref_notifications.xml b/app/src/main/res/xml/pref_notifications.xml
+index 7970a21..fecabc2 100644
+--- a/app/src/main/res/xml/pref_notifications.xml
++++ b/app/src/main/res/xml/pref_notifications.xml
+@@ -1,3 +1,6 @@
++<!--                 android:targetPackage="@string/package_activity_preferences" -->
++<!--                 http://stackoverflow.com/questions/18924279/specifying-a-targetpackage-for-an-intent-in-an-xml-file-of-a-library-project -->
++
+ <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+     <PreferenceCategory
+         android:title="Alerts and Notifications"

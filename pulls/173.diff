@@ -1,0 +1,102 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java b/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java
+index 6bef3a2..9f2b4e3 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java
+@@ -238,17 +238,6 @@ protected void onCreate(Bundle savedInstanceState) {
+             endHour = AlertType.time2Hours(at.end_time_minutes);
+             endMinute = AlertType.time2Minutes(at.end_time_minutes);
+             alertReraise = at.minutes_between;
+-
+-            if(uuid.equals(AlertType.LOW_ALERT_55)) {
+-                // This is the 55 alert, can not be edited
+-                alertText.setKeyListener(null);
+-                alertThreshold.setKeyListener(null);
+-                buttonalertMp3.setEnabled(false);
+-                checkboxAllDay.setEnabled(false);
+-                checkboxVibrate.setEnabled(false);
+-                checkboxAlertOverride.setEnabled(false);
+-                reraise.setEnabled(false);
+-            }
+         }
+         reraise.setText(String.valueOf(alertReraise));
+         alertMp3File.setKeyListener(null);
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+index 309598c..88aa069 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+@@ -82,7 +82,6 @@
+     @Column(name = "uuid", index = true)
+     public String uuid;
+ 
+-    public final static String LOW_ALERT_55 = "c5f1999c-4ec5-449e-adad-3980b172b920";
+     private final static String TAG = Notifications.class.getSimpleName();
+     private final static String TAG_ALERT = "AlertBg";
+ 
+@@ -266,11 +265,6 @@ public static void update_alert(
+             int snooze,
+             boolean vibrate) {
+ 
+-        if(uuid.equals(LOW_ALERT_55)) {
+-            // This alert can not be removed/updated
+-            return;
+-        }
+-
+         AlertType at = get_alert(uuid);
+         at.name = name;
+         at.above = above;
+@@ -288,10 +282,6 @@ public static void update_alert(
+         at.save();
+     }
+     public static void remove_alert(String uuid) {
+-        if(uuid.equals(LOW_ALERT_55)) {
+-            // This alert can not be removed/updated
+-            return;
+-        }
+         AlertType alert = get_alert(uuid);
+ 		if(alert != null) {
+ 	        alert.delete();
+@@ -340,15 +330,6 @@ public static void print_all() {
+ 
+ 
+ 
+-    // This function is used to make sure that we always have a static alert on 55 low.
+-    // This alert will not be editable/removable.
+-    public static void CreateStaticAlerts() {
+-        if(get_alert(LOW_ALERT_55) == null) {
+-            add_alert(LOW_ALERT_55, "low alert (unchangable)", false, 55, true, 1, null, 0, 0, true, 20, true);
+-        }
+-    }
+-
+-
+     public static void testAll(Context context) {
+ 
+         remove_all();
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
+index bbf5e55..c063eec 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
+@@ -214,12 +214,6 @@ private void Vibrate(Context ctx, AlertType alert, String bgValue, Boolean overr
+         Log.d(TAG, "Vibrate called timeFromStartPlaying = " + timeFromStartPlaying);
+         Log.d("ALARM", "setting vibrate alarm");
+         int profile = getAlertProfile(ctx);
+-        if(alert.uuid.equals(AlertType.LOW_ALERT_55)) {
+-            // boost alerts...
+-            if(profile == ALERT_PROFILE_VIBRATE_ONLY) {
+-                profile = ALERT_PROFILE_ASCENDING;
+-            }
+-        }
+ 
+         // We use timeFromStartPlaying as a way to force vibrating/ non vibrating...
+         if (profile != ALERT_PROFILE_ASCENDING) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
+index 5fc1f35..326b158 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
+@@ -30,7 +30,6 @@ public void performAll() {
+ 
+     private void migrateBGAlerts() {
+         // Migrate away from old style notifications to Tzachis new Alert system
+-        AlertType.CreateStaticAlerts();
+         if(prefs.getBoolean("bg_notifications", true)){
+             double highMark = Double.parseDouble(prefs.getString("highValue", "170"));
+             double lowMark = Double.parseDouble(prefs.getString("lowValue", "70"));

@@ -1,0 +1,32 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index ab307a9..c40730e 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -88,6 +88,11 @@ android {
+         multiDexEnabled true
+     }
+     buildTypes {
++        release {
++            minifyEnabled true
++            proguardFiles getDefaultProguardFile('proguard-android.txt'),
++                    'proguard-rules.pro'
++        }
+     }
+ }
+ 
+diff --git a/app/proguard-rules.pro b/app/proguard-rules.pro
+index 654a25c..b898332 100644
+--- a/app/proguard-rules.pro
++++ b/app/proguard-rules.pro
+@@ -20,3 +20,11 @@
+ -keep class retrofit.** { *; }
+ -keepattributes Signature
+ -keepattributes Exceptions
++-dontwarn com.**
++-dontwarn net.**
++-dontwarn okio.**
++-dontwarn org.**
++-dontwarn rx.**
++
++
++-dontobfuscate

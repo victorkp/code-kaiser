@@ -1,0 +1,16 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Sensor.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Sensor.java
+index 1c0c3fe..5bde7c5 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Sensor.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Sensor.java
+@@ -90,6 +90,11 @@ public static boolean isActive() {
+     }
+ 
+     public static void updateBatteryLevel(Sensor sensor, int sensorBatteryLevel) {
++        if(sensorBatteryLevel < 120) {
++            // This must be a wrong battery level. Some transmitter send those every couple of readings
++            // even if the battery is ok.
++            return;
++        }
+         int startBatteryLevel = sensor.latest_battery_level;
+         if(sensor.latest_battery_level == 0) {
+             sensor.latest_battery_level = sensorBatteryLevel;

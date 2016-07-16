@@ -1,0 +1,13 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java b/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
+index 86d11fd..31e8ab6 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
+@@ -127,7 +127,7 @@ public boolean onOptionsItemSelected(MenuItem item) {
+                         Toast.makeText(this, "Bluetooth is turned off on this device currently", Toast.LENGTH_LONG).show();
+                         return true;
+                     } else {
+-                        if(android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2){
++                        if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2){
+                             Toast.makeText(this, "The android version of this device is not compatible with Bluetooth Low Energy", Toast.LENGTH_LONG).show();
+                             return true;
+                         }

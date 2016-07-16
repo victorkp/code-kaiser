@@ -1,0 +1,45 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationGraph.java b/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationGraph.java
+index 4cad3da..19036d3 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationGraph.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/CalibrationGraph.java
+@@ -39,7 +39,6 @@
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_calibration_graph);
+-
+         GraphHeader = (TextView) findViewById(R.id.CalibrationGraphHeader);
+     }
+ 
+@@ -48,6 +47,12 @@ public String getMenuName() {
+         return menu_name;
+     }
+ 
++    @Override
++    protected void onResume(){
++        super.onResume();
++        setupCharts();
++    }
++
+     public void setupCharts() {
+         chart = (LineChartView) findViewById(R.id.chart);
+         List<Calibration> calibrations = Calibration.allForSensor();
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+index 2d32322..506785b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+@@ -218,14 +218,13 @@ public static void create(EGVRecord egvRecord, long addativeOffset, Context cont
+                 double calSlope = (calibration.first_scale / firstAdjSlope)*1000;
+                 double calIntercept = ((calibration.first_scale * calibration.first_intercept) / firstAdjSlope)*-1;
+                 bgReading.raw_calculated = (((calSlope * bgReading.raw_data) + calIntercept) - 5);
+-                bgReading.noise = egvRecord.noiseValue();
+             }
+             Log.w(TAG, "create: NEW VALUE CALCULATED AT: " + bgReading.calculated_value);
+             bgReading.calculated_value_slope = bgReading.slopefromName(egvRecord.getTrend().friendlyTrendName());
++            bgReading.noise = egvRecord.noiseValue();
+             if(egvRecord.getTrend().friendlyTrendName().compareTo("NOT_COMPUTABLE") == 0 || egvRecord.getTrend().friendlyTrendName().compareTo("OUT_OF_RANGE") == 0) {
+                 bgReading.hide_slope = true;
+             }
+-
+             bgReading.save();
+             bgReading.find_new_curve();
+             bgReading.find_new_raw_curve();

@@ -1,0 +1,20 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+index eb442cb..0e4457e 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+@@ -116,10 +116,15 @@ public static AlertType get_highest_active_alert(Context context, double bg) {
+ 
+         checkIfMissedReadingAlert(context);
+ 
++        if (bg <= 14) { // Special dexcom codes should not set off low alarms
++            return null;
++        }
++
+         Boolean bg_unclear_readings_alerts = prefs.getBoolean("bg_unclear_readings_alerts", false);
+         Long UnclearTimeSetting = Long.parseLong(prefs.getString("bg_unclear_readings_minutes", "90")) * 60000;
+ 
+         Long UnclearTime = BgReading.getUnclearTime(UnclearTimeSetting);
++
+         AlertType at;
+         if (UnclearTime >= UnclearTimeSetting && bg_unclear_readings_alerts ) {
+             Log.w("NOTIFICATIONS", "Readings have been unclear for too long!!");

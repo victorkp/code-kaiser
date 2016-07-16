@@ -1,0 +1,105 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+index 86276ad..73e76ee 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+@@ -23,6 +23,7 @@
+ import com.google.gson.annotations.Expose;
+ import com.google.gson.internal.bind.DateTypeAdapter;
+ 
++import java.text.DecimalFormat;
+ import java.util.ArrayList;
+ import java.util.Date;
+ import java.util.List;
+@@ -631,6 +632,17 @@ public static double min_recent() {
+                 .execute();
+     }
+ 
++    public static List<Calibration> latestForGraph(int number, double startTime) {
++        DecimalFormat df = new DecimalFormat("#");
++        df.setMaximumFractionDigits(1);
++        return new Select()
++                .from(Calibration.class)
++                .where("timestamp >= " + df.format(startTime))
++                .orderBy("timestamp desc")
++                .limit(number)
++                .execute();
++    }
++
+     public static List<Calibration> allForSensor() {
+         Sensor sensor = Sensor.currentSensor();
+         if (sensor == null) { return null; }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+index 6ba5291..3709452 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+@@ -8,6 +8,7 @@
+ import android.text.format.DateFormat;
+ 
+ import com.eveningoutpost.dexdrip.Models.BgReading;
++import com.eveningoutpost.dexdrip.Models.Calibration;
+ 
+ import java.text.DecimalFormat;
+ import java.text.SimpleDateFormat;
+@@ -49,10 +50,12 @@
+     private double endHour;
+     private final int numValues =(60/5)*24;
+     private final List<BgReading> bgReadings = BgReading.latestForGraph( numValues, (start_time * FUZZER));
++    private final List<Calibration> calibrations = Calibration.latestForGraph( numValues, (start_time * FUZZER));
+     private List<PointValue> inRangeValues = new ArrayList<PointValue>();
+     private List<PointValue> highValues = new ArrayList<PointValue>();
+     private List<PointValue> lowValues = new ArrayList<PointValue>();
+     private List<PointValue> rawInterpretedValues = new ArrayList<PointValue>();
++    private List<PointValue> calibrationValues = new ArrayList<PointValue>();
+     public Viewport viewport;
+ 
+ 
+@@ -90,6 +93,8 @@ public LineChartData previewLineData() {
+     public List<Line> defaultLines() {
+         addBgReadingValues();
+         List<Line> lines = new ArrayList<Line>();
++        Line[] calib = calibrationValuesLine();
++        lines.add(calib[0]); // white circle of calib in background
+         lines.add(minShowLine());
+         lines.add(maxShowLine());
+         lines.add(highLine());
+@@ -98,6 +103,7 @@ public LineChartData previewLineData() {
+         lines.add(lowValuesLine());
+         lines.add(highValuesLine());
+         lines.add(rawInterpretedLine());
++        lines.add(calib[1]); // red dot of calib in foreground
+         return lines;
+     }
+ 
+@@ -136,6 +142,22 @@ public Line rawInterpretedLine() {
+         return line;
+     }
+ 
++    public Line[] calibrationValuesLine() {
++        Line[] lines = new Line[2];
++        lines[0] = new Line(calibrationValues);
++        lines[0].setColor(Color.parseColor("#FFFFFF"));
++        lines[0].setHasLines(false);
++        lines[0].setPointRadius(pointSize * 3 / 2);
++        lines[0].setHasPoints(true);
++        lines[1] = new Line(calibrationValues);
++        lines[1].setColor(Utils.COLOR_RED);
++        lines[1].setHasLines(false);
++        lines[1].setPointRadius(pointSize * 3 / 4);
++        lines[1].setHasPoints(true);
++        return lines;
++    }
++
++
+     private void addBgReadingValues() {
+         for (BgReading bgReading : bgReadings) {
+             if (bgReading.raw_calculated != 0 && prefs.getBoolean("interpret_raw", false)) {
+@@ -152,6 +174,9 @@ private void addBgReadingValues() {
+                 lowValues.add(new PointValue((float)(bgReading.timestamp/ FUZZER), (float) unitized(40)));
+             }
+         }
++        for (Calibration calibration : calibrations) {
++            calibrationValues.add(new PointValue((float)(calibration.timestamp/ FUZZER), (float) unitized(calibration.bg)));
++        }
+     }
+ 
+     public Line highLine() {

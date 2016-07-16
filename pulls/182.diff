@@ -1,0 +1,3908 @@
+diff --git a/app/app.iml b/app/app.iml
+index ff164ff..210cf01 100644
+--- a/app/app.iml
++++ b/app/app.iml
+@@ -36,13 +36,13 @@
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/buildConfig/debug" isTestSource="false" generated="true" />
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/rs/debug" isTestSource="false" generated="true" />
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/res/rs/debug" type="java-resource" />
+-      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/generated/debug" type="java-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/resValues/debug" type="java-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/r/androidTest/debug" isTestSource="true" generated="true" />
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/aidl/androidTest/debug" isTestSource="true" generated="true" />
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/buildConfig/androidTest/debug" isTestSource="true" generated="true" />
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/rs/androidTest/debug" isTestSource="true" generated="true" />
+       <sourceFolder url="file://$MODULE_DIR$/build/generated/res/rs/androidTest/debug" type="java-test-resource" />
+-      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/generated/androidTest/debug" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/resValues/androidTest/debug" type="java-test-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src/debug/res" type="java-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src/debug/resources" type="java-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src/debug/assets" type="java-resource" />
+@@ -71,6 +71,20 @@
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex-cache" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/22.0.0/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/23.1.0/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.crashlytics.sdk.android/answers/1.3.0/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.crashlytics.sdk.android/beta/1.1.3/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.crashlytics.sdk.android/crashlytics-core/2.3.3/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.crashlytics.sdk.android/crashlytics/2.5.0/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.embarkmobile/zxing-android-integration/2.0.0/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.embarkmobile/zxing-android-legacy/2.0.0/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.embarkmobile/zxing-android-minimal/2.0.0/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.getpebble/pebblekit/3.0.0/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.github.lecho/hellocharts-android/v1.5.5/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.nispok/snackbar/2.10.8/jars" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/io.fabric.sdk.android/fabric/1.3.5/jars" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/jacoco" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/javaResources" />
+@@ -86,40 +100,41 @@
+       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
+       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
+     </content>
+-    <orderEntry type="jdk" jdkName="Android API 22 Platform (1)" jdkType="Android SDK" />
++    <orderEntry type="jdk" jdkName="Android API 23 Platform" jdkType="Android SDK" />
+     <orderEntry type="sourceFolder" forTests="false" />
+     <orderEntry type="library" exported="" name="bson-3.1.0-rc0" level="project" />
+-    <orderEntry type="library" exported="" name="okio-1.2.0" level="project" />
+     <orderEntry type="library" exported="" name="answers-1.3.0" level="project" />
+     <orderEntry type="library" exported="" name="crashlytics-core-2.3.3" level="project" />
+     <orderEntry type="library" exported="" name="zxing-android-integration-2.0.0" level="project" />
+     <orderEntry type="library" exported="" name="core-3.1.0" level="project" />
++    <orderEntry type="library" exported="" name="retrofit-2.0.0-beta2" level="project" />
++    <orderEntry type="library" exported="" name="converter-gson-2.0.0-beta2" level="project" />
+     <orderEntry type="library" exported="" name="rxjava-1.0.0" level="project" />
+     <orderEntry type="library" exported="" name="crashlytics-2.5.0" level="project" />
+     <orderEntry type="library" exported="" name="guava-18.0" level="project" />
+     <orderEntry type="library" exported="" name="seeds-functional-16.0.1" level="project" />
+     <orderEntry type="library" exported="" name="seeds-strings-16.0.1" level="project" />
++    <orderEntry type="library" exported="" name="appcompat-v7-23.1.0" level="project" />
+     <orderEntry type="library" exported="" name="usb-serial-for-android-v010" level="project" />
++    <orderEntry type="library" exported="" name="okio-1.6.0" level="project" />
+     <orderEntry type="library" exported="" name="seeds-base-16.0.1" level="project" />
+     <orderEntry type="library" exported="" name="fabric-1.3.5" level="project" />
+     <orderEntry type="library" exported="" name="recyclerview-v7-22.0.0" level="project" />
+     <orderEntry type="library" exported="" name="zxing-android-minimal-2.0.0" level="project" />
++    <orderEntry type="library" exported="" name="support-annotations-23.1.0" level="project" />
+     <orderEntry type="library" exported="" name="android-uploader-CORE_FOR_XDRIP" level="project" />
+     <orderEntry type="library" exported="" name="ActiveAndroid" level="project" />
+     <orderEntry type="library" exported="" name="zxing-android-legacy-2.0.0" level="project" />
+-    <orderEntry type="library" exported="" name="okhttp-2.2.0" level="project" />
+-    <orderEntry type="library" exported="" name="retrofit-1.9.0" level="project" />
+     <orderEntry type="library" exported="" name="mongodb-driver-core-3.1.0-SNAPSHOT" level="project" />
+-    <orderEntry type="library" exported="" name="support-annotations-22.1.1" level="project" />
+-    <orderEntry type="library" exported="" name="slf4j-api-1.7.7" level="project" />
+     <orderEntry type="library" exported="" name="gson-2.3.1" level="project" />
+-    <orderEntry type="library" exported="" name="appcompat-v7-22.1.1" level="project" />
++    <orderEntry type="library" exported="" name="slf4j-api-1.7.7" level="project" />
+     <orderEntry type="library" exported="" name="snackbar-2.10.8" level="project" />
++    <orderEntry type="library" exported="" name="okhttp-2.5.0" level="project" />
+     <orderEntry type="library" exported="" name="beta-1.1.3" level="project" />
+     <orderEntry type="library" exported="" name="seeds-primitives-16.0.1" level="project" />
+     <orderEntry type="library" exported="" name="mongodb-driver-3.1.0-SNAPSHOT" level="project" />
+     <orderEntry type="library" exported="" name="pebblekit-3.0.0" level="project" />
+-    <orderEntry type="library" exported="" name="support-v4-22.1.1" level="project" />
+     <orderEntry type="library" exported="" name="hellocharts-android-v1.5.5" level="project" />
++    <orderEntry type="library" exported="" name="support-v4-23.1.0" level="project" />
+   </component>
+ </module>
+\ No newline at end of file
+diff --git a/app/build.gradle b/app/build.gradle
+index b67192c..988ab9d 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -76,13 +76,13 @@ def generateVersionName = { ->
+ 
+ 
+ android {
+-    compileSdkVersion 22
++    compileSdkVersion 23
+     buildToolsVersion "22.0.1"
+ 
+     defaultConfig {
+         applicationId "com.eveningoutpost.dexdrip"
+         minSdkVersion 17
+-        targetSdkVersion 21
++        targetSdkVersion 23
+         versionCode 2
+         versionName generateVersionName()
+     }
+@@ -92,12 +92,13 @@ android {
+ 
+ dependencies {
+     compile fileTree(dir: 'libs', include: ['*.jar'])
+-    testCompile 'com.squareup.okhttp:mockwebserver:2.2.0'
++    testCompile 'com.squareup.okhttp:mockwebserver:2.5.0'
+     compile 'com.nispok:snackbar:2.10.8'
+-    compile 'com.android.support:appcompat-v7:22.1.1'
+-    compile 'com.squareup.okhttp:okhttp:2.2.0'
++    compile 'com.android.support:appcompat-v7:23.1.0'
++    compile 'com.squareup.okhttp:okhttp:2.5.0'
+     compile 'com.google.code.gson:gson:2.3'
+-    compile 'com.squareup.retrofit:retrofit:1.9.0'
++    compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
++    compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
+     compile 'com.getpebble:pebblekit:3.0.0'
+     compile 'io.reactivex:rxjava:1.0.0'
+     compile 'com.github.lecho:hellocharts-android:v1.5.5'
+diff --git a/app/proguard-rules.pro b/app/proguard-rules.pro
+index 397a2d7..654a25c 100644
+--- a/app/proguard-rules.pro
++++ b/app/proguard-rules.pro
+@@ -15,3 +15,8 @@
+ #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+ #   public *;
+ #}
++
++-dontwarn retrofit.**
++-keep class retrofit.** { *; }
++-keepattributes Signature
++-keepattributes Exceptions
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 3e754c2..3a8e00b 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -13,12 +13,14 @@
+     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+     <uses-permission android:name="android.permission.INTERNET" />
++    <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION" />
++    <uses-permission-sdk-23 android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+     <uses-permission android:name="android.permission.WAKE_LOCK" />
+     <uses-permission android:name="android.permission.VIBRATE" />
+     <uses-permission android:name="android.permission.BATTERY_STATS" />
+     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+-    <uses-permission android:name="android.permission." />
++
+ 
+     <application
+         android:name=".xdrip"
+@@ -195,7 +197,7 @@
+         </receiver>
+ 
+         <service
+-            android:name=".widgetUpdateService"
++            android:name=".WidgetUpdateService"
+             android:enabled="true"
+             android:exported="true" >
+         </service>
+@@ -224,11 +226,6 @@
+             android:exported="true" >
+         </service>
+         <service
+-            android:name=".ShareModels.ShareRest"
+-            android:enabled="true"
+-            android:exported="true" >
+-        </service>
+-        <service
+             android:name=".UtilityModels.Notifications"
+             android:exported="false" >
+         </service>
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java b/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
+index 31e8ab6..64ea052 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
+@@ -12,10 +12,13 @@
+ import android.content.Context;
+ import android.content.Intent;
+ import android.content.SharedPreferences;
++import android.content.pm.PackageManager;
+ import android.os.Build;
+ import android.os.Bundle;
+ import android.os.Handler;
+ import android.preference.PreferenceManager;
++import android.support.v4.app.ActivityCompat;
++import android.support.v4.content.ContextCompat;
+ import android.text.InputFilter;
+ import android.text.TextUtils;
+ import android.view.LayoutInflater;
+@@ -73,13 +76,25 @@ protected void onCreate(Bundle savedInstanceState) {
+             finish();
+             return;
+         }
+-        if(!bluetooth_manager.getAdapter().isEnabled()) {
++        if (!bluetooth_manager.getAdapter().isEnabled()) {
+             Toast.makeText(this, "Bluetooth is turned off on this device currently", Toast.LENGTH_LONG).show();
+         } else {
+-            if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2){
++            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                 Toast.makeText(this, "The android version of this device is not compatible with Bluetooth Low Energy", Toast.LENGTH_LONG).show();
+             }
+         }
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
++            if (ContextCompat.checkSelfPermission(this,
++                    android.Manifest.permission.ACCESS_COARSE_LOCATION)
++                    != PackageManager.PERMISSION_GRANTED) {
++
++                ActivityCompat.requestPermissions(this,
++                        new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
++                        0);
++
++
++            }
++        }
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+             initializeScannerCallback();
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java b/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java
+index 6bef3a2..dc7d977 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java
+@@ -413,7 +413,7 @@ public void onClick(View v) {
+                     Toast.makeText(getApplicationContext(), "Reraise Value must be 1 minute or greater", Toast.LENGTH_LONG).show();
+                     return;
+                 } else if (alertReraise >= defaultSnooze) {
+-                    Toast.makeText(getApplicationContext(), "Reraise Value must less than snooze length", Toast.LENGTH_LONG).show();
++                    Toast.makeText(getApplicationContext(), "Reraise Value must be less than snooze length", Toast.LENGTH_LONG).show();
+                     return;
+                 }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/FollowerListAdapter.java b/app/src/main/java/com/eveningoutpost/dexdrip/FollowerListAdapter.java
+index 3e1b22a..10d65ce 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/FollowerListAdapter.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/FollowerListAdapter.java
+@@ -6,16 +6,18 @@
+ import android.view.ViewGroup;
+ import android.widget.BaseAdapter;
+ import android.widget.Button;
+-import android.widget.LinearLayout;
+ import android.widget.TextView;
+ import android.widget.Toast;
+ 
+-import com.eveningoutpost.dexdrip.ShareModels.FollowerManager;
+ import com.eveningoutpost.dexdrip.ShareModels.Models.ExistingFollower;
++import com.eveningoutpost.dexdrip.ShareModels.ShareRest;
++import com.squareup.okhttp.ResponseBody;
+ 
+ import java.util.List;
+ 
+-import rx.functions.Action1;
++import retrofit.Callback;
++import retrofit.Response;
++import retrofit.Retrofit;
+ 
+ /**
+  * Created by stephenblack on 8/11/15.
+@@ -23,12 +25,11 @@
+ public class FollowerListAdapter extends BaseAdapter {
+     private List<ExistingFollower> list;
+     private Context context;
+-    private FollowerManager followerManager;
+-
+-    public FollowerListAdapter(Context context, FollowerManager followerManager, List<ExistingFollower> list) {
++    private ShareRest shareRest;
++    public FollowerListAdapter(Context context, ShareRest shareRest, List<ExistingFollower> list) {
+         this.context = context;
+         this.list = list;
+-        this.followerManager = followerManager;
++        this.shareRest = shareRest;
+     }
+ 
+     @Override
+@@ -62,10 +63,10 @@ public View getView(final int position, final View convertView, ViewGroup parent
+         deleteButton.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
+-                Action1<Boolean> deleteFollowerListener = new Action1<Boolean>() {
++                Callback<ResponseBody> deleteFollowerListener = new Callback<ResponseBody>() {
+                     @Override
+-                    public void call(Boolean deleted) {
+-                        if (deleted) {
++                    public void onResponse(Response<ResponseBody> response, Retrofit retrofit) {
++                        if (response.isSuccess()) {
+                             Toast.makeText(context, "Follower deleted succesfully", Toast.LENGTH_LONG).show();
+                             list.remove(position);
+                             notifyDataSetChanged();
+@@ -73,8 +74,13 @@ public void call(Boolean deleted) {
+                             Toast.makeText(context, "Failed to delete follower", Toast.LENGTH_LONG).show();
+                         }
+                     }
++
++                    @Override
++                    public void onFailure(Throwable t) {
++                        Toast.makeText(context, "Failed to delete follower", Toast.LENGTH_LONG).show();
++                    }
+                 };
+-                followerManager.deleteFollower(deleteFollowerListener, follower.ContactId);
++                shareRest.deleteContact(follower.ContactId, deleteFollowerListener);
+             }
+         });
+         return view;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/FollowerManagementActivity.java b/app/src/main/java/com/eveningoutpost/dexdrip/FollowerManagementActivity.java
+index 56f33e0..23c0021 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/FollowerManagementActivity.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/FollowerManagementActivity.java
+@@ -12,32 +12,29 @@
+ import android.widget.ListView;
+ import android.widget.Toast;
+ 
+-import com.eveningoutpost.dexdrip.ShareModels.FollowerManager;
+ import com.eveningoutpost.dexdrip.ShareModels.Models.ExistingFollower;
++import com.eveningoutpost.dexdrip.ShareModels.Models.InvitationPayload;
++import com.eveningoutpost.dexdrip.ShareModels.ShareRest;
+ import com.eveningoutpost.dexdrip.utils.ActivityWithMenu;
+ 
+ import java.util.List;
+ 
+-import rx.functions.Action1;
++import retrofit.Callback;
++import retrofit.Response;
++import retrofit.Retrofit;
+ 
+ /**
+  * Created by stephenblack on 8/11/15.
+  */
+ public class FollowerManagementActivity extends ActivityWithMenu {
+-    static String FollowerManagementActivity = Home.class.getName();
+-    public static String menu_name = "Follower Management";
+-
+-    ListView existingFollowersView;
+-    Button addFollowerButton;
+-    FollowerManager followerManager;
+-    Action1<List<ExistingFollower>> existingFollowerListener;
+-    List<ExistingFollower> existingFollowerList;
+-    FollowerListAdapter followerListAdapter;
+-
+-    String login;
+-    String password;
+-    String receiverSn;
+-
++    private static final String menu_name = "Follower Management";
++    private static final String TAG = Home.class.getName();
++    private ListView existingFollowersView;
++    private Button addFollowerButton;
++    private ShareRest shareRest;
++    private Callback<List<ExistingFollower>> existingFollowerListener;
++    private List<ExistingFollower> existingFollowerList;
++    private FollowerListAdapter followerListAdapter;
+ 
+     @Override
+     public String getMenuName() {
+@@ -50,40 +47,45 @@ protected void onCreate(Bundle savedInstanceState) {
+         setContentView(R.layout.activity_follower_management);
+         existingFollowersView = (ListView) findViewById(R.id.followerList);
+         addFollowerButton = (Button) findViewById(R.id.inviteFollower);
++        shareRest = new ShareRest(this, null);
+     }
+ 
+     @Override
+     protected void onResume() {
+         super.onResume();
+         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+-        login = prefs.getString("dexcom_account_name", "");
+-        password = prefs.getString("dexcom_account_password", "");
+-        receiverSn = prefs.getString("share_key", "SM00000000").toUpperCase();
+ 
+         populateFollowerList();
+         setInviteListener();
+     }
+ 
+     private void populateFollowerList() {
+-        followerManager = new FollowerManager(login, password, receiverSn, getApplicationContext());
+-         existingFollowerListener = new Action1<List<ExistingFollower>>() {
++        existingFollowerListener = new Callback<List<ExistingFollower>>() {
+             @Override
+-            public void call(List<ExistingFollower> existingFollowers) {
+-                if(followerListAdapter != null) {
++            public void onResponse(Response<List<ExistingFollower>> response, Retrofit retrofit) {
++                List<ExistingFollower> existingFollowers = response.body();
++                if (followerListAdapter != null) {
+                     existingFollowerList.clear();
+-                    if(existingFollowers != null && existingFollowers.size() > 0)
++                    if (existingFollowers != null && existingFollowers.size() > 0)
+                         existingFollowerList.addAll(existingFollowers);
+                     followerListAdapter.notifyDataSetChanged();
+                 } else {
+-                    if(existingFollowers != null && existingFollowers.size() > 0) {
++                    if (existingFollowers != null && existingFollowers.size() > 0) {
+                         existingFollowerList = existingFollowers;
+-                        followerListAdapter = new FollowerListAdapter(getApplicationContext(), followerManager, existingFollowerList);
++                        followerListAdapter = new FollowerListAdapter(getApplicationContext(), shareRest, existingFollowerList);
+                         existingFollowersView.setAdapter(followerListAdapter);
+                     }
+                 }
+             }
++
++            @Override
++            public void onFailure(Throwable t) {
++                // If it fails, don't show followers.
++            }
+         };
+-        followerManager.getFollowers(existingFollowerListener);
++
++        shareRest.getContacts(existingFollowerListener);
++
+     }
+ 
+     private void setInviteListener() {
+@@ -102,30 +104,53 @@ public void onClick(View v) {
+                     @Override
+                     public void onClick(View v) {
+                         if (!TextUtils.isEmpty(followerName.getText()) && !TextUtils.isEmpty(followerNicName.getText()) && !TextUtils.isEmpty(followerEmail.getText())) {
+-                            Action1<Boolean> invitedFollowerListener = new Action1<Boolean>() {
+-                                @Override
+-                                public void call(Boolean deleted) {
+-                                    if (deleted) {
+-                                        Toast.makeText(getApplicationContext(), "Follower invite sent succesfully", Toast.LENGTH_LONG).show();
+-                                        populateFollowerList();
+-                                    } else {
+-                                        Toast.makeText(getApplicationContext(), "Failed to invite follower", Toast.LENGTH_LONG).show();
++
++
++                            shareRest.createContact(followerName.getText().toString().trim(), followerEmail.getText().toString().trim(), new Callback<String>() {
++
++                                        @Override
++                                        public void onResponse(Response<String> response, Retrofit retrofit) {
++                                            if (response.isSuccess()) {
++                                                shareRest.createInvitationForContact(response.body(), new InvitationPayload(followerNicName.getText().toString().trim()), new Callback<String>() {
++                                                    @Override
++                                                    public void onResponse(Response<String> response, Retrofit retrofit) {
++                                                        if (response.isSuccess()) {
++                                                            populateFollowerList();
++                                                            Toast.makeText(getApplicationContext(), "Follower invite sent succesfully", Toast.LENGTH_LONG).show();
++                                                        } else {
++                                                            Toast.makeText(getApplicationContext(), "Failed to invite follower", Toast.LENGTH_LONG).show();
++                                                        }
++                                                    }
++
++                                                    @Override
++                                                    public void onFailure(Throwable t) {
++                                                        Toast.makeText(getApplicationContext(), "Failed to invite follower", Toast.LENGTH_LONG).show();
++                                                    }
++                                                });
++                                            } else {
++                                                Toast.makeText(getApplicationContext(), "Failed to invite follower", Toast.LENGTH_LONG).show();
++                                            }
++                                        }
++
++                                        @Override
++                                        public void onFailure(Throwable t) {
++                                            Toast.makeText(getApplicationContext(), "Failed to invite follower", Toast.LENGTH_LONG).show();
++                                        }
+                                     }
+-                                }
+-                            };
+-                            followerManager.inviteFollower(followerEmail.getText().toString().trim(), followerName.getText().toString().trim(), followerNicName.getText().toString().trim(), invitedFollowerListener);
++                            );
+                         }
+                         dialog.dismiss();
+                     }
+                 });
+                 cancelButton.setOnClickListener(new View.OnClickListener() {
+-                    @Override
+-                    public void onClick(View v) {
+-                        dialog.dismiss();
+-                    }
+-                });
++                                                    @Override
++                                                    public void onClick(View v) {
++                                                        dialog.dismiss();
++                                                    }
++                                                });
+                 WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+-                lp.copyFrom(dialog.getWindow().getAttributes());
++                lp.copyFrom(dialog.getWindow().
++                                getAttributes());
+                 lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                 dialog.show();
+                 dialog.getWindow().setAttributes(lp);
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index e2627b4..a60aa2c 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -5,6 +5,7 @@
+ import android.content.Intent;
+ import android.content.IntentFilter;
+ import android.content.SharedPreferences;
++import android.content.pm.PackageManager;
+ import android.graphics.Canvas;
+ import android.graphics.Color;
+ import android.graphics.ColorFilter;
+@@ -12,10 +13,16 @@
+ import android.graphics.drawable.Drawable;
+ import android.net.Uri;
+ import android.os.AsyncTask;
++import android.os.Build;
+ import android.os.Bundle;
++import android.os.PowerManager;
+ import android.preference.PreferenceManager;
++import android.provider.Settings;
++import android.support.v4.app.ActivityCompat;
++import android.support.v4.content.ContextCompat;
+ import android.support.v4.widget.DrawerLayout;
+ import android.util.DisplayMetrics;
++import android.util.Log;
+ import android.view.Menu;
+ import android.view.MenuItem;
+ import android.view.View;
+@@ -62,13 +69,9 @@
+     private SharedPreferences prefs;
+     private Viewport tempViewport = new Viewport();
+     private Viewport holdViewport = new Viewport();
+-    private boolean isBTWixel;
+-    private boolean isDexbridgeWixel;
+     private boolean isBTShare;
+-    private boolean isWifiWixel;
+     private BroadcastReceiver _broadcastReceiver;
+     private BroadcastReceiver newDataReceiver;
+-    private NavigationDrawerFragment mNavigationDrawerFragment;
+     private LineChartView            chart;
+     private PreviewLineChartView     previewChart;
+     private TextView                 dexbridgeBattery;
+@@ -98,7 +101,21 @@ protected void onCreate(Bundle savedInstanceState) {
+         if(BgGraphBuilder.isXLargeTablet(getApplicationContext())) {
+             this.notificationText.setTextSize(40);
+         }
+-
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
++            Intent intent = new Intent();
++            String packageName = getPackageName();
++            Log.d(TAG, "Maybe ignoring battery optimization");
++            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
++            if (!pm.isIgnoringBatteryOptimizations(packageName) &&
++                    !prefs.getBoolean("requested_ignore_battery_optimizations", false)) {
++                Log.d(TAG, "Requesting ignore battery optimization");
++
++                prefs.edit().putBoolean("requested_ignore_battery_optimizations", true).apply();
++                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
++                intent.setData(Uri.parse("package:" + packageName));
++                startActivity(intent);
++            }
++        }
+     }
+ 
+     @Override
+@@ -157,7 +174,7 @@ public void setupCharts() {
+ 
+         //Transmitter Battery Level
+         final Sensor sensor = Sensor.currentSensor();
+-        if (sensor != null && sensor.latest_battery_level != 0 && sensor.latest_battery_level <= Constants.TRANSMITTER_BATTERY_LOW) {
++        if (sensor != null && sensor.latest_battery_level != 0 && sensor.latest_battery_level <= Constants.TRANSMITTER_BATTERY_LOW && ! prefs.getBoolean("disable_battery_warning", false)) {
+             Drawable background = new Drawable() {
+ 
+                 @Override
+@@ -237,10 +254,10 @@ public void updateCurrentBgInfo() {
+         }
+         notificationText.setText("");
+         notificationText.setTextColor(Color.RED);
+-        isBTWixel = CollectionServiceStarter.isBTWixel(getApplicationContext());
+-        isDexbridgeWixel = CollectionServiceStarter.isDexbridgeWixel(getApplicationContext());
++        boolean isBTWixel = CollectionServiceStarter.isBTWixel(getApplicationContext());
++        boolean isDexbridgeWixel = CollectionServiceStarter.isDexbridgeWixel(getApplicationContext());
+         isBTShare = CollectionServiceStarter.isBTShare(getApplicationContext());
+-        isWifiWixel = CollectionServiceStarter.isWifiWixel(getApplicationContext());
++        boolean isWifiWixel = CollectionServiceStarter.isWifiWixel(getApplicationContext());
+         if (isBTShare) {
+             updateCurrentBgInfoForBtShare(notificationText);
+         }
+@@ -261,8 +278,8 @@ public void updateCurrentBgInfo() {
+         } else if (prefs.getLong("high_alerts_disabled_until", 0) > new Date().getTime()) {
+             notificationText.append("\n HIGH ALERTS CURRENTLY DISABLED");
+         } 
+-        mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+-        mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), menu_name, this);
++        NavigationDrawerFragment navigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
++        navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), menu_name, this);
+     }
+ 
+     private void updateCurrentBgInfoForWifiWixel(TextView notificationText) {
+@@ -454,7 +471,17 @@ public boolean onOptionsItemSelected(MenuItem item) {
+             new AsyncTask<Void, Void, String>() {
+                 @Override
+                 protected String doInBackground(Void... params) {
+-                    return DatabaseUtil.saveSql(getBaseContext());
++                    int permissionCheck = ContextCompat.checkSelfPermission(Home.this,
++                            android.Manifest.permission.READ_EXTERNAL_STORAGE);
++                    if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
++                        ActivityCompat.requestPermissions(Home.this,
++                                new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
++                                0);
++                        return null;
++                    } else {
++                        return DatabaseUtil.saveSql(getBaseContext());
++                    }
++
+                 }
+ 
+                 @Override
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ImportDatabaseActivity.java b/app/src/main/java/com/eveningoutpost/dexdrip/ImportDatabaseActivity.java
+index 99cf50e..2b6d3c4 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ImportDatabaseActivity.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ImportDatabaseActivity.java
+@@ -1,5 +1,6 @@
+ package com.eveningoutpost.dexdrip;
+ 
++import android.Manifest;
+ import android.app.AlertDialog;
+ import android.content.DialogInterface;
+ import android.content.Intent;
+@@ -10,6 +11,8 @@
+ import android.os.AsyncTask;
+ import android.os.Bundle;
+ import android.os.Handler;
++import android.support.v4.app.ActivityCompat;
++import android.support.v4.content.ContextCompat;
+ import android.view.LayoutInflater;
+ import android.view.View;
+ import android.widget.ArrayAdapter;
+@@ -44,9 +47,15 @@ protected void onCreate(Bundle savedInstanceState) {
+     }
+ 
+     private void generateDBGui() {
+-        if (findAllDatabases()) {
++        int permissionCheck = ContextCompat.checkSelfPermission(this,
++                Manifest.permission.READ_EXTERNAL_STORAGE);
++        if (permissionCheck == PackageManager.PERMISSION_GRANTED && findAllDatabases()) {
+             sortDatabasesAlphabetically();
+             showDatabasesInList();
++        } else if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
++            ActivityCompat.requestPermissions(this,
++                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
++                    0);
+         } else {
+             postImportDB("\'xdrip\' is not a directory... aborting.");
+         }
+@@ -80,7 +89,7 @@ public int compare(File lhs, File rhs) {
+     }
+ 
+     private boolean findAllDatabases() {
+-        databases = new ArrayList<File>();
++        databases = new ArrayList<>();
+ 
+         File file = new File(FileUtils.getExternalDir());
+         if (!FileUtils.makeSureDirectoryExists(file.getAbsolutePath())) {
+@@ -97,21 +106,21 @@ public boolean accept(File path) {
+                 return path.isDirectory();
+             }
+         });
+-        for (int i = 0; i < subdirectories.length; i++) {
+-            addAllDatabases(subdirectories[i], databases);
++        for (File subdirectory : subdirectories) {
++            addAllDatabases(subdirectory, databases);
+         }
+         return true;
+     }
+ 
+     private void showDatabasesInList() {
+-        databaseNames = new ArrayList<String>();
++        databaseNames = new ArrayList<>();
+ 
+         //show found databases in List
+         for (File db : databases) {
+             databaseNames.add(db.getName());
+         }
+ 
+-        final ArrayAdapter adapter = new ArrayAdapter(this,
++        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                 android.R.layout.simple_list_item_1, databaseNames);
+         setListAdapter(adapter);
+ 
+@@ -124,14 +133,11 @@ private void addAllDatabases(File file, ArrayList<File> databases) {
+         File[] files = file.listFiles(new FileFilter() {
+             @Override
+             public boolean accept(File pathname) {
+-                if (pathname.getPath().endsWith(".sqlite")) return true;
+-                return false;
++                return pathname.getPath().endsWith(".sqlite");
+             }
+         });
+ 
+-        for (int i = 0; i < files.length; i++) {
+-            databases.add(files[i]);
+-        }
++        Collections.addAll(databases, files);
+     }
+ 
+     @Override
+@@ -168,17 +174,15 @@ public String getMenuName() {
+ 
+     public int getDBVersion() {
+ 
+-        ApplicationInfo ai = null;
+         int version = -1;
+         try {
+-            ai = getPackageManager().getApplicationInfo(this.getPackageName(), PackageManager.GET_META_DATA);
++            ApplicationInfo ai = getPackageManager().getApplicationInfo(this.getPackageName(), PackageManager.GET_META_DATA);
+             Bundle bundle = ai.metaData;
+             version = bundle.getInt("AA_DB_VERSION");
+         } catch (PackageManager.NameNotFoundException e) {
+             e.printStackTrace();
+-        } finally {
+-            return version;
+         }
++        return version;
+     }
+ 
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/BgReadingInterface.java b/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/BgReadingInterface.java
+deleted file mode 100644
+index 61f0519..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/BgReadingInterface.java
++++ /dev/null
+@@ -1,21 +0,0 @@
+-package com.eveningoutpost.dexdrip.Interfaces;
+-
+-import com.eveningoutpost.dexdrip.Models.BgReading;
+-
+-import retrofit.Callback;
+-import retrofit.http.Body;
+-import retrofit.http.POST;
+-import retrofit.http.PUT;
+-import retrofit.http.Path;
+-
+-/**
+- * Created by stephenblack on 11/6/14.
+- */
+-public interface BgReadingInterface {
+-
+-    @POST("/api/v1/users/{user_uuid}/BgReadings/new")
+-    void createReading(@Path("user_uuid") String user_uuid, @Body BgReading bgReading, Callback callback);
+-
+-    @PUT("/api/v1/users/{user_uuid}/BgReading/{bgReading_uuid}")
+-    void updateReading(@Path("user_uuid") String user_uuid, @Path("bgReading_uuid") String uuid, @Body BgReading bgReading, Callback callback);
+-}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/CalibrationInterface.java b/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/CalibrationInterface.java
+deleted file mode 100644
+index 98dd925..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/CalibrationInterface.java
++++ /dev/null
+@@ -1,17 +0,0 @@
+-package com.eveningoutpost.dexdrip.Interfaces;
+-
+-import com.eveningoutpost.dexdrip.Models.Calibration;
+-
+-import retrofit.Callback;
+-import retrofit.http.Body;
+-import retrofit.http.POST;
+-import retrofit.http.Path;
+-
+-/**
+- * Created by stephenblack on 11/7/14.
+- */
+-public interface CalibrationInterface {
+-
+-    @POST("/api/v1/users/{user_uuid}/calibrations/new")
+-    void createCalibration(@Path("user_uuid") String user_uuid, @Body Calibration calibration, Callback callback);
+-}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/SensorInterface.java b/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/SensorInterface.java
+deleted file mode 100644
+index 8be09c7..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/SensorInterface.java
++++ /dev/null
+@@ -1,17 +0,0 @@
+-package com.eveningoutpost.dexdrip.Interfaces;
+-
+-import com.eveningoutpost.dexdrip.Sensor;
+-
+-import retrofit.Callback;
+-import retrofit.http.Body;
+-import retrofit.http.POST;
+-import retrofit.http.Path;
+-
+-/**
+- * Created by stephenblack on 11/7/14.
+- */
+-public interface SensorInterface {
+-
+-    @POST("/api/v1/users/{user_uuid}/sensors/new")
+-    void createSensor(@Path("user_uuid") String user_uuid, @Body Sensor sensor, Callback callback);
+-}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/UserInterface.java b/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/UserInterface.java
+deleted file mode 100644
+index 55c44c5..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Interfaces/UserInterface.java
++++ /dev/null
+@@ -1,17 +0,0 @@
+-package com.eveningoutpost.dexdrip.Interfaces;
+-
+-import com.eveningoutpost.dexdrip.Models.User;
+-
+-import retrofit.Callback;
+-import retrofit.http.Body;
+-import retrofit.http.POST;
+-
+-/**
+- * Created by stephenblack on 11/10/14.
+- */
+-public interface UserInterface {
+-
+-    @POST("/api/v1/sessions/new")
+-    void authenticate(@Body User user, Callback callback);
+-
+-}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java
+index f0d9232..09da3dc 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java
+@@ -162,5 +162,10 @@ public int getUpdatePlayTime() {
+         Long timeSeconds =  (new Date().getTime() - alert_started_at) / 1000;
+         return (int)Math.round(timeSeconds / 60.0);
+     }
++
++    public void updateNextAlertAt(long nextAlertTime){
++        next_alert_at = nextAlertTime;
++        save();
++    }
+ }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+index 9bb871f..0569470 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+@@ -1,12 +1,12 @@
+ package com.eveningoutpost.dexdrip.Models;
+ 
++import android.app.AlarmManager;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.preference.PreferenceManager;
+ import android.provider.BaseColumns;
+ import com.eveningoutpost.dexdrip.Models.UserError.Log;
+-
+ import com.activeandroid.Model;
+ import com.activeandroid.annotation.Column;
+ import com.activeandroid.annotation.Table;
+@@ -437,6 +437,15 @@ private boolean trending_to_threshold(double bg) {
+         }
+         return false;
+     }
++    
++     public long getNextAlertTime(Context ctx) {
++         int time = minutes_between;
++         if (time < 1 || AlertPlayer.isAscendingMode(ctx)) {
++             time = 1;
++         }
++         Calendar calendar = Calendar.getInstance();
++         return calendar.getTimeInMillis() + (time * 60000);
++     }
+ 
+     public boolean should_alarm(double bg) {
+ //        Log.e(TAG, "should_alarm called active =  " + active );
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/User.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/User.java
+deleted file mode 100644
+index 5c2b655..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/User.java
++++ /dev/null
+@@ -1,105 +0,0 @@
+-package com.eveningoutpost.dexdrip.Models;
+-
+-import android.provider.BaseColumns;
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+-
+-import com.activeandroid.Model;
+-import com.activeandroid.annotation.Column;
+-import com.activeandroid.annotation.Table;
+-import com.activeandroid.query.Select;
+-import com.eveningoutpost.dexdrip.Interfaces.UserInterface;
+-import com.google.gson.Gson;
+-import com.google.gson.GsonBuilder;
+-import com.google.gson.JsonObject;
+-import com.google.gson.annotations.Expose;
+-import com.google.gson.internal.bind.DateTypeAdapter;
+-
+-import java.util.Date;
+-
+-import retrofit.Callback;
+-import retrofit.RestAdapter;
+-import retrofit.RetrofitError;
+-import retrofit.client.Response;
+-import retrofit.converter.GsonConverter;
+-
+-/**
+- * Created by stephenblack on 11/7/14.
+- */
+-@Table(name = "User", id = BaseColumns._ID)
+-public class User extends Model {
+-    private static final String baseUrl = "http://10.0.2.2:3000";
+-
+-    public static Gson gson = new GsonBuilder()
+-            .excludeFieldsWithoutExposeAnnotation()
+-            .registerTypeAdapter(Date.class, new DateTypeAdapter())
+-            .create();
+-
+-    @Expose
+-    @Column(name = "email")
+-    public String email;
+-
+-    @Expose
+-    @Column(name = "password")
+-    public String password;
+-
+-    @Expose
+-    @Column(name = "token")
+-    public String token;
+-
+-    @Expose
+-    @Column(name = "token_expiration")
+-    public double token_expiration;
+-
+-    @Expose
+-    @Column(name = "uuid", index = true)
+-    public String uuid;
+-
+-
+-    public static User currentUser() {
+-        User user = new Select()
+-                .from(User.class)
+-                .orderBy("_ID desc")
+-                .limit(1)
+-                .executeSingle();
+-        return user;
+-    }
+-
+-    //TODO: Add refresh token attempt instance method!!
+-
+-    public static void authenticate() {
+-        final User user = User.currentUser();
+-        userInterface().authenticate(user, new Callback<String>() {
+-                    @Override
+-                    public void success(String gsonResponse, Response response) {
+-                        JsonObject jobj = new Gson().fromJson(gsonResponse, JsonObject.class);
+-                        user.token = jobj.get("token").getAsString();
+-                        user.token_expiration = jobj.get("expiration").getAsDouble();
+-                        user.save();
+-                    }
+-                    @Override
+-                    public void failure(RetrofitError error) {
+-                        Response response = error.getResponse();
+-                        Log.w("REST CALL REASON:", response.getReason());
+-                    }
+-                }
+-        );
+-    }
+-
+-    public static UserInterface userInterface() {
+-        RestAdapter adapter = adapterBuilder().build();
+-        UserInterface userInterface =
+-                adapter.create(UserInterface.class);
+-        return userInterface();
+-    }
+-
+-    public static RestAdapter.Builder adapterBuilder() {
+-        RestAdapter.Builder adapterBuilder = new RestAdapter.Builder();
+-        adapterBuilder
+-                .setEndpoint(baseUrl)
+-                .setConverter(new GsonConverter(gson));
+-        return adapterBuilder;
+-    }
+-
+-
+-}
+-
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+index fbcd5aa..4795a15 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+@@ -150,33 +150,40 @@ public void listenForChangeInSettings() {
+     public void setRetryTimer() {
+         if (CollectionServiceStarter.isBTWixel(getApplicationContext()) || CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
+             long retry_in = (1000 * 65);
+-            Log.d(TAG, "setRetryTimer: Restarting in: " + (retry_in/1000)  + " seconds");
++            Log.d(TAG, "setRetryTimer: Restarting in: " + (retry_in / 1000) + " seconds");
+             Calendar calendar = Calendar.getInstance();
+             AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-            if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+-                alarm.setExact(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, DexCollectionService.class), 0));
+-            } else {
+-                alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, DexCollectionService.class), 0));
+-            }
++            long wakeTime = calendar.getTimeInMillis() + retry_in;
++            PendingIntent serviceIntent = PendingIntent.getService(this, 0, new Intent(this, this.getClass()), 0);
++            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
++                alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, wakeTime, serviceIntent);
++            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
++                alarm.setExact(AlarmManager.RTC_WAKEUP, wakeTime, serviceIntent);
++            } else
++                alarm.set(AlarmManager.RTC_WAKEUP, wakeTime, serviceIntent);
+         }
+     }
+ 
+     public void setFailoverTimer() {
+-        if (CollectionServiceStarter.isBTWixel(getApplicationContext())|| CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
++        if (CollectionServiceStarter.isBTWixel(getApplicationContext()) || CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
+             long retry_in = (1000 * 60 * 6);
+             Log.d(TAG, "setFailoverTimer: Fallover Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
+             Calendar calendar = Calendar.getInstance();
+             AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-            if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+-                alarm.setExact(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, DexCollectionService.class), 0));
+-            } else {
+-                alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, DexCollectionService.class), 0));
+-            }
++            long wakeTime = calendar.getTimeInMillis() + retry_in;
++            PendingIntent serviceIntent = PendingIntent.getService(this, 0, new Intent(this, this.getClass()), 0);
++            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
++                alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, wakeTime, serviceIntent);
++            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
++                alarm.setExact(AlarmManager.RTC_WAKEUP, wakeTime, serviceIntent);
++            } else
++                alarm.set(AlarmManager.RTC_WAKEUP, wakeTime, serviceIntent);
+         } else {
+             stopSelf();
+         }
+     }
+ 
++
+     public void attemptConnection() {
+         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+         if (bluetoothManager == null) {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
+index 855f985..5a1c7c2 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
+@@ -101,6 +101,11 @@
+     public Service service;
+     private BgToSpeech bgToSpeech;
+ 
++    private long lastHeartbeat = 0;
++    private int heartbeatCount = 0;
++
++    private PendingIntent pendingIntent;
++
+     @Override
+     public void onCreate() {
+         super.onCreate();
+@@ -117,9 +122,10 @@ public void onCreate() {
+ 
+     @Override
+     public int onStartCommand(Intent intent, int flags, int startId) {
+-        PowerManager powerManager = (PowerManager) getApplicationContext().getSystemService(getApplicationContext().POWER_SERVICE);
++        PowerManager powerManager = (PowerManager) getApplicationContext().getSystemService(POWER_SERVICE);
+         PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DexShareCollectionStart");
+         wakeLock.acquire(40000);
++        Log.d(TAG, "onStartCommand");
+         try {
+ 
+             if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+@@ -187,11 +193,16 @@ public void setRetryTimer() {
+             Log.d(TAG, "Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
+             Calendar calendar = Calendar.getInstance();
+             AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-            if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+-                alarm.setExact(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, DexShareCollectionService.class), 0));
+-            } else {
+-                alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, DexShareCollectionService.class), 0));
+-            }
++            if (pendingIntent != null)
++                alarm.cancel(pendingIntent);
++            long wakeTime = calendar.getTimeInMillis() + retry_in;
++            pendingIntent = PendingIntent.getService(this, 0, new Intent(this, this.getClass()), 0);
++            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
++                alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, wakeTime, pendingIntent);
++            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
++                alarm.setExact(AlarmManager.RTC_WAKEUP, wakeTime, pendingIntent);
++            } else
++                alarm.set(AlarmManager.RTC_WAKEUP, wakeTime, pendingIntent);
+         }
+     }
+ 
+@@ -201,7 +212,16 @@ public void setFailoverTimer() { //Sometimes it gets stuck in limbo on 4.4, this
+             Log.d(TAG, "Fallover Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
+             Calendar calendar = Calendar.getInstance();
+             AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-            alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, DexShareCollectionService.class), 0));
++            if (pendingIntent != null)
++                alarm.cancel(pendingIntent);
++            long wakeTime = calendar.getTimeInMillis() + retry_in;
++            pendingIntent = PendingIntent.getService(this, 0, new Intent(this, this.getClass()), 0);
++            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
++                alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, wakeTime, pendingIntent);
++            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
++                alarm.setExact(AlarmManager.RTC_WAKEUP, wakeTime, pendingIntent);
++            } else
++                alarm.set(AlarmManager.RTC_WAKEUP, wakeTime, pendingIntent);
+         } else {
+             stopSelf();
+         }
+@@ -257,25 +277,38 @@ public void attemptConnection() {
+         }
+     }
+ 
++    public void requestHighPriority() {
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
++            mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
++        }
++    }
++
++    public void requestLowPriority() {
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
++            mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER);
++        }
++    }
++
+     public void attemptRead() {
+         PowerManager powerManager = (PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE);
+         final PowerManager.WakeLock wakeLock1 = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                 "ReadingShareData");
+         wakeLock1.acquire(60000);
++        requestHighPriority();
+         Log.d(TAG, "Attempting to read data");
+         final Action1<Long> systemTimeListener = new Action1<Long>() {
+             @Override
+             public void call(Long s) {
+                 if (s != null) {
+                     Log.d(TAG, "Made the full round trip, got " + s + " as the system time");
+-                    final long addativeSystemTimeOffset = new Date().getTime() - s;
++                    final long additiveSystemTimeOffset = new Date().getTime() - s;
+ 
+                     final Action1<Long> dislpayTimeListener = new Action1<Long>() {
+                         @Override
+                         public void call(Long s) {
+                             if (s != null) {
+                                 Log.d(TAG, "Made the full round trip, got " + s + " as the display time offset");
+-                                final long addativeDisplayTimeOffset = addativeSystemTimeOffset - (s * 1000);
++                                final long addativeDisplayTimeOffset = additiveSystemTimeOffset - (s * 1000);
+ 
+                                 Log.d(TAG, "Making " + addativeDisplayTimeOffset + " the the total time offset");
+ 
+@@ -284,10 +317,11 @@ public void call(Long s) {
+                                     public void call(EGVRecord[] egvRecords) {
+                                         if (egvRecords != null) {
+                                             Log.d(TAG, "Made the full round trip, got " + egvRecords.length + " EVG Records");
+-                                            BgReading.create(egvRecords, addativeSystemTimeOffset, getApplicationContext());
++                                            BgReading.create(egvRecords, additiveSystemTimeOffset, getApplicationContext());
+                                             {
+                                                 Log.d(TAG, "Releasing wl in egv");
+                                                 if(wakeLock1 != null && wakeLock1.isHeld()) wakeLock1.release();
++                                                requestLowPriority();
+                                                 Log.d(TAG, "released");
+                                             }
+                                             if (shouldDisconnect) {
+@@ -304,7 +338,7 @@ public void call(EGVRecord[] egvRecords) {
+                                     public void call(SensorRecord[] sensorRecords) {
+                                         if (sensorRecords != null) {
+                                             Log.d(TAG, "Made the full round trip, got " + sensorRecords.length + " Sensor Records");
+-                                            BgReading.create(sensorRecords, addativeSystemTimeOffset, getApplicationContext());
++                                            BgReading.create(sensorRecords, additiveSystemTimeOffset, getApplicationContext());
+                                             readData.getRecentEGVs(evgRecordListener);
+                                         }
+                                     }
+@@ -335,7 +369,7 @@ public void call(CalRecord[] calRecords) {
+     }
+ 
+     public boolean connect(final String address) {
+-        PowerManager powerManager = (PowerManager) getApplicationContext().getSystemService(getApplicationContext().POWER_SERVICE);
++        PowerManager powerManager = (PowerManager) getApplicationContext().getSystemService(POWER_SERVICE);
+         PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                 "DexShareCollectionStart");
+         wakeLock.acquire(30000);
+@@ -613,6 +647,18 @@ public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteris
+                 if (value != null) {
+                     Observable.just(characteristic.getValue()).subscribe(mDataResponseListener);
+                 }
++            } else if (charUuid.compareTo(mHeartBeatCharacteristic.getUuid()) == 0) {
++                long heartbeat = System.currentTimeMillis();
++                Log.d(TAG, "Heartbeat delta: " + (heartbeat - lastHeartbeat));
++                if ((heartbeat-lastHeartbeat < 59000) || heartbeatCount > 5) {
++                    Log.d(TAG, "Early heartbeat.  Fetching data.");
++                    AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
++                    alarm.cancel(pendingIntent);
++                    heartbeatCount = 0;
++                    attemptConnection();
++                }
++                heartbeatCount += 1;
++                lastHeartbeat = heartbeat;
+             }
+         }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/MissedReadingService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/MissedReadingService.java
+index 358ccca..90a9bc1 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/MissedReadingService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/MissedReadingService.java
+@@ -61,10 +61,13 @@ public void checkBackAfterMissedTime() {
+     public void setAlarm(long alarmIn) {
+         Calendar calendar = Calendar.getInstance();
+         AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+-            alarm.setExact(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + alarmIn, PendingIntent.getService(this, 0, new Intent(this, MissedReadingService.class), 0));
+-        } else {
+-            alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + alarmIn, PendingIntent.getService(this, 0, new Intent(this, MissedReadingService.class), 0));
+-        }
++        long wakeTime = calendar.getTimeInMillis() + alarmIn;
++        PendingIntent serviceIntent = PendingIntent.getService(this, 0, new Intent(this, this.getClass()), 0);
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
++            alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, wakeTime, serviceIntent);
++        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
++            alarm.setExact(AlarmManager.RTC_WAKEUP, wakeTime, serviceIntent);
++        } else
++            alarm.set(AlarmManager.RTC_WAKEUP, wakeTime, serviceIntent);
+     }
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/SyncService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/SyncService.java
+index b4adc75..8a2f27a 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/SyncService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/SyncService.java
+@@ -3,26 +3,19 @@
+ import android.app.AlarmManager;
+ import android.app.IntentService;
+ import android.app.PendingIntent;
+-import android.app.Service;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.content.SharedPreferences;
+-import android.os.IBinder;
++import android.os.Build;
+ import android.preference.PreferenceManager;
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ 
+-import com.eveningoutpost.dexdrip.Models.BgReading;
+-import com.eveningoutpost.dexdrip.Models.Calibration;
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ import com.eveningoutpost.dexdrip.UtilityModels.BgSendQueue;
+ import com.eveningoutpost.dexdrip.UtilityModels.CalibrationSendQueue;
+ import com.eveningoutpost.dexdrip.UtilityModels.MongoSendTask;
+-import com.eveningoutpost.dexdrip.UtilityModels.NightscoutUploader;
+-import com.eveningoutpost.dexdrip.UtilityModels.RestCalls;
+ import com.eveningoutpost.dexdrip.UtilityModels.SensorSendQueue;
+ 
+-import java.util.ArrayList;
+ import java.util.Calendar;
+-import java.util.List;
+ 
+ public class SyncService extends IntentService {
+     private Context mContext;
+@@ -41,24 +34,11 @@ protected void onHandleIntent(Intent intent) {
+         prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+         enableRESTUpload = prefs.getBoolean("cloud_storage_api_enable", false);
+         enableMongoUpload = prefs.getBoolean("cloud_storage_mongodb_enable", false);
+-        setRetryTimer();
+         attemptSend();
+     }
+ 
+     public void attemptSend() {
+         if (enableRESTUpload || enableMongoUpload) { syncToMogoDb(); }
+-
+-        if (false) { //Disabled for now as central server project has been abandoned for now
+-            for (SensorSendQueue job : SensorSendQueue.queue()) {
+-                RestCalls.sendSensor(job);
+-            }
+-            for (CalibrationSendQueue job : CalibrationSendQueue.queue()) {
+-                RestCalls.sendCalibration(job);
+-            }
+-            for (BgSendQueue job : BgSendQueue.queue()) {
+-                RestCalls.sendBgReading(job);
+-            }
+-        }
+         setRetryTimer();
+     }
+ 
+@@ -66,7 +46,10 @@ public void setRetryTimer() {
+         if (enableRESTUpload || enableMongoUpload) { //Check for any upload type being enabled
+             Calendar calendar = Calendar.getInstance();
+             AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-            alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + (1000 * 30 * 5), PendingIntent.getService(this, 0, new Intent(this, SyncService.class), 0));
++            long wakeTime = calendar.getTimeInMillis() + (1000 * 60 * 6);
++            // make it up on the next BG reading or retry if the reading doesn't materialize
++            PendingIntent serviceIntent = PendingIntent.getService(this, 0, new Intent(this, SyncService.class), PendingIntent.FLAG_CANCEL_CURRENT);
++            alarm.set(AlarmManager.RTC_WAKEUP, wakeTime, serviceIntent);
+         }
+     }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/BgUploader.java b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/BgUploader.java
+index d3a7170..2178cd5 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/BgUploader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/BgUploader.java
+@@ -1,96 +1,37 @@
+ package com.eveningoutpost.dexdrip.ShareModels;
+ 
+ import android.content.Context;
+-import android.content.SharedPreferences;
+-import android.preference.PreferenceManager;
+-import android.util.Log;
+ 
+ import com.eveningoutpost.dexdrip.ShareModels.Models.ShareUploadPayload;
++import com.squareup.okhttp.ResponseBody;
+ 
+ import retrofit.Callback;
+-import retrofit.RetrofitError;
+-import retrofit.client.Response;
+-import rx.Observable;
+-import rx.functions.Action1;
++import retrofit.Response;
++import retrofit.Retrofit;
+ 
+ /**
+  * Created by stephenblack on 7/31/15.
+  */
+ public class BgUploader {
+     public static String TAG = BgUploader.class.getSimpleName();
+-    private String sessionId;
+ 
+-    private String username;
+-    private String password;
+-    private String serialNumber;
+-    private Context context;
+-    private SharedPreferences prefs;
+-    private ShareUploadableBg bg;
++    private ShareRest shareRest;
+ 
+-    private boolean uploadRetried = false;
+-    private Action1<Boolean> successListener;
+-
+-    public BgUploader(String username, String password, String serialNumber, Context context, Action1<Boolean> successListener) {
+-        this.username = username;
+-        this.password = password;
+-        this.serialNumber = serialNumber;
+-        this.context = context;
+-        this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
+-        this.successListener = successListener;
+-    }
+-
+-    public BgUploader(String username, String password, String serialNumber, Context context) {
+-        this.username = username;
+-        this.password = password;
+-        this.serialNumber = serialNumber;
+-        this.context = context;
+-        this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
+-    }
+-
+-    public void upload(ShareUploadableBg bg) {
+-        this.uploadRetried = false;
+-        this.bg = bg;
+-        tryUpload();
+-    }
+-
+-    private void tryUpload() {
+-        Action1<Boolean> authListener = new Action1<Boolean>() {
+-            @Override
+-            public void call(Boolean authed) {
+-                if (authed) {
+-                    sessionId = prefs.getString("dexcom_share_session_id", "");
+-                    upload();
+-                } else {
+-                    if(successListener != null) {
+-                        Observable.just(false).subscribe(successListener);
+-                    }
+-                }
+-            }
+-        };
+-        new ShareAuthentication(username, password, serialNumber, context, authListener).authenticate();
++    public BgUploader(Context context) {
++        this.shareRest = new ShareRest(context, null);
+     }
+ 
+-    private void upload() {
+-       ShareRest.jsonBodyInterface().uploadBGRecords(ShareRest.querySessionMap(sessionId), new ShareUploadPayload(serialNumber, bg), new Callback<Response>() {
++    public void upload(ShareUploadPayload bg) {
++        shareRest.uploadBGRecords(bg, new Callback<ResponseBody>() {
+             @Override
+-            public void success(Response o, Response response) {
+-                Log.d(TAG, "Success!! Uploaded!!");
+-                if(successListener != null) {
+-                    Observable.just(true).subscribe(successListener);
+-                }
++            public void onResponse(Response<ResponseBody> response, Retrofit retrofit) {
++                // This should probably be pulled up into BgSendQueue or NightscoutUploader
++                // where errors can be handled properly.
+             }
+ 
+             @Override
+-            public void failure(RetrofitError retrofitError) {
+-                Log.e(TAG, "Upload failure", retrofitError);
+-                if (ShareAuthentication.shouldReAuth(context, retrofitError, uploadRetried)) {
+-                    uploadRetried = true;
+-                    tryUpload();
+-                } else {
+-                    if(successListener != null) {
+-                        Observable.just(false).subscribe(successListener);
+-                    }
+-                }
++            public void onFailure(Throwable t) {
++                // TODO add error handling in a refactoring pass
+             }
+         });
+     }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/DexcomShare.java b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/DexcomShare.java
+new file mode 100644
+index 0000000..474fb90
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/DexcomShare.java
+@@ -0,0 +1,133 @@
++package com.eveningoutpost.dexdrip.ShareModels;
++
++import com.eveningoutpost.dexdrip.ShareModels.Models.ExistingFollower;
++import com.eveningoutpost.dexdrip.ShareModels.Models.InvitationPayload;
++import com.eveningoutpost.dexdrip.ShareModels.Models.ShareUploadPayload;
++import com.eveningoutpost.dexdrip.ShareModels.UserAgentInfo.UserAgent;
++import com.squareup.okhttp.ResponseBody;
++
++import java.util.List;
++import java.util.Map;
++
++import retrofit.Call;
++import retrofit.http.Body;
++import retrofit.http.Headers;
++import retrofit.http.POST;
++import retrofit.http.Query;
++
++/**
++ * Created by stephenblack on 3/16/15.
++ */
++public interface DexcomShare {
++
++    @POST("General/LoginPublisherAccountByName")
++    Call<String> getSessionId(@Body Map<String, String> body);
++    //Since this seems to respond with a string we need a delegate that will parse the response body
++    //new String(((TypedByteArray) response.getBody()).getBytes());
++
++    @POST("Publisher/IsRemoteMonitoringSessionActive")
++    Call<Boolean> checkSessionActive(@Query("sessionId") String sessionId);
++    // needs ?sessionId={YourSessionId}
++    // returns true or false
++
++    @POST("Publisher/StartRemoteMonitoringSession")
++    Call<ResponseBody> StartRemoteMonitoringSession(@Query("sessionId") String sessionId,
++                                                    @Query("serialNumber") String serialNumber);
++    // needs ?sessionId={YourSessionId}&serialNumber={YourdexcomSerialNumber}
++    // returns status code
++
++    @POST("Publisher/PostReceiverEgvRecords")
++    Call<ResponseBody> uploadBGRecords(@Query("sessionId") String sessionId, @Body ShareUploadPayload payload);
++    // needs ?sessionId={YourSessionId}
++    // body ShareUploadPayload
++    // returns status code
++
++    @POST("General/AuthenticatePublisherAccount")
++    Call<String> authenticatePublisherAccount(@Query("sessionId") String sessionId,
++                                                    @Query("serialNumber") String serialNumber,
++                                                    @Body Map<String, String> body);
++    // maybe needs ?sessionId={YourSessionId}&serialNumber={YourdexcomSerialNumber}
++    // body ShareUploadPayload
++    // returns status code
++
++    @POST("Publisher/CheckMonitoredReceiverAssignmentStatus")
++    Call<String> checkMonitorAssignment(@Query("sessionId") String sessionId,
++                                              @Query("serialNumber") String serialNumber);
++    // needs ?sessionId={YourSessionId}&serialNumber={YourdexcomSerialNumber}
++    // returns `AssignedToYou` or `NotAssigned`
++
++    @POST("Publisher/ReplacePublisherAccountMonitoredReceiver")
++    Call<ResponseBody> updateMonitorAssignment(@Query("sessionId") String sessionId,
++                                               @Query("serialNumber") String serialNumber);
++    // needs ?sessionId={YourSessionId}&serialNumber={YourdexcomSerialNumber}
++    // returns status code?
++
++
++    @POST("Publisher/UpdatePublisherAccountRuntimeInfo")
++    Call<ResponseBody> updatePublisherAccountInfo(@Body UserAgent body);
++    //Since this seems to respond with a string we need a delegate that will parse the response body
++    //new String(((TypedByteArray) response.getBody()).getBytes());
++
++
++
++    //Follower Related
++    @POST("Publisher/ListPublisherAccountSubscriptions")
++    Call<List<ExistingFollower>> getContacts(@Query("sessionId") String sessionId);
++    // needs ?sessionId={YourSessionId}
++    // returns
++    // [
++    //    {
++    //        "ContactId":"FollowersContactId",
++    //            "ContactName":"FollowersName",
++    //            "DateTimeCreated":{
++    //        "DateTime":"\/Date(1437101121008)\/",
++    //                "OffsetMinutes":0
++    //          },
++    //        "DateTimeModified":{
++    //        "DateTime":"\/Date(1437101121008)\/",
++    //                "OffsetMinutes":0
++    //          },
++    //        "DisplayName":"YourDisplayName",
++    //            "InviteExpires":{
++    //        "DateTime":"\/Date(1437705921008)\/",
++    //                "OffsetMinutes":0
++    //          },
++    //        "IsEnabled":false,
++    //        "IsMonitoringSessionActive":true,
++    //        "Permissions":1,
++    //        "State":2,
++    //        "SubscriberId":"00000000-0000-0000-0000-000000000000",
++    //        "SubscriptionId":"theirSubscriptionIdIsuppose?"
++    //    }
++    //]
++
++    @POST("Publisher/DoesContactExistByName")
++    @Headers({"Content-Length: 0"})
++    Call<ResponseBody> doesContactExist(@Query("sessionId") String sessionId,
++                                        @Query("contactName") String contactName);
++    // needs ?sessionId={YourSessionId}&contactName={newcontactName}
++    // returns true or false
++
++    @POST("Publisher/CreateContact")
++    @Headers({"Content-Length: 0"})
++    Call<String> createContact(@Query("sessionId") String sessionId,
++                                     @Query("contactName") String contactName,
++                                     @Query("emailAddress") String emailAddress);
++    // needs ?sessionId={YourSessionId}&contactName={newcontactName}&emailAddress={FollowerEmail}
++    // returns a contact id
++
++    @POST("Publisher/CreateSubscriptionInvitation")
++    Call<String> createInvitationForContact(@Query("sessionId") String sessionId,
++                                                  @Query("contactId") String contactId,
++                                                  @Body InvitationPayload body);
++    // needs ?sessionId={YourSessionId}&contactId={ContactId}
++    // returns a contact id
++
++    @POST("Publisher/DeleteContact")
++    @Headers({"Content-Length: 0"})
++    Call<ResponseBody> deleteContact(@Query("sessionId") String sessionId,
++                                     @Query("contactId") String contactId);
++    // needs ?sessionId={YourSessionId}&contactId={foll`owersContactId}
++    // just a status
++
++}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/DexcomShareInterface.java b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/DexcomShareInterface.java
+deleted file mode 100644
+index 65dedc3..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/DexcomShareInterface.java
++++ /dev/null
+@@ -1,118 +0,0 @@
+-package com.eveningoutpost.dexdrip.ShareModels;
+-
+-import com.eveningoutpost.dexdrip.ShareModels.Models.ExistingFollower;
+-import com.eveningoutpost.dexdrip.ShareModels.Models.InvitationPayload;
+-import com.eveningoutpost.dexdrip.ShareModels.Models.ShareAuthenticationBody;
+-import com.eveningoutpost.dexdrip.ShareModels.Models.ShareUploadPayload;
+-import com.eveningoutpost.dexdrip.ShareModels.UserAgentInfo.UserAgent;
+-
+-import java.util.List;
+-import java.util.Map;
+-
+-import retrofit.Callback;
+-import retrofit.client.Response;
+-import retrofit.http.Body;
+-import retrofit.http.POST;
+-import retrofit.http.QueryMap;
+-
+-/**
+- * Created by stephenblack on 3/16/15.
+- */
+-public interface DexcomShareInterface {
+-    @POST("/General/LoginPublisherAccountByName")
+-    void getSessionId(@Body ShareAuthenticationBody body, Callback<Response> callback);
+-    //Since this seems to respond with a string we need a callback that will parse the response body
+-    //new String(((TypedByteArray) response.getBody()).getBytes());
+-
+-    @POST("/Publisher/IsRemoteMonitoringSessionActive")
+-    void checkSessionActive(@QueryMap Map<String, String> options, Callback<Response> callback);
+-    // needs ?sessionId={YourSessionId}
+-    // returns true or false
+-
+-    @POST("/Publisher/StartRemoteMonitoringSession")
+-    void StartRemoteMonitoringSession(@QueryMap Map<String, String> options, Callback<Response> callback);
+-    // needs ?sessionId={YourSessionId}&serialNumber={YourdexcomSerialNumber}
+-    // returns status code
+-
+-    @POST("/Publisher/PostReceiverEgvRecords")
+-    void uploadBGRecords(@QueryMap Map<String, String> options, @Body ShareUploadPayload payload, Callback<Response> callback);
+-    // needs ?sessionId={YourSessionId}
+-    // body ShareUploadPayload
+-    // returns status code
+-
+-    @POST("/General/AuthenticatePublisherAccount")
+-    void authenticatePublisherAccount(@Body ShareAuthenticationBody body, @QueryMap Map<String, String> options, Callback<Response> callback);
+-    // maybe needs ?sessionId={YourSessionId}&serialNumber={YourdexcomSerialNumber}
+-    // body ShareUploadPayload
+-    // returns status code
+-
+-    @POST("/Publisher/CheckMonitoredReceiverAssignmentStatus")
+-    void checkMonitorAssignment(@QueryMap Map<String, String> options, Callback<Response> callback);
+-    // needs ?sessionId={YourSessionId}&serialNumber={YourdexcomSerialNumber}
+-    // returns `AssignedToYou` or `NotAssigned`
+-
+-    @POST("/Publisher/ReplacePublisherAccountMonitoredReceiver")
+-    void updateMonitorAssignment(@QueryMap Map<String, String> options, Callback<Response> callback);
+-    // needs ?sessionId={YourSessionId}&serialNumber={YourdexcomSerialNumber}
+-    // returns status code?
+-
+-
+-    @POST("/Publisher/UpdatePublisherAccountRuntimeInfo")
+-    void updatePublisherAccountInfo(@Body UserAgent body, Callback<Response> callback);
+-    //Since this seems to respond with a string we need a callback that will parse the response body
+-    //new String(((TypedByteArray) response.getBody()).getBytes());
+-
+-
+-
+-    //Follower Related
+-    @POST("/Publisher/ListPublisherAccountSubscriptions")
+-   void getContacts(@QueryMap Map<String, String> options, Callback<List<ExistingFollower>> callback);
+-    // needs ?sessionId={YourSessionId}
+-    // returns
+-    // [
+-    //    {
+-    //        "ContactId":"FollowersContactId",
+-    //            "ContactName":"FollowersName",
+-    //            "DateTimeCreated":{
+-    //        "DateTime":"\/Date(1437101121008)\/",
+-    //                "OffsetMinutes":0
+-    //          },
+-    //        "DateTimeModified":{
+-    //        "DateTime":"\/Date(1437101121008)\/",
+-    //                "OffsetMinutes":0
+-    //          },
+-    //        "DisplayName":"YourDisplayName",
+-    //            "InviteExpires":{
+-    //        "DateTime":"\/Date(1437705921008)\/",
+-    //                "OffsetMinutes":0
+-    //          },
+-    //        "IsEnabled":false,
+-    //        "IsMonitoringSessionActive":true,
+-    //        "Permissions":1,
+-    //        "State":2,
+-    //        "SubscriberId":"00000000-0000-0000-0000-000000000000",
+-    //        "SubscriptionId":"theirSubscriptionIdIsuppose?"
+-    //    }
+-    //]
+-
+-    @POST("/Publisher/DoesContactExistByName")
+-    void doesContactExist(@QueryMap Map<String, String> options, Callback<Response> callback);
+-    // needs ?sessionId={YourSessionId}&contactName={newcontactName}
+-    // returns true or false
+-
+-    @POST("/Publisher/CreateContact")
+-    void createContact(@QueryMap Map<String, String> options, Callback<Response> callback);
+-    // needs ?sessionId={YourSessionId}&contactName={newcontactName}&emailAddress={FollowerEmail}
+-    // returns a contact id
+-
+-    @POST("/Publisher/CreateSubscriptionInvitation")
+-    void createInvitationForContact(@Body InvitationPayload body, @QueryMap Map<String, String> options, Callback<Response> callback);
+-    // needs ?sessionId={YourSessionId}&contactId={ContactId}
+-    // returns a contact id
+-
+-    @POST("/Publisher/DeleteContact")
+-    void deleteContact(@QueryMap Map<String, String> options, Callback<Response> callback);
+-    // needs ?sessionId={YourSessionId}&contactId={followersContactId}
+-    // just a status
+-
+-}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/FollowerManager.java b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/FollowerManager.java
+deleted file mode 100644
+index 1c00e29..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/FollowerManager.java
++++ /dev/null
+@@ -1,272 +0,0 @@
+-package com.eveningoutpost.dexdrip.ShareModels;
+-
+-import android.content.Context;
+-import android.content.SharedPreferences;
+-import android.preference.PreferenceManager;
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+-
+-import com.eveningoutpost.dexdrip.ShareModels.Models.ExistingFollower;
+-import com.eveningoutpost.dexdrip.ShareModels.Models.InvitationPayload;
+-
+-import java.util.ArrayList;
+-import java.util.HashMap;
+-import java.util.List;
+-import java.util.Map;
+-
+-import retrofit.Callback;
+-import retrofit.RetrofitError;
+-import retrofit.client.Response;
+-import retrofit.mime.TypedByteArray;
+-import rx.Observable;
+-import rx.functions.Action1;
+-
+-/**
+- * Created by stephenblack on 8/10/15.
+- */
+-public class FollowerManager {
+-    public static String TAG = FollowerManager.class.getSimpleName();
+-    private String sessionId;
+-
+-    private String username;
+-    private String password;
+-    private String serialNumber;
+-    private Context context;
+-    private SharedPreferences prefs;
+-
+-    private Action1<List <ExistingFollower>> followerListener;
+-
+-    private Action1<Boolean> deletedListener;
+-
+-    private boolean getFollowersRetried = false;
+-    private boolean deleteFollowerRetried = false;
+-
+-    private String contactId;
+-    private String email;
+-    private String followerName;
+-    private String displayName;
+-    private Action1<Boolean> invitedListener;
+-    private boolean inviteRetried = false;
+-
+-    public FollowerManager(String username, String password, String serialNumber, Context context) {
+-        this.username = username;
+-        this.password = password;
+-        this.serialNumber = serialNumber;
+-        this.context = context;
+-        this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
+-    }
+-
+-    public void getFollowers(Action1<List <ExistingFollower>> followerListener) {
+-        this.getFollowersRetried = false;
+-        this.followerListener = followerListener;
+-        tryGetFollowers();
+-    }
+-
+-    public void deleteFollower(Action1<Boolean> deletedListener, String contactId) {
+-        this.deleteFollowerRetried = false;
+-        this.deletedListener = deletedListener;
+-        this.contactId = contactId;
+-        tryDelete();
+-    }
+-
+-    public void inviteFollower(String email, String followerName, String displayName, Action1<Boolean> invitedListener) {
+-        this.email = email;
+-        this.followerName = followerName;
+-        this.displayName = displayName;
+-        this.invitedListener = invitedListener;
+-        inviteRetried = false;
+-        tryInviteFollower();
+-    }
+-
+-
+-
+-    //GET FOLLOWERS RELATED
+-    private void tryGetFollowers() {
+-        Action1<Boolean> followerAuthListener = new Action1<Boolean>() {
+-            @Override
+-            public void call(Boolean authed) {
+-                if (authed) {
+-                    sessionId = prefs.getString("dexcom_share_session_id", "");
+-                    getListOfFollowers();
+-                } else {
+-                    Observable.just(new ArrayList<ExistingFollower>()).subscribe(followerListener);
+-                }
+-            }
+-        };
+-        new ShareAuthentication(username, password, serialNumber, context, followerAuthListener).authenticate();
+-    }
+-
+-    private void getListOfFollowers() {
+-        ShareRest.emptyBodyInterface().getContacts(ShareRest.querySessionMap(sessionId), new Callback<List<ExistingFollower>>() {
+-            @Override
+-            public void success(List<ExistingFollower> followers, Response response) {
+-                Observable.just(followers).subscribe(followerListener);
+-            }
+-
+-            @Override
+-            public void failure(RetrofitError retrofitError) {
+-                Log.e(TAG, "List Followers failure", retrofitError);
+-                if (ShareAuthentication.shouldReAuth(context, retrofitError, getFollowersRetried)) {
+-                    getFollowersRetried = true;
+-                    tryGetFollowers();
+-                } else {
+-                    Observable.just(new ArrayList<ExistingFollower>()).subscribe(followerListener);
+-                }
+-            }
+-        });
+-    }
+-
+-
+-
+-
+-    //Delete Follower Related
+-    private void tryDelete() {
+-        Action1<Boolean> authListener = new Action1<Boolean>() {
+-            @Override
+-            public void call(Boolean authed) {
+-                if (authed) {
+-                    sessionId = prefs.getString("dexcom_share_session_id", "");
+-                    deleteFollower();
+-                } else {
+-                    Observable.just(false).subscribe(deletedListener);
+-                }
+-            }
+-        };
+-        new ShareAuthentication(username, password, serialNumber, context, authListener).authenticate();
+-    }
+-
+-    private void deleteFollower() {
+-        ShareRest.emptyBodyInterface().deleteContact(deleteFollowerPayload(sessionId, contactId), new Callback<Response>() {
+-            @Override
+-            public void success(Response o, Response response) {
+-                Log.d("ShareFollower", "contact Invite sent!");
+-                Observable.just(true).subscribe(deletedListener);
+-            }
+-
+-            @Override
+-            public void failure(RetrofitError retrofitError) {
+-                Log.e(TAG, "Deleting Follower Failure", retrofitError);
+-                if (ShareAuthentication.shouldReAuth(context, retrofitError, deleteFollowerRetried)) {
+-                    deleteFollowerRetried = true;
+-                    tryDelete();
+-                } else {
+-                    Observable.just(false).subscribe(deletedListener);
+-                }
+-            }
+-        });
+-    }
+-
+-    private Map<String, String> deleteFollowerPayload(String sessionId, String contactId) {
+-        Map map = new HashMap<String, String>();
+-        map.put("sessionID", sessionId);
+-        map.put("contactId", contactId);
+-        return map;
+-    }
+-
+-
+-
+-   //Invite follower Related
+-    private void tryInviteFollower() {
+-        Action1<Boolean> authListener = new Action1<Boolean>() {
+-            @Override
+-            public void call(Boolean authed) {
+-                if (authed) {
+-                    sessionId = prefs.getString("dexcom_share_session_id", "");
+-                    invite();
+-                } else {
+-                    Observable.just(false).subscribe(invitedListener);
+-                }
+-            }
+-        };
+-        new ShareAuthentication(username, password, serialNumber, context, authListener).authenticate();
+-    }
+-
+-    private void invite() {
+-        ShareRest.emptyBodyInterface().doesContactExist(queryCheckContactExists(), new Callback<Response>() {
+-            @Override
+-            public void success(Response o, Response response) {
+-                if (new String(((TypedByteArray) response.getBody()).getBytes()).toLowerCase().contains("true")) {
+-                    Log.e("ShareFollower", "contact already exists");
+-                    Observable.just(true).subscribe(invitedListener);
+-                } else {
+-                    createContact();
+-                }
+-            }
+-
+-            @Override
+-            public void failure(RetrofitError retrofitError) {
+-                Log.e(TAG, "Trouble Checking if contact exists", retrofitError);
+-                if (ShareAuthentication.shouldReAuth(context, retrofitError, inviteRetried)) {
+-                    inviteRetried = true;
+-                    tryInviteFollower();
+-                } else {
+-                    Observable.just(false).subscribe(invitedListener);
+-                }
+-            }
+-        });
+-    }
+-
+-    private void createContact() {
+-        ShareRest.emptyBodyInterface().createContact(queryCreateContact(), new Callback<Response>() {
+-            @Override
+-            public void success(Response o, Response response) {
+-                Log.d("ShareFollower", "contact created!");
+-                contactId = new String(((TypedByteArray) response.getBody()).getBytes()).replace("\"", "");
+-                sendInviteToContact();
+-            }
+-
+-            @Override
+-            public void failure(RetrofitError retrofitError) {
+-                Log.e(TAG, "Creating new Contact", retrofitError);
+-                if (ShareAuthentication.shouldReAuth(context, retrofitError, inviteRetried)) {
+-                    inviteRetried = true;
+-                    tryInviteFollower();
+-                } else {
+-                    Observable.just(false).subscribe(invitedListener);
+-                }
+-            }
+-        });
+-    }
+-
+-    private void sendInviteToContact() {
+-        ShareRest.jsonBodyInterface().createInvitationForContact(new InvitationPayload(displayName), querySendInvite(), new Callback<Response>() {
+-            @Override
+-            public void success(Response o, Response response) {
+-                Log.d("ShareFollower", "contact Invite sent!");
+-                Observable.just(true).subscribe(invitedListener);
+-            }
+-
+-            @Override
+-            public void failure(RetrofitError retrofitError) {
+-                Log.e(TAG, "Sending invite", retrofitError);
+-                if (ShareAuthentication.shouldReAuth(context, retrofitError, inviteRetried)) {
+-                    inviteRetried = true;
+-                    tryInviteFollower();
+-                } else {
+-                    Observable.just(false).subscribe(invitedListener);
+-                }
+-            }
+-        });
+-    }
+-
+-    private Map<String, String> queryCheckContactExists() {
+-        Map<String, String> map = new HashMap<>();
+-        map.put("sessionID", sessionId);
+-        map.put("contactName", followerName);
+-        return map;
+-    }
+-
+-    private Map<String, String> queryCreateContact() {
+-        Map<String, String> map = new HashMap<>();
+-        map.put("sessionID", sessionId);
+-        map.put("contactName", followerName);
+-        map.put("emailAddress", email);
+-        return map;
+-    }
+-
+-    private Map<String, String> querySendInvite() {
+-        Map<String, String> map = new HashMap<>();
+-        map.put("sessionID", sessionId);
+-        map.put("contactId", contactId);
+-        return map;
+-    }
+-}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/Models/ShareAuthenticationBody.java b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/Models/ShareAuthenticationBody.java
+index fc91de0..6bcb708 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/Models/ShareAuthenticationBody.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/Models/ShareAuthenticationBody.java
+@@ -2,6 +2,9 @@
+ 
+ import com.google.gson.annotations.Expose;
+ 
++import java.util.Map;
++import java.util.TreeMap;
++
+ /**
+  * Created by stephenblack on 3/16/15.
+  */
+@@ -20,4 +23,12 @@ public ShareAuthenticationBody(String aPassword, String aAccountName) {
+         this.accountName = aAccountName;
+         this.applicationId = "d89443d2-327c-4a6f-89e5-496bbb0317db";
+     }
++
++    public Map<String, String> toMap() {
++        Map<String, String> map = new TreeMap<>();
++        map.put("password", password);
++        map.put("applicationId", applicationId);
++        map.put("accountName", accountName);
++        return map;
++    }
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareAuthentication.java b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareAuthentication.java
+deleted file mode 100644
+index 177360e..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareAuthentication.java
++++ /dev/null
+@@ -1,355 +0,0 @@
+-package com.eveningoutpost.dexdrip.ShareModels;
+-
+-import android.content.Context;
+-import android.content.SharedPreferences;
+-import android.preference.PreferenceManager;
+-import android.util.Log;
+-
+-import com.eveningoutpost.dexdrip.ShareModels.Models.ShareAuthenticationBody;
+-import com.eveningoutpost.dexdrip.ShareModels.UserAgentInfo.UserAgent;
+-import com.google.gson.Gson;
+-import com.google.gson.GsonBuilder;
+-import com.squareup.okhttp.OkHttpClient;
+-
+-import java.security.cert.CertificateException;
+-import java.util.HashMap;
+-import java.util.Map;
+-
+-import javax.net.ssl.HostnameVerifier;
+-import javax.net.ssl.SSLContext;
+-import javax.net.ssl.SSLSession;
+-import javax.net.ssl.SSLSocketFactory;
+-import javax.net.ssl.TrustManager;
+-import javax.net.ssl.X509TrustManager;
+-
+-import retrofit.Callback;
+-import retrofit.RequestInterceptor;
+-import retrofit.RestAdapter;
+-import retrofit.RetrofitError;
+-import retrofit.android.AndroidLog;
+-import retrofit.client.OkClient;
+-import retrofit.client.Response;
+-import retrofit.converter.GsonConverter;
+-import retrofit.mime.TypedByteArray;
+-import rx.Observable;
+-import rx.functions.Action1;
+-
+-/**
+- * Created by stephenblack on 7/31/15.
+- */
+-public class ShareAuthentication {
+-    private final static String TAG = ShareAuthentication.class.getSimpleName();
+-    private Context mContext;
+-    private String login;
+-    private String password;
+-    private String receiverSn;
+-    private String sessionId = null;
+-    private SharedPreferences prefs;
+-    private Action1<Boolean> authListener;
+-    OkClient client;
+-
+-    public static Gson gson = new GsonBuilder()
+-            .excludeFieldsWithoutExposeAnnotation()
+-            .create();
+-
+-    public ShareAuthentication(String login, String password, String receiverSerialNumber, Context context, final Action1<Boolean> authListener) {
+-        this.client = getOkClient();
+-        this.mContext = context;
+-        this.prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+-        this.login = login;
+-        this.password = password;
+-        this.receiverSn = receiverSerialNumber.toUpperCase();
+-        this.authListener = authListener;
+-    }
+-
+-    public static void invalidate(Context context){
+-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+-        prefs.edit().putString("dexcom_share_session_id", "").apply();
+-    }
+-
+-    public void authenticate() {
+-        if (login.length() == 0 || password.length() == 0 || receiverSn.length() == 0 || receiverSn.equals("SM00000000")) {
+-            authFailure();
+-        }
+-
+-        sessionId = prefs.getString("dexcom_share_session_id", "");
+-        if(sessionId.length() != 0) {
+-            Log.d(TAG, "We already have a stored session ID");
+-            authSuccess();
+-        } else {
+-            Log.d(TAG, "There is no stored session id, we need to get a new one");
+-            getValidSessionId();
+-        }
+-    }
+-
+-    private void authSuccess() {
+-        prefs.edit().putString("dexcom_share_session_id", sessionId).apply();
+-        Observable.just(true).subscribe(authListener);
+-    }
+-
+-    private void authFailure() {
+-        prefs.edit().putString("dexcom_share_session_id", "").apply();
+-        Observable.just(false).subscribe(authListener);
+-    }
+-
+-    public void getValidSessionId() {
+-        if (sessionId != null && !sessionId.equalsIgnoreCase("")) {
+-            Log.d(TAG, "Session ID not null, checking if active");
+-            emptyBodyInterface().checkSessionActive(querySessionMap(sessionId), new Callback<Response>() {
+-                @Override
+-                public void success(Response o, Response response) {
+-                    Log.d(TAG, "Success!! got a response checking if session is active");
+-                    if (response.getBody() != null) {
+-                        if(new String(((TypedByteArray) response.getBody()).getBytes()).toLowerCase().contains("true")) {
+-                            Log.d(TAG, "Session is active :-)");
+-                            authSuccess();
+-                        } else {
+-                            Log.d(TAG, "Session is apparently not active :-( " + new String(((TypedByteArray) response.getBody()).getBytes()));
+-                            StartRemoteMonitoringSession();
+-                        }
+-                    }
+-                }
+-
+-                @Override
+-                public void failure(RetrofitError retrofitError) {
+-                    sessionId = null;
+-                    Log.e(TAG, "Failed to check if session is active", retrofitError);
+-                    getValidSessionId();
+-                }
+-            });
+-        } else {
+-            Log.d(TAG, "Session ID is null, Getting a new one");
+-            jsonBodyInterface().getSessionId(new ShareAuthenticationBody(password, login), new Callback<Response>() {
+-                @Override
+-                public void success(Response o, Response response) {
+-                    Log.d(TAG, "Success!! got a response on auth.");
+-                    sessionId = new String(((TypedByteArray) response.getBody()).getBytes()).replace("\"", "");
+-                    sendUserAgentData();
+-                }
+-
+-                @Override
+-                public void failure(RetrofitError retrofitError) {
+-                    Log.e(TAG, "Unable to auth", retrofitError);
+-                    authFailure();
+-                }
+-            });
+-        }
+-    }
+-
+-    public void sendUserAgentData() {
+-        jsonBodyInterface().updatePublisherAccountInfo(new UserAgent(sessionId), new Callback<Response>() {
+-            @Override
+-            public void success(Response o, Response response) {
+-                Log.d(TAG, "User Agent Data Updated!!");
+-                checkAndSetRecieverAssignment();
+-            }
+-
+-            @Override
+-            public void failure(RetrofitError retrofitError) {
+-                Log.e(TAG, "Error updating user agent data", retrofitError);
+-                authFailure();
+-            }
+-        });
+-    }
+-
+-    public void StartRemoteMonitoringSession() {
+-        if (sessionId != null && !sessionId.equalsIgnoreCase("")) {
+-            jsonBodyInterface().authenticatePublisherAccount(new ShareAuthenticationBody(password, login), queryActivateSessionMap(), new Callback<Response>() {
+-                @Override
+-                public void success(Response o, Response response) {
+-                    Log.d(TAG, "Success!! Authenticated Publisher account!!!");
+-                    emptyBodyInterface().StartRemoteMonitoringSession(queryActivateSessionMap(), new Callback<Response>() {
+-                        @Override
+-                        public void success(Response o, Response response) {
+-                            Log.d(TAG, "Success!! Our remote monitoring session is up!");
+-                            if (response.getBody() != null) {
+-                                authSuccess();
+-                            }
+-                        }
+-
+-                        @Override
+-                        public void failure(RetrofitError retrofitError) {
+-                            Log.e(TAG, "Unable to start a remote monitoring session", retrofitError);
+-                            authFailure();
+-                        }
+-                    });
+-                }
+-
+-                @Override
+-                public void failure(RetrofitError retrofitError) {
+-                    Log.e(TAG, "Unable to authenticate publisher account", retrofitError);
+-                    authFailure();
+-                }
+-            });
+-        }
+-    }
+-
+-    public void checkAndSetRecieverAssignment() {
+-        emptyBodyInterface().checkMonitorAssignment(queryActivateSessionMap(), new Callback<Response>() {
+-            @Override
+-            public void success(Response o, Response response) {
+-                Log.d(TAG, "Success!! Our remote monitoring session is up!");
+-                if (response.getBody() != null) {
+-                    if (!(new String(((TypedByteArray) response.getBody()).getBytes()).contains("AssignedToYou"))) {
+-
+-                        Log.e("Receiver trouble: ", "That receiver is not assigned to your account, trying to re-assign");
+-                        emptyBodyInterface().updateMonitorAssignment(queryActivateSessionMap(), new Callback<Response>() {
+-                            @Override
+-                            public void success(Response o, Response response) {
+-                                getValidSessionId();
+-                            }
+-                            @Override
+-                            public void failure(RetrofitError retrofitError) {
+-                                Log.e(TAG, "Unable to set yourself as the publisher for that receiver", retrofitError);
+-                                authFailure();
+-                            }
+-                        });
+-                    } else {
+-                        getValidSessionId();
+-                    }
+-                }
+-            }
+-
+-            @Override
+-            public void failure(RetrofitError retrofitError) {
+-                Log.e(TAG, "Unable to check receiver ownership", retrofitError);
+-                authFailure();
+-            }
+-        });
+-    }
+-
+-    public DexcomShareInterface jsonBodyInterface() {
+-        RestAdapter adapter = authoirizeAdapterBuilder().build();
+-        DexcomShareInterface dexcomShareInterface =
+-                adapter.create(DexcomShareInterface.class);
+-        return dexcomShareInterface;
+-    }
+-
+-    public DexcomShareInterface emptyBodyInterface() {
+-        RestAdapter adapter = getBgAdapterBuilder().build();
+-        DexcomShareInterface checkSessionActive =
+-                adapter.create(DexcomShareInterface.class);
+-        return checkSessionActive;
+-    }
+-
+-    private RestAdapter.Builder authoirizeAdapterBuilder() {
+-        RestAdapter.Builder adapterBuilder = new RestAdapter.Builder();
+-        adapterBuilder
+-                .setClient(client)
+-                .setLogLevel(RestAdapter.LogLevel.FULL).setLog(new AndroidLog(TAG))
+-                .setEndpoint("https://share1.dexcom.com/ShareWebServices/Services")
+-                .setRequestInterceptor(authorizationRequestInterceptor)
+-                .setConverter(new GsonConverter(new GsonBuilder()
+-                        .excludeFieldsWithoutExposeAnnotation()
+-                        .create()));
+-        return adapterBuilder;
+-    }
+-
+-    private RestAdapter.Builder getBgAdapterBuilder() {
+-        RestAdapter.Builder adapterBuilder = new RestAdapter.Builder();
+-        adapterBuilder
+-                .setClient(client)
+-                .setLogLevel(RestAdapter.LogLevel.FULL).setLog(new AndroidLog(TAG))
+-                .setEndpoint("https://share1.dexcom.com/ShareWebServices/Services")
+-                .setRequestInterceptor(getBgRequestInterceptor)
+-                .setConverter(new GsonConverter(new GsonBuilder()
+-                        .excludeFieldsWithoutExposeAnnotation()
+-                        .create()));
+-        return adapterBuilder;
+-    }
+-
+-    static RequestInterceptor authorizationRequestInterceptor = new RequestInterceptor() {
+-        @Override
+-        public void intercept(RequestInterceptor.RequestFacade request) {
+-            request.addHeader("User-Agent", "Dexcom Share/3.0.2.11 CFNetwork/711.2.23 Darwin/14.0.0");
+-            request.addHeader("Content-Type", "application/json");
+-            request.addHeader("Accept", "application/json");
+-        }
+-    };
+-    RequestInterceptor getBgRequestInterceptor = new RequestInterceptor() {
+-        @Override
+-        public void intercept(RequestInterceptor.RequestFacade request) {
+-            request.addHeader("User-Agent", "Dexcom Share/3.0.2.11 CFNetwork/711.2.23 Darwin/14.0.0");
+-            request.addHeader("Content-Type", "application/json");
+-            request.addHeader("Content-Length", "0");
+-            request.addHeader("Accept", "application/json");
+-        }
+-    };
+-
+-    public OkHttpClient getOkHttpClient() {
+-        try {
+-            final TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+-                @Override
+-                public void checkClientTrusted(
+-                        java.security.cert.X509Certificate[] chain,
+-                        String authType) throws CertificateException {
+-                }
+-
+-                @Override
+-                public void checkServerTrusted( java.security.cert.X509Certificate[] chain,
+-                        String authType) throws CertificateException {
+-                }
+-
+-                @Override
+-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+-                    return null;
+-                }
+-            } };
+-
+-            final SSLContext sslContext = SSLContext.getInstance("SSL");
+-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+-            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+-
+-            OkHttpClient okHttpClient = new OkHttpClient();
+-            okHttpClient.setSslSocketFactory(sslSocketFactory);
+-            okHttpClient.setHostnameVerifier(new HostnameVerifier() {
+-
+-                @Override
+-                public boolean verify(String hostname, SSLSession session) {
+-                    return true;
+-                }
+-            });
+-
+-            return okHttpClient;
+-        } catch (Exception e) {
+-            throw new RuntimeException(e);
+-        }
+-    }
+-
+-    public OkClient getOkClient (){
+-        OkHttpClient client1 = getOkHttpClient();
+-        OkClient _client = new OkClient(client1);
+-        return _client;
+-    }
+-
+-    public Map<String, String> querySessionMap(String sessionId) {
+-        Map map = new HashMap<String, String>();
+-        map.put("sessionID", sessionId);
+-        return map;
+-    }
+-
+-    public Map<String, String> queryActivateSessionMap() {
+-        Map map = new HashMap<String, String>();
+-        map.put("sessionID", sessionId);
+-        map.put("serialNumber", receiverSn);
+-        return map;
+-    }
+-
+-    public static boolean shouldReAuth(Context context, RetrofitError retrofitError, boolean retried) {
+-        if (body(retrofitError).toLowerCase().contains("session") && !retried) {
+-            ShareAuthentication.invalidate(context);
+-            return true;
+-        } else {
+-            Log.e("ShareServerError", "Body: " + body(retrofitError));
+-            return false;
+-        }
+-    }
+-
+-    public static String body(Response response) {
+-        return (response == null) ? "" : ((response.getBody() == null) ? "" : new String(((TypedByteArray) (response.getBody())).getBytes()));
+-    }
+-
+-    public static String body(RetrofitError error) {
+-        return body(error.getResponse());
+-    }
+-}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareRest.java b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareRest.java
+index 20db159..700386c 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareRest.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareRest.java
+@@ -1,12 +1,28 @@
+ package com.eveningoutpost.dexdrip.ShareModels;
+ 
++import android.content.Context;
++import android.content.SharedPreferences;
++import android.os.AsyncTask;
++import android.preference.PreferenceManager;
++import android.util.Log;
++
++import com.eveningoutpost.dexdrip.ShareModels.Models.ExistingFollower;
++import com.eveningoutpost.dexdrip.ShareModels.Models.InvitationPayload;
++import com.eveningoutpost.dexdrip.ShareModels.Models.ShareAuthenticationBody;
++import com.eveningoutpost.dexdrip.ShareModels.Models.ShareUploadPayload;
+ import com.google.gson.Gson;
+ import com.google.gson.GsonBuilder;
++import com.squareup.okhttp.Interceptor;
++import com.squareup.okhttp.MediaType;
+ import com.squareup.okhttp.OkHttpClient;
++import com.squareup.okhttp.Request;
++import com.squareup.okhttp.Response;
++import com.squareup.okhttp.ResponseBody;
+ 
++import java.io.IOException;
+ import java.security.cert.CertificateException;
+-import java.util.HashMap;
+-import java.util.Map;
++import java.util.List;
++import java.util.concurrent.ExecutionException;
+ 
+ import javax.net.ssl.HostnameVerifier;
+ import javax.net.ssl.SSLContext;
+@@ -15,85 +31,64 @@
+ import javax.net.ssl.TrustManager;
+ import javax.net.ssl.X509TrustManager;
+ 
+-import retrofit.RequestInterceptor;
+-import retrofit.RestAdapter;
+-import retrofit.android.AndroidLog;
+-import retrofit.client.OkClient;
+-import retrofit.converter.GsonConverter;
++import okio.Buffer;
++import retrofit.Callback;
++import retrofit.GsonConverterFactory;
++import retrofit.Retrofit;
+ 
+ /**
+  * Created by stephenblack on 12/26/14.
+  */
+ public class ShareRest {
+-    public final static String TAG = ShareRest.class.getSimpleName();
++    public static String TAG = ShareRest.class.getSimpleName();
+ 
+-    public static Gson gson = new GsonBuilder()
+-            .excludeFieldsWithoutExposeAnnotation()
+-            .create();
++    private String sessionId;
+ 
+-    public static DexcomShareInterface jsonBodyInterface() {
+-        RestAdapter adapter = authoirizeAdapterBuilder().build();
+-        DexcomShareInterface dexcomShareInterface =
+-                adapter.create(DexcomShareInterface.class);
+-        return dexcomShareInterface;
+-    }
++    private String username;
++    private String password;
++    private String serialNumber;
++    private DexcomShare dexcomShareApi;
+ 
+-    public static DexcomShareInterface emptyBodyInterface() {
+-        RestAdapter adapter = getBgAdapterBuilder().build();
+-        DexcomShareInterface checkSessionActive =
+-                adapter.create(DexcomShareInterface.class);
+-        return checkSessionActive;
+-    }
++    private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
++        @Override
++        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
++            if ("dexcom_account_name".equals(key)) {
++                username = sharedPreferences.getString(key, null);
++            } else if ("dexcom_account_password".equals(key)) {
++                password = sharedPreferences.getString(key, null);
++            } else if ("share_key".equals(key)) {
++                serialNumber = sharedPreferences.getString(key, null);
++            }
+ 
+-    private static RestAdapter.Builder authoirizeAdapterBuilder() {
+-        RestAdapter.Builder adapterBuilder = new RestAdapter.Builder();
+-        adapterBuilder
+-                .setClient(getOkClient())
+-                .setLogLevel(RestAdapter.LogLevel.FULL).setLog(new AndroidLog(TAG))
+-                .setEndpoint("https://share1.dexcom.com/ShareWebServices/Services")
+-                .setRequestInterceptor(authorizationRequestInterceptor())
+-                .setConverter(new GsonConverter(new GsonBuilder()
+-                        .excludeFieldsWithoutExposeAnnotation()
+-                        .create()));
+-        return adapterBuilder;
+-    }
++        }
++    };
+ 
+-    private static RestAdapter.Builder getBgAdapterBuilder() {
+-        RestAdapter.Builder adapterBuilder = new RestAdapter.Builder();
+-        adapterBuilder
+-                .setClient(getOkClient())
+-                .setLogLevel(RestAdapter.LogLevel.FULL).setLog(new AndroidLog(TAG))
+-                .setEndpoint("https://share1.dexcom.com/ShareWebServices/Services")
+-                .setRequestInterceptor(getBgRequestInterceptor())
+-                .setConverter(new GsonConverter(new GsonBuilder()
+-                        .excludeFieldsWithoutExposeAnnotation()
+-                        .create()));
+-        return adapterBuilder;
+-    }
++    private static final String SHARE_BASE_URL = "https://share1.dexcom.com/ShareWebServices/Services/";
++    private SharedPreferences sharedPreferences;
+ 
+-    public static RequestInterceptor authorizationRequestInterceptor() {
+-        return new RequestInterceptor() {
+-            @Override
+-            public void intercept(RequestInterceptor.RequestFacade request) {
+-                request.addHeader("User-Agent", "Dexcom Share/3.0.2.11 CFNetwork/711.2.23 Darwin/14.0.0");
+-                request.addHeader("Content-Type", "application/json");
+-                request.addHeader("Accept", "application/json");
+-            }
+-        };
+-    }
+-    public static RequestInterceptor getBgRequestInterceptor() {
+-        return new RequestInterceptor() {
+-            @Override
+-            public void intercept(RequestInterceptor.RequestFacade request) {
+-                request.addHeader("User-Agent", "Dexcom Share/3.0.2.11 CFNetwork/711.2.23 Darwin/14.0.0");
+-                request.addHeader("Content-Type", "application/json");
+-                request.addHeader("Content-Length", "0");
+-                request.addHeader("Accept", "application/json");
+-            }
+-        };
++    public ShareRest (Context context, OkHttpClient okHttpClient) {
++        OkHttpClient httpClient = okHttpClient != null ? okHttpClient : getOkHttpClient();
++
++        Gson gson = new GsonBuilder()
++                .excludeFieldsWithoutExposeAnnotation()
++                .create();
++        Retrofit retrofit = new Retrofit.Builder()
++                .baseUrl(SHARE_BASE_URL)
++                .client(httpClient)
++                .addConverterFactory(GsonConverterFactory.create(gson))
++                .build();
++        dexcomShareApi = retrofit.create(DexcomShare.class);
++        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
++        sessionId = sharedPreferences.getString("dexcom_share_session_id", null);
++        username = sharedPreferences.getString("dexcom_account_name", null);
++        password = sharedPreferences.getString("dexcom_account_password", null);
++        serialNumber = sharedPreferences.getString("share_key", null);
++        sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
++        if ("".equals(sessionId)) // migrate previous empty sessionIds to null;
++            sessionId = null;
+     }
+ 
+-    public static OkHttpClient getOkHttpClient() {
++    public OkHttpClient getOkHttpClient() {
+         try {
+             final TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+                 @Override
+@@ -119,6 +114,34 @@ public void checkServerTrusted(
+             final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+ 
+             OkHttpClient okHttpClient = new OkHttpClient();
++            okHttpClient.networkInterceptors().add(new Interceptor() {
++                @Override
++                public Response intercept(Chain chain) throws IOException {
++                    // Add user-agent and relevant headers.
++                    Request original = chain.request();
++                    Request copy = original.newBuilder().build();
++                    Request modifiedRequest = original.newBuilder()
++                            .header("User-Agent", "Dexcom Share/3.0.2.11 CFNetwork/711.2.23 Darwin/14.0.0")
++                            .header("Content-Type", "application/json")
++                            .header("Accept", "application/json")
++                            .build();
++                    Log.d(TAG, "Sending request: " + modifiedRequest.toString());
++                    Buffer buffer = new Buffer();
++                    copy.body().writeTo(buffer);
++                    Log.d(TAG, "Request body: " + buffer.readUtf8());
++
++                    Response response = chain.proceed(modifiedRequest);
++                    Log.d(TAG, "Received response: " + response.toString());
++                    if (response.body() != null) {
++                        MediaType contentType = response.body().contentType();
++                        String bodyString = response.body().string();
++                        Log.d(TAG, "Response body: " + bodyString);
++                        return response.newBuilder().body(ResponseBody.create(contentType, bodyString)).build();
++                    } else
++                        return response;
++                }
++            });
++
+             okHttpClient.setSslSocketFactory(sslSocketFactory);
+             okHttpClient.setHostnameVerifier(new HostnameVerifier() {
+ 
+@@ -130,19 +153,133 @@ public boolean verify(String hostname, SSLSession session) {
+ 
+             return okHttpClient;
+         } catch (Exception e) {
+-            throw new RuntimeException(e);
++            throw new RuntimeException("Error occurred initializing OkHttp: ", e);
+         }
+     }
+ 
+-    public static OkClient getOkClient (){
+-        OkHttpClient client1 = getOkHttpClient();
+-        OkClient _client = new OkClient(client1);
+-        return _client;
++    public String getSessionId() {
++        AsyncTask<String, Void, String> task = new AsyncTask<String, Void, String>() {
++
++            @Override
++            protected String doInBackground(String... params) {
++                try {
++                    Boolean isActive = null;
++                    if (params[0] != null)
++                        isActive = dexcomShareApi.checkSessionActive(params[0]).execute().body();
++                    if (isActive == null || !isActive) {
++                        return updateAuthenticationParams();
++                    } else
++                        return params[0];
++                } catch (IOException e) {
++                    return null;
++                }
++            }
++
++            private String updateAuthenticationParams() throws IOException {
++                sessionId = dexcomShareApi.getSessionId(new ShareAuthenticationBody(password, username).toMap()).execute().body();
++                dexcomShareApi.authenticatePublisherAccount(sessionId, serialNumber, new ShareAuthenticationBody(password, username).toMap()).execute().body();
++                dexcomShareApi.StartRemoteMonitoringSession(sessionId, serialNumber).execute();
++                String assignment = dexcomShareApi.checkMonitorAssignment(sessionId, serialNumber).execute().body();
++                if (!assignment.equals("AssignedToYou")) {
++                    dexcomShareApi.updateMonitorAssignment(sessionId, serialNumber).execute();
++                }
++                return sessionId;
++            }
++
++        };
++
++        if (sessionId == null || sessionId.equals(""))
++            try {
++                sessionId = task.execute(sessionId).get();
++            } catch (InterruptedException | ExecutionException e) {
++                e.printStackTrace();
++            }
++        return sessionId;
++    }
++
++    public void getContacts(Callback<List<ExistingFollower>> existingFollowerListener) {
++        dexcomShareApi.getContacts(getSessionId()).enqueue(new AuthenticatingCallback<List<ExistingFollower>>(existingFollowerListener) {
++            @Override
++            public void onRetry() {
++                dexcomShareApi.getContacts(getSessionId()).enqueue(this);
++            }
++        });
++    }
++
++    public void uploadBGRecords(final ShareUploadPayload bg, Callback<ResponseBody> callback) {
++        dexcomShareApi.uploadBGRecords(getSessionId(), bg).enqueue(new AuthenticatingCallback<ResponseBody>(callback) {
++            @Override
++            public void onRetry() {
++                dexcomShareApi.uploadBGRecords(getSessionId(), bg).enqueue(this);
++            }
++        });
++    }
++
++    public void createContact(final String followerName, final String followerEmail, Callback<String> callback) {
++        dexcomShareApi.createContact(getSessionId(), followerName, followerEmail).enqueue(new AuthenticatingCallback<String>(callback) {
++            @Override
++            public void onRetry() {
++                dexcomShareApi.createContact(getSessionId(), followerName, followerEmail).enqueue(this);
++            }
++        });
++    }
++
++    public void createInvitationForContact(final String contactId, final InvitationPayload invitationPayload, Callback<String> callback) {
++        dexcomShareApi.createInvitationForContact(getSessionId(), contactId, invitationPayload).enqueue(new AuthenticatingCallback<String>(callback) {
++            @Override
++            public void onRetry() {
++                dexcomShareApi.createInvitationForContact(getSessionId(), contactId, invitationPayload).enqueue(this);
++            }
++        });
++    }
++
++    public void deleteContact(final String contactId, Callback<ResponseBody> deleteFollowerListener) {
++        dexcomShareApi.deleteContact(getSessionId(), contactId).enqueue(new AuthenticatingCallback<ResponseBody>(deleteFollowerListener) {
++            @Override
++            public void onRetry() {
++                dexcomShareApi.deleteContact(getSessionId(), contactId).enqueue(this);
++            }
++        });
+     }
+ 
+-    public static Map<String, String> querySessionMap(String sessionId) {
+-        Map map = new HashMap<String, String>();
+-        map.put("sessionID", sessionId);
+-        return map;
++    public abstract class AuthenticatingCallback<T> implements Callback<T> {
++
++        private int attempts = 0;
++        private Callback<T> delegate;
++        public AuthenticatingCallback (Callback<T> callback) {
++            this.delegate = callback;
++        }
++
++        public abstract void onRetry();
++
++        @Override
++        public void onResponse(retrofit.Response<T> response, Retrofit retrofit) {
++            if (response.code() == 500 && attempts == 0) {
++                // retry with new session ID
++                attempts += 1;
++                dexcomShareApi.getSessionId(new ShareAuthenticationBody(password, username).toMap()).enqueue(new Callback<String>() {
++                    @Override
++                    public void onResponse(retrofit.Response<String> response, Retrofit retrofit) {
++                        if (response.isSuccess()) {
++                            sessionId = response.body();
++                            ShareRest.this.sharedPreferences.edit().putString("dexcom_share_session_id", sessionId).apply();
++                            onRetry();
++                        }
++                    }
++
++                    @Override
++                    public void onFailure(Throwable t) {
++                        delegate.onFailure(t);
++                    }
++                });
++            } else {
++                delegate.onResponse(response, retrofit);
++            }
++        }
++
++        @Override
++        public void onFailure(Throwable t) {
++            delegate.onFailure(t);
++        }
+     }
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareUploadableBg.java b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareUploadableBg.java
+index e5ca195..07d554b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareUploadableBg.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ShareModels/ShareUploadableBg.java
+@@ -4,9 +4,9 @@
+  * Created by stephenblack on 8/10/15.
+  */
+ public interface ShareUploadableBg {
+-    public int getMgdlValue();
+-    public long getEpochTimestamp(); //in milliseconds
+-    public int getSlopeOrdinal();
++    int getMgdlValue();
++    long getEpochTimestamp(); //in milliseconds
++    int getSlopeOrdinal();
+ 
+     //Ordinals:
+     //  0 - NONE
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ShareTest.java b/app/src/main/java/com/eveningoutpost/dexdrip/ShareTest.java
+index 36c0b43..2df5efa 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ShareTest.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ShareTest.java
+@@ -1,8 +1,6 @@
+ package com.eveningoutpost.dexdrip;
+ 
+ import android.app.Activity;
+-import android.app.AlarmManager;
+-import android.app.PendingIntent;
+ import android.bluetooth.BluetoothAdapter;
+ import android.bluetooth.BluetoothDevice;
+ import android.bluetooth.BluetoothGatt;
+@@ -19,19 +17,12 @@
+ import android.content.SharedPreferences;
+ import android.os.Bundle;
+ import android.preference.PreferenceManager;
+-import android.text.TextUtils;
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+-import android.view.Menu;
+-import android.view.MenuItem;
+ import android.view.View;
+ import android.widget.Button;
+-import android.widget.EditText;
+ import android.widget.TextView;
+ import android.widget.Toast;
+ 
+ import com.activeandroid.query.Select;
+-import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.PacketBuilder;
+-import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.ReadData;
+ import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.ReadDataShare;
+ import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.records.CalRecord;
+ import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.records.EGVRecord;
+@@ -39,15 +30,12 @@
+ import com.eveningoutpost.dexdrip.Models.ActiveBluetoothDevice;
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.eveningoutpost.dexdrip.Models.Calibration;
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ import com.eveningoutpost.dexdrip.UtilityModels.DexShareAttributes;
+ import com.eveningoutpost.dexdrip.UtilityModels.ForegroundServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.HM10Attributes;
+ 
+-import java.lang.reflect.Method;
+-import java.nio.ByteBuffer;
+ import java.nio.charset.StandardCharsets;
+-import java.util.ArrayList;
+-import java.util.Calendar;
+ import java.util.Date;
+ import java.util.List;
+ import java.util.UUID;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
+index bbf5e55..ddd0383 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
+@@ -29,7 +29,6 @@
+     private MediaPlayer mediaPlayer;
+     int volumeBeforeAlert;
+     int volumeForThisAlert;
+-    Context context;
+ 
+     final static int ALERT_PROFILE_HIGH = 1;
+     final static int ALERT_PROFILE_ASCENDING = 2;
+@@ -59,9 +58,9 @@ public synchronized  void startAlert(Context ctx, boolean trendingToAlertEnd, Al
+         }
+ 
+         stopAlert(ctx, true, false);
+-        int alertIn = newAlert.minutes_between;
+-        if(alertIn < 1) { alertIn = 1; }
+-        ActiveBgAlert.Create(newAlert.uuid, false, new Date().getTime() + alertIn * 60000 );
++
++        long nextAlertTime = newAlert.getNextAlertTime(ctx);
++        ActiveBgAlert.Create(newAlert.uuid, false, nextAlertTime );
+         Vibrate(ctx, newAlert, bgValue, newAlert.override_silent_mode, 0);
+     }
+ 
+@@ -128,12 +127,15 @@ public void ClockTick(Context ctx, boolean trendingToAlertEnd, String bgValue)
+                 return;
+             }
+             Log.d(TAG,"ClockTick: Playing the alert again");
++            long nextAlertTime = alert.getNextAlertTime(ctx);
++            activeBgAlert.updateNextAlertAt(nextAlertTime);
++            
+             Vibrate(ctx, alert, bgValue, alert.override_silent_mode, timeFromStartPlaying);
+         }
+ 
+     }
+ 
+-    private void PlayFile(Context ctx, String FileName, float VolumeFrac) {
++    private void PlayFile(final Context ctx, String FileName, float VolumeFrac) {
+         Log.i(TAG, "PlayFile: called FileName = " + FileName);
+         if(mediaPlayer != null) {
+             Log.i(TAG, "ERROR, PlayFile:going to leak a mediaplayer !!!");
+@@ -151,13 +153,12 @@ private void PlayFile(Context ctx, String FileName, float VolumeFrac) {
+             volumeBeforeAlert = manager.getStreamVolume(AudioManager.STREAM_MUSIC);
+             volumeForThisAlert = (int)(maxVolume * VolumeFrac);
+             manager.setStreamVolume(AudioManager.STREAM_MUSIC, volumeForThisAlert, 0);
+-            context = ctx;
+ 
+             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                 @Override
+                 public void onCompletion(MediaPlayer mp) {
+                     Log.i(TAG, "PlayFile: onCompletion called (finished playing) ");
+-                    AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
++                    AudioManager manager = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
+                     int currentVolume = manager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                     if(volumeForThisAlert == currentVolume) {
+                         // If the user has changed the volume, don't change it again.
+@@ -209,6 +210,11 @@ static private int getAlertProfile(Context ctx){
+         return ALERT_PROFILE_ASCENDING;
+ 
+     }
++    
++    public static boolean isAscendingMode(Context ctx){
++        Log.d("Adrian", "(getAlertProfile(ctx) == ALERT_PROFILE_ASCENDING): " + (getAlertProfile(ctx) == ALERT_PROFILE_ASCENDING));
++        return getAlertProfile(ctx) == ALERT_PROFILE_ASCENDING;
++    }
+ 
+     private void Vibrate(Context ctx, AlertType alert, String bgValue, Boolean overrideSilent, int timeFromStartPlaying) {
+         Log.d(TAG, "Vibrate called timeFromStartPlaying = " + timeFromStartPlaying);
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java
+index cff16ab..b21d5b4 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java
+@@ -21,10 +21,10 @@
+ import com.activeandroid.query.Select;
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.eveningoutpost.dexdrip.Services.SyncService;
+-import com.eveningoutpost.dexdrip.ShareModels.ShareRest;
++import com.eveningoutpost.dexdrip.ShareModels.Models.ShareUploadPayload;
+ import com.eveningoutpost.dexdrip.utils.BgToSpeech;
+ import com.eveningoutpost.dexdrip.ShareModels.BgUploader;
+-import com.eveningoutpost.dexdrip.widgetUpdateService;
++import com.eveningoutpost.dexdrip.WidgetUpdateService;
+ import com.eveningoutpost.dexdrip.xDripWidget;
+ 
+ import java.util.List;
+@@ -94,7 +94,7 @@ public static void addToQueue(BgReading bgReading, String operation_type, Contex
+             context.sendBroadcast(updateIntent);
+ 
+             if(AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, xDripWidget.class)).length > 0){
+-                context.startService(new Intent(context, widgetUpdateService.class));
++                context.startService(new Intent(context, WidgetUpdateService.class));
+             }
+ 
+             if (prefs.getBoolean("broadcast_data_through_intents", false)) {
+@@ -160,11 +160,9 @@ public static void addToQueue(BgReading bgReading, String operation_type, Contex
+ 
+             if (prefs.getBoolean("share_upload", false)) {
+                 Log.d("ShareRest", "About to call ShareRest!!");
+-                String login = prefs.getString("dexcom_account_name", "");
+-                String password = prefs.getString("dexcom_account_password", "");
+                 String receiverSn = prefs.getString("share_key", "SM00000000").toUpperCase();
+-                BgUploader bgUploader = new BgUploader(login, password, receiverSn, context);
+-                bgUploader.upload(bgReading);
++                BgUploader bgUploader = new BgUploader(context);
++                bgUploader.upload(new ShareUploadPayload(receiverSn, bgReading));
+             }
+             context.startService(new Intent(context, SyncService.class));
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+index 9feae27..224668b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+@@ -10,6 +10,7 @@
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.eveningoutpost.dexdrip.Models.Calibration;
+ import com.eveningoutpost.dexdrip.Models.UserError.Log;
++import com.google.common.base.Charsets;
+ import com.google.common.hash.Hashing;
+ import com.mongodb.BasicDBObject;
+ import com.mongodb.DB;
+@@ -17,19 +18,12 @@
+ import com.mongodb.MongoClient;
+ import com.mongodb.MongoClientURI;
+ import com.mongodb.WriteConcern;
++import com.squareup.okhttp.MediaType;
++import com.squareup.okhttp.OkHttpClient;
++import com.squareup.okhttp.RequestBody;
++import com.squareup.okhttp.ResponseBody;
+ 
+-import net.tribe7.common.base.Charsets;
+-
+-import org.apache.http.Header;
+-import org.apache.http.client.ResponseHandler;
+-import org.apache.http.client.methods.HttpPost;
+-import org.apache.http.entity.StringEntity;
+-import org.apache.http.impl.client.BasicResponseHandler;
+-import org.apache.http.impl.client.DefaultHttpClient;
+-import org.apache.http.message.BasicHeader;
+-import org.apache.http.params.BasicHttpParams;
+-import org.apache.http.params.HttpConnectionParams;
+-import org.apache.http.params.HttpParams;
++import org.json.JSONArray;
+ import org.json.JSONObject;
+ 
+ import java.net.URI;
+@@ -37,7 +31,16 @@
+ import java.util.ArrayList;
+ import java.util.Date;
+ import java.util.List;
++import java.util.Locale;
+ import java.util.TimeZone;
++import java.util.concurrent.TimeUnit;
++
++import retrofit.Call;
++import retrofit.Response;
++import retrofit.Retrofit;
++import retrofit.http.Body;
++import retrofit.http.Header;
++import retrofit.http.POST;
+ 
+ /**
+  * THIS CLASS WAS BUILT BY THE NIGHTSCOUT GROUP FOR THEIR NIGHTSCOUT ANDROID UPLOADER
+@@ -48,6 +51,7 @@
+  * -Stephen Black
+  */
+ public class NightscoutUploader {
++
+         private static final String TAG = NightscoutUploader.class.getSimpleName();
+         private static final int SOCKET_TIMEOUT = 60000;
+         private static final int CONNECTION_TIMEOUT = 30000;
+@@ -55,10 +59,39 @@
+         private Boolean enableRESTUpload;
+         private Boolean enableMongoUpload;
+         private SharedPreferences prefs;
++        private OkHttpClient client;
++
++        public interface NightscoutService {
++            @POST("entries")
++            Call<ResponseBody> upload(@Header("api-secret") String secret, @Body RequestBody body);
++
++            @POST("entries")
++            Call<ResponseBody> upload(@Body RequestBody body);
++
++            @POST("devicestatus")
++            Call<ResponseBody> uploadDeviceStatus(@Body RequestBody body);
++
++            @POST("devicestatus")
++            Call<ResponseBody> uploadDeviceStatus(@Header("api-secret") String secret, @Body RequestBody body);
++
++        }
++
++        private class UploaderException extends RuntimeException {
++            int code;
++
++            public UploaderException (String message, int code) {
++                super(message);
++                this.code = code;
++            }
++        }
+ 
+         public NightscoutUploader(Context context) {
+             mContext = context;
+             prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
++            client = new OkHttpClient();
++            client.setConnectTimeout(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
++            client.setWriteTimeout(SOCKET_TIMEOUT, TimeUnit.MILLISECONDS);
++            client.setReadTimeout(SOCKET_TIMEOUT, TimeUnit.MILLISECONDS);
+             enableRESTUpload = prefs.getBoolean("cloud_storage_api_enable", false);
+             enableMongoUpload = prefs.getBoolean("cloud_storage_mongodb_enable", false);
+         }
+@@ -80,7 +113,7 @@ public boolean upload(List<BgReading> glucoseDataSets, List<Calibration> meterRe
+                 Log.i(TAG, String.format("Finished upload of %s record using a Mongo in %s ms", glucoseDataSets.size() + meterRecords.size(), System.currentTimeMillis() - start));
+             }
+ 
+-                return apiStatus || mongoStatus;
++            return apiStatus || mongoStatus;
+         }
+ 
+         private boolean doRESTUpload(SharedPreferences prefs, List<BgReading> glucoseDataSets, List<Calibration> meterRecords, List<Calibration> calRecords) {
+@@ -100,157 +133,73 @@ private boolean doRESTUpload(SharedPreferences prefs, List<BgReading> glucoseDat
+ 
+             for (String baseURI : baseURIs) {
+                 try {
+-                    doRESTUploadTo(URI.create(baseURI), glucoseDataSets, meterRecords, calRecords);
+-                } catch (Exception e) {
+-                    Log.e(TAG, "Unable to do REST API Upload " + e.getMessage());
+-                    return false;
+-                }
+-            }
+-            return true;
+-        }
+-
+-        private void doRESTUploadTo(URI baseURI, List<BgReading> glucoseDataSets, List<Calibration> meterRecords, List<Calibration> calRecords) {
+-            try {
+-                int apiVersion = 0;
+-                if (baseURI.getPath().endsWith("/v1/")) apiVersion = 1;
+-
+-                String secret = baseURI.getUserInfo();
+-                String baseURL;
+-                if ((secret == null || secret.isEmpty()) && apiVersion == 0) {
+-                    baseURL = baseURI.toString();
+-                } else if ((secret == null || secret.isEmpty()) && apiVersion > 0) {
+-                    throw new Exception("Starting with API v1, a pass phase is required");
+-                } else if ((secret != null && !secret.isEmpty()) && apiVersion > 0) {
+-                    baseURL = baseURI.toString().replaceFirst("//[^@]+@", "//");
+-                } else {
+-                    throw new Exception("Unexpected baseURI");
+-                }
+-
+-                String postURL = baseURL + "entries";
+-                Log.i(TAG, "postURL: " + postURL);
+-
+-                HttpParams params = new BasicHttpParams();
+-                HttpConnectionParams.setSoTimeout(params, SOCKET_TIMEOUT);
+-                HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
+-
+-                DefaultHttpClient httpclient = new DefaultHttpClient(params);
+-
+-                HttpPost post = new HttpPost(postURL);
+-
+-                Header apiSecretHeader = null;
+-
+-                if (apiVersion > 0) {
+-                    if (secret == null || secret.isEmpty()) {
++                    int apiVersion = 0;
++                    URI uri = new URI(baseURI);
++                    if (uri.getPath().endsWith("/v1/")) apiVersion = 1;
++                    String baseURL;
++                    String secret = uri.getUserInfo();
++                    if ((secret == null || secret.isEmpty()) && apiVersion == 0) {
++                        baseURL = baseURI;
++                    } else if ((secret == null || secret.isEmpty())) {
+                         throw new Exception("Starting with API v1, a pass phase is required");
++                    } else if (apiVersion > 0) {
++                        baseURL = baseURI.replaceFirst("//[^@]+@", "//");
+                     } else {
+-                        String token =  Hashing.sha1().hashBytes(secret.getBytes(Charsets.UTF_8)).toString();
+-                        apiSecretHeader = new BasicHeader("api-secret", token);
++                        throw new Exception("Unexpected baseURI");
+                     }
+-                }
+-
+-                if (apiSecretHeader != null) {
+-                    post.setHeader(apiSecretHeader);
+-                }
+ 
+-                for (BgReading record : glucoseDataSets) {
+-                    JSONObject json = new JSONObject();
+-
+-                    try {
+-                        if (apiVersion >= 1)
+-                            populateV1APIBGEntry(json, record);
+-                        else
+-                            populateLegacyAPIEntry(json, record);
+-                    } catch (Exception e) {
+-                        Log.e(TAG, "Unable to populate entry", e);
+-                        continue;
+-                    }
+-
+-                    String jsonString = json.toString();
+-
+-                    Log.i(TAG, "SGV JSON: " + jsonString);
+-
+-                    try {
+-                        StringEntity se = new StringEntity(jsonString);
+-                        post.setEntity(se);
+-                        post.setHeader("Accept", "application/json");
+-                        post.setHeader("Content-type", "application/json");
+-
+-                        ResponseHandler responseHandler = new BasicResponseHandler();
+-                        httpclient.execute(post, responseHandler);
+-                    } catch (Exception e) {
+-                        Log.e(TAG, "Unable to populate entry", e);
+-                    }
+-                }
++                    Retrofit retrofit = new Retrofit.Builder().baseUrl(baseURL).client(client).build();
++                    NightscoutService nightscoutService = retrofit.create(NightscoutService.class);
+ 
+-                if (apiVersion >= 1) {
+-                    for (Calibration record : meterRecords) {
+-                        JSONObject json = new JSONObject();
+-
+-                        try {
+-                            populateV1APIMeterReadingEntry(json, record);
+-                        } catch (Exception e) {
+-                            Log.e(TAG, "Unable to populate entry", e);
+-                            continue;
+-                        }
+-
+-                        String jsonString = json.toString();
+-                        Log.i(TAG, "MBG JSON: " + jsonString);
+-
+-                        try {
+-                            StringEntity se = new StringEntity(jsonString);
+-                            post.setEntity(se);
+-                            post.setHeader("Accept", "application/json");
+-                            post.setHeader("Content-type", "application/json");
+-
+-                            ResponseHandler responseHandler = new BasicResponseHandler();
+-                            httpclient.execute(post, responseHandler);
+-                        } catch (Exception e) {
+-                            Log.e(TAG, "Unable to post data", e);
+-                        }
++                    if (apiVersion == 1) {
++                        String hashedSecret = Hashing.sha1().hashBytes(secret.getBytes(Charsets.UTF_8)).toString();
++                        doRESTUploadTo(nightscoutService, hashedSecret, glucoseDataSets, meterRecords, calRecords);
++                    } else {
++                        doLegacyRESTUploadTo(nightscoutService, glucoseDataSets);
+                     }
++                } catch (Exception e) {
++                    Log.e(TAG, "Unable to do REST API Upload " + e.getMessage());
++                    e.printStackTrace();
++                    return false;
+                 }
++            }
++            return true;
++        }
+ 
+-                if (apiVersion >= 1) {
+-                    for (Calibration calRecord : calRecords) {
+-
+-                        JSONObject json = new JSONObject();
+-
+-                        try {
+-                            populateV1APICalibrationEntry(json, calRecord);
+-                        } catch (Exception e) {
+-                            Log.e(TAG, "Unable to populate entry", e);
+-                            continue;
+-                        }
++        private void doLegacyRESTUploadTo(NightscoutService nightscoutService, List<BgReading> glucoseDataSets) throws Exception {
++            for (BgReading record : glucoseDataSets) {
++                Response<ResponseBody> r = nightscoutService.upload(populateLegacyAPIEntry(record)).execute();
++                if (!r.isSuccess()) throw new UploaderException(r.message(), r.code());
+ 
+-                        String jsonString = json.toString();
+-                        Log.i(TAG, "CAL JSON: " + jsonString);
++            }
++            postDeviceStatus(nightscoutService, null);
++        }
+ 
+-                        try {
+-                            StringEntity se = new StringEntity(jsonString);
+-                            post.setEntity(se);
+-                            post.setHeader("Accept", "application/json");
+-                            post.setHeader("Content-type", "application/json");
++        private void doRESTUploadTo(NightscoutService nightscoutService, String secret, List<BgReading> glucoseDataSets, List<Calibration> meterRecords, List<Calibration> calRecords) throws Exception {
++            JSONArray array = new JSONArray();
+ 
+-                            ResponseHandler responseHandler = new BasicResponseHandler();
+-                            httpclient.execute(post, responseHandler);
+-                        } catch (Exception e) {
+-                            Log.e(TAG, "Unable to post data", e);
+-                        }
+-                    }
+-                }
++            for (BgReading record : glucoseDataSets) {
++                populateV1APIBGEntry(array, record);
++            }
++            for (Calibration record : meterRecords) {
++                populateV1APIMeterReadingEntry(array, record);
++            }
++            for (Calibration record : calRecords) {
++                populateV1APICalibrationEntry(array, record);
++            }
+ 
+-                // TODO: this is a quick port from the original code and needs to be checked before release
+-                postDeviceStatus(baseURL, apiSecretHeader, httpclient);
++            RequestBody body = RequestBody.create(MediaType.parse("application/json"), array.toString());
++            Response<ResponseBody> r = nightscoutService.upload(secret, body).execute();
++            if (!r.isSuccess()) throw new UploaderException(r.message(), r.code());
+ 
+-            } catch (Exception e) {
+-                Log.e(TAG, "Unable to post data", e);
+-            }
++            postDeviceStatus(nightscoutService, secret);
+         }
+ 
+-        private void populateV1APIBGEntry(JSONObject json, BgReading record) throws Exception {
+-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
++        private void populateV1APIBGEntry(JSONArray array, BgReading record) throws Exception {
++            JSONObject json = new JSONObject();
++            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US);
+             format.setTimeZone(TimeZone.getDefault());
+-            json.put("device", "xDrip-"+prefs.getString("dex_collection_method", "BluetoothWixel"));
++            json.put("device", "xDrip-" + prefs.getString("dex_collection_method", "BluetoothWixel"));
+             json.put("date", record.timestamp);
+             json.put("dateString", format.format(record.timestamp));
+             json.put("sgv", (int)record.calculated_value);
+@@ -260,30 +209,36 @@ private void populateV1APIBGEntry(JSONObject json, BgReading record) throws Exce
+             json.put("unfiltered", record.usedRaw() * 1000);
+             json.put("rssi", 100);
+             json.put("noise", record.noiseValue());
++            array.put(json);
+         }
+ 
+-        private void populateLegacyAPIEntry(JSONObject json, BgReading record) throws Exception {
+-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
++        private RequestBody populateLegacyAPIEntry(BgReading record) throws Exception {
++            JSONObject json = new JSONObject();
++            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US);
+             format.setTimeZone(TimeZone.getDefault());
+             json.put("device", "xDrip-"+prefs.getString("dex_collection_method", "BluetoothWixel"));
+             json.put("date", record.timestamp);
+             json.put("dateString", format.format(record.timestamp));
+             json.put("sgv", (int)record.calculated_value);
+             json.put("direction", record.slopeName());
++            return RequestBody.create(MediaType.parse("application/json"), json.toString());
+         }
+ 
+-        private void populateV1APIMeterReadingEntry(JSONObject json, Calibration record) throws Exception {
+-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
++        private void populateV1APIMeterReadingEntry(JSONArray array, Calibration record) throws Exception {
++            JSONObject json = new JSONObject();
++            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US);
+             format.setTimeZone(TimeZone.getDefault());
+-            json.put("device", "xDrip-"+prefs.getString("dex_collection_method", "BluetoothWixel"));
++            json.put("device", "xDrip-" + prefs.getString("dex_collection_method", "BluetoothWixel"));
+             json.put("type", "mbg");
+             json.put("date", record.timestamp);
+             json.put("dateString", format.format(record.timestamp));
+             json.put("mbg", record.bg);
++            array.put(json);
+         }
+ 
+-        private void populateV1APICalibrationEntry(JSONObject json, Calibration record) throws Exception {
+-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
++        private void populateV1APICalibrationEntry(JSONArray array, Calibration record) throws Exception {
++            JSONObject json = new JSONObject();
++            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US);
+             format.setTimeZone(TimeZone.getDefault());
+             json.put("device", "xDrip-" + prefs.getString("dex_collection_method", "BluetoothWixel"));
+             json.put("type", "cal");
+@@ -298,35 +253,24 @@ private void populateV1APICalibrationEntry(JSONObject json, Calibration record)
+                 json.put("intercept", (long) ((record.intercept * -1000) / (record.slope * 1000)));
+                 json.put("scale", 1);
+             }
++            array.put(json);
+         }
+ 
+-        // TODO: this is a quick port from original code and needs to be refactored before release
+-        private void postDeviceStatus(String baseURL, Header apiSecretHeader, DefaultHttpClient httpclient) throws Exception {
+-            String devicestatusURL = baseURL + "devicestatus";
+-            Log.i(TAG, "devicestatusURL: " + devicestatusURL);
+-
++        private void postDeviceStatus(NightscoutService nightscoutService, String apiSecret) throws Exception {
+             JSONObject json = new JSONObject();
+             json.put("uploaderBattery", getBatteryLevel());
+-            String jsonString = json.toString();
+-
+-            HttpPost post = new HttpPost(devicestatusURL);
+-
+-            if (apiSecretHeader != null) {
+-                post.setHeader(apiSecretHeader);
+-            }
+-
+-            StringEntity se = new StringEntity(jsonString);
+-            post.setEntity(se);
+-            post.setHeader("Accept", "application/json");
+-            post.setHeader("Content-type", "application/json");
+-
+-            ResponseHandler responseHandler = new BasicResponseHandler();
+-            httpclient.execute(post, responseHandler);
++            RequestBody body = RequestBody.create(MediaType.parse("application/json"), json.toString());
++            Response<ResponseBody> r;
++            if (apiSecret != null) {
++                r = nightscoutService.uploadDeviceStatus(apiSecret, body).execute();
++            } else
++                r = nightscoutService.uploadDeviceStatus(body).execute();
++            if (!r.isSuccess()) throw new UploaderException(r.message(), r.code());
+         }
+ 
+         private boolean doMongoUpload(SharedPreferences prefs, List<BgReading> glucoseDataSets,
+                                       List<Calibration> meterRecords,  List<Calibration> calRecords) {
+-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
++            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US);
+             format.setTimeZone(TimeZone.getDefault());
+ 
+             String dbURI = prefs.getString("cloud_storage_mongodb_uri", null);
+@@ -419,11 +363,13 @@ private boolean doMongoUpload(SharedPreferences prefs, List<BgReading> glucoseDa
+         }
+     public int getBatteryLevel() {
+         Intent batteryIntent = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+-        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+-        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+-        if(level == -1 || scale == -1) {
+-            return 50;
+-        }
+-        return (int)(((float)level / (float)scale) * 100.0f);
++        if (batteryIntent != null) {
++            int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
++            int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
++            if (level == -1 || scale == -1) {
++                return 50;
++            }
++            return (int) (((float) level / (float) scale) * 100.0f);
++        } else return 50;
+     }
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+index 0e10fd9..ef8888d 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+@@ -18,6 +18,7 @@
+ import android.os.Build;
+ import android.os.Handler;
+ import android.os.Looper;
++import android.os.PowerManager;
+ import android.preference.PreferenceManager;
+ import android.support.v4.app.NotificationCompat;
+ import android.support.v4.app.NotificationManagerCompat;
+@@ -44,7 +45,7 @@
+  * Created by stephenblack on 11/28/14.
+  */
+ public class Notifications extends IntentService {
+-    public static final long[] vibratePattern = {0,1000,300,1000,300,1000};
++    public static final long[] vibratePattern = {0, 1000, 300, 1000, 300, 1000};
+     public static boolean bg_notifications;
+     public static boolean bg_ongoing;
+     public static boolean bg_vibrate;
+@@ -63,6 +64,7 @@
+     private final static String TAG = AlertPlayer.class.getSimpleName();
+ 
+     Context mContext;
++    PendingIntent wakeIntent;
+     private static Handler mHandler = new Handler(Looper.getMainLooper());
+ 
+     int currentVolume;
+@@ -82,8 +84,6 @@
+     public static final int riseAlertNotificationId = 011;
+     public static final int failAlertNotificationId = 012;
+ 
+-    final static int callbackPeriod = 60000 * 1;
+-
+     SharedPreferences prefs;
+ 
+     public Notifications() {
+@@ -93,10 +93,14 @@ public Notifications() {
+ 
+     @Override
+     protected void onHandleIntent(Intent intent) {
++        PowerManager pm = (PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE);
++        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "NotificationsIntent");
++        wl.acquire();
+         Log.d("Notifications", "Running Notifications Intent Service");
+         ReadPerfs(getApplicationContext());
+         notificationSetter(getApplicationContext());
+-        ArmTimer();
++        ArmTimer(getApplicationContext());
++        wl.release();
+     }
+ 
+     public void ReadPerfs(Context context) {
+@@ -130,7 +134,7 @@ public void FileBasedNotifications(Context context) {
+         Sensor sensor = Sensor.currentSensor();
+ 
+         BgReading bgReading = BgReading.last();
+-        if(bgReading == null) {
++        if (bgReading == null) {
+             // Sensor is stopped, or there is not enough data
+             AlertPlayer.getPlayer().stopAlert(context, true, false);
+             return;
+@@ -153,7 +157,7 @@ public void FileBasedNotifications(Context context) {
+             }
+ 
+             AlertType activeBgAlert = ActiveBgAlert.alertTypegetOnly();
+-            if(activeBgAlert == null) {
++            if (activeBgAlert == null) {
+                 Log.d(TAG, "FileBasedNotifications we have a new alert, starting to play it... " + newAlert.name);
+                 // We need to create a new alert  and start playing
+                 boolean trendingToAlertEnd = trendingToAlertEnd(context, true, newAlert);
+@@ -169,7 +173,7 @@ public void FileBasedNotifications(Context context) {
+                 AlertPlayer.getPlayer().ClockTick(context, trendingToAlertEnd, EditAlertActivity.unitsConvert2Disp(doMgdl, bgReading.calculated_value));
+                 return;
+             }
+-           // Currently the ui blocks having two alerts with the same alert value.
++            // Currently the ui blocks having two alerts with the same alert value.
+ 
+             boolean alertSnoozeOver = ActiveBgAlert.alertSnoozeOver();
+             if (alertSnoozeOver) {
+@@ -187,7 +191,7 @@ public void FileBasedNotifications(Context context) {
+                 // We should not do anything if we are snoozed for the 80...
+                 // If one allert was high and the second one is low however, we alarm in any case (snoozing ignored).
+                 boolean opositeDirection = AlertType.OpositeDirection(activeBgAlert, newAlert);
+-                AlertType  newHigherAlert = AlertType.HigherAlert(activeBgAlert, newAlert);
++                AlertType newHigherAlert = AlertType.HigherAlert(activeBgAlert, newAlert);
+                 if ((newHigherAlert == activeBgAlert) && (!opositeDirection)) {
+                     // the existing alert is the higher, we should check if to play it
+                     Log.d(TAG, "FileBasedNotifications The existing alert has the same direcotion, checking if to playit newHigherAlert = " + newHigherAlert.name +
+@@ -203,20 +207,18 @@ public void FileBasedNotifications(Context context) {
+             AlertPlayer.getPlayer().stopAlert(context, true, false);
+             boolean trendingToAlertEnd = trendingToAlertEnd(context, true, newAlert);
+             AlertPlayer.getPlayer().startAlert(context, trendingToAlertEnd, newAlert, EditAlertActivity.unitsConvert2Disp(doMgdl, bgReading.calculated_value));
+-            return;
+-
+         } else {
+             AlertPlayer.getPlayer().stopAlert(context, true, false);
+         }
+     }
+ 
+     boolean trendingToAlertEnd(Context context, Boolean newAlert, AlertType Alert) {
+-        if(newAlert && !smart_alerting) {
+-        //  User does not want smart alerting at all.
++        if (newAlert && !smart_alerting) {
++            //  User does not want smart alerting at all.
+             return false;
+         }
+-        if((!newAlert) && (!smart_snoozing)) {
+-        //  User does not want smart snoozing at all.
++        if ((!newAlert) && (!smart_snoozing)) {
++            //  User does not want smart snoozing at all.
+             return false;
+         }
+         return BgReading.trendingToAlertEnd(context, Alert.above);
+@@ -232,7 +234,7 @@ public void notificationSetter(Context context) {
+         if (bg_ongoing && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)) {
+             bgOngoingNotification(bgGraphBuilder);
+         }
+-        if(prefs.getLong("alerts_disabled_until", 0) > new Date().getTime()){
++        if (prefs.getLong("alerts_disabled_until", 0) > new Date().getTime()) {
+             Log.d("NOTIFICATIONS", "Notifications are currently disabled!!");
+             return;
+         }
+@@ -244,8 +246,12 @@ public void notificationSetter(Context context) {
+ 
+         List<BgReading> bgReadings = BgReading.latest(3);
+         List<Calibration> calibrations = Calibration.allForSensorInLastFourDays();
+-        if(bgReadings == null || bgReadings.size() < 3) { return; }
+-        if(calibrations == null || calibrations.size() < 2) { return; }
++        if (bgReadings == null || bgReadings.size() < 3) {
++            return;
++        }
++        if (calibrations == null || calibrations.size() < 2) {
++            return;
++        }
+         BgReading bgReading = bgReadings.get(0);
+ 
+         if (calibration_notifications) {
+@@ -253,37 +259,53 @@ public void notificationSetter(Context context) {
+                 if (calibrations.size() == 0 && (new Date().getTime() - bgReadings.get(2).timestamp <= (60000 * 30)) && sensor != null) {
+                     if ((sensor.started_at + (60000 * 60 * 2)) < new Date().getTime()) {
+                         doubleCalibrationRequest();
+-                    } else { clearDoubleCalibrationRequest(); }
+-                } else { clearDoubleCalibrationRequest(); }
+-            } else { clearDoubleCalibrationRequest(); }
++                    } else {
++                        clearDoubleCalibrationRequest();
++                    }
++                } else {
++                    clearDoubleCalibrationRequest();
++                }
++            } else {
++                clearDoubleCalibrationRequest();
++            }
+             if (CalibrationRequest.shouldRequestCalibration(bgReading) && (new Date().getTime() - bgReadings.get(2).timestamp <= (60000 * 24))) {
+                 extraCalibrationRequest();
+-            } else { clearExtraCalibrationRequest(); }
+-            if (calibrations.size() >= 1 && Math.abs((new Date().getTime() - calibrations.get(0).timestamp))/(1000*60*60) > 12) {
+-                Log.d("NOTIFICATIONS", "Calibration difference in hours: " + ((new Date().getTime() - calibrations.get(0).timestamp))/(1000*60*60));
++            } else {
++                clearExtraCalibrationRequest();
++            }
++            if (calibrations.size() >= 1 && Math.abs((new Date().getTime() - calibrations.get(0).timestamp)) / (1000 * 60 * 60) > 12) {
++                Log.d("NOTIFICATIONS", "Calibration difference in hours: " + ((new Date().getTime() - calibrations.get(0).timestamp)) / (1000 * 60 * 60));
+                 calibrationRequest();
+-            } else { clearCalibrationRequest(); }
++            } else {
++                clearCalibrationRequest();
++            }
+ 
+         } else {
+             clearAllCalibrationNotifications();
+         }
+     }
+ 
+-    private void  ArmTimer() {
++    private void ArmTimer(Context ctx) {
+         Log.d(TAG, "ArmTimer called");
+         ActiveBgAlert activeBgAlert = ActiveBgAlert.getOnly();
+-        if(activeBgAlert != null ) {
++        if (activeBgAlert != null) {
+             AlertType alert = AlertType.get_alert(activeBgAlert.alert_uuid);
+-            if(alert != null) {
+-                int time = alert.minutes_between;
+-                if (time < 1) { time = 1; }
++            if (alert != null) {
+                 Calendar calendar = Calendar.getInstance();
+                 AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+-                    alarm.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() + time * 60000, PendingIntent.getService(this, 0, new Intent(this, Notifications.class), 0));
+-                } else {
+-                    alarm.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() + time * 60000, PendingIntent.getService(this, 0, new Intent(this, Notifications.class), 0));
+-                }
++                // sleep longer if the alert is snoozed.
++                long wakeTime = activeBgAlert.is_snoozed ? activeBgAlert.next_alert_at :
++                    alert.getNextAlertTime(ctx);
++                Log.d(TAG , "ArmTimer waking at: "+ new Date(wakeTime) +" in " +  (wakeTime - calendar.getTimeInMillis())/60000d + " minutes");
++                if (wakeIntent != null)
++                    alarm.cancel(wakeIntent);
++                wakeIntent = PendingIntent.getService(this, 0, new Intent(this, this.getClass()), 0);
++                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
++                    alarm.setAlarmClock(new AlarmManager.AlarmClockInfo(wakeTime, wakeIntent), wakeIntent);
++                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
++                    alarm.setExact(AlarmManager.RTC_WAKEUP, wakeTime, wakeIntent);
++                } else
++                    alarm.set(AlarmManager.RTC_WAKEUP, wakeTime, wakeIntent);
+             }
+         }
+     }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/RestCalls.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/RestCalls.java
+deleted file mode 100644
+index eef7f6a..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/RestCalls.java
++++ /dev/null
+@@ -1,159 +0,0 @@
+-package com.eveningoutpost.dexdrip.UtilityModels;
+-
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+-
+-import com.eveningoutpost.dexdrip.Interfaces.BgReadingInterface;
+-import com.eveningoutpost.dexdrip.Interfaces.CalibrationInterface;
+-import com.eveningoutpost.dexdrip.Interfaces.SensorInterface;
+-import com.eveningoutpost.dexdrip.Models.BgReading;
+-import com.eveningoutpost.dexdrip.Models.Calibration;
+-import com.eveningoutpost.dexdrip.Sensor;
+-import com.eveningoutpost.dexdrip.Models.User;
+-import com.google.gson.Gson;
+-import com.google.gson.GsonBuilder;
+-import com.google.gson.internal.bind.DateTypeAdapter;
+-
+-import java.util.Date;
+-
+-import retrofit.Callback;
+-import retrofit.RequestInterceptor;
+-import retrofit.RestAdapter;
+-import retrofit.RetrofitError;
+-import retrofit.client.Response;
+-import retrofit.converter.GsonConverter;
+-
+-/**
+- * Created by stephenblack on 11/6/14.
+- */
+-public class RestCalls {
+-    private static final String baseUrl = "http://10.0.2.2:3000";
+-
+-
+-    public static Gson gson = new GsonBuilder()
+-            .excludeFieldsWithoutExposeAnnotation()
+-            .registerTypeAdapter(Date.class, new DateTypeAdapter())
+-            .create();
+-
+-
+-
+-    public static void sendBgReading(final BgSendQueue bgSendQueue) {
+-        User user = User.currentUser();
+-        bgReadingInterface().createReading(user.uuid, bgSendQueue.bgReading, new Callback<Gson>() {
+-                    @Override
+-                    public void success(Gson gsonResponse, Response response) {
+-                        bgSendQueue.success = true;
+-                        bgSendQueue.save();
+-                        BgReading bgReading = bgSendQueue.bgReading;
+-                        bgReading.synced = true;
+-                        bgReading.save();
+-                    }
+-                    @Override
+-                    public void failure(RetrofitError error) {
+-                        Response response = error.getResponse();
+-                        Log.w("REST CALL REASON:", response.getReason());
+-                    }
+-                }
+-        );
+-    }
+-
+-
+-    public static void updateBgReading(final BgSendQueue bgSendQueue) {
+-        User user = User.currentUser();
+-        bgReadingInterface().updateReading(user.uuid, bgSendQueue.bgReading.uuid, bgSendQueue.bgReading, new Callback<Gson>() {
+-                    @Override
+-                    public void success(Gson gsonResponse, Response response) {
+-                        bgSendQueue.success = true;
+-                        bgSendQueue.save();
+-                    }
+-                    @Override
+-                    public void failure(RetrofitError error) {
+-                        Response response = error.getResponse();
+-                        Log.w("REST CALL REASON:", response.getReason());
+-                    }
+-                }
+-        );
+-    }
+-
+-
+-    public static void sendCalibration(final CalibrationSendQueue calibrationSendQueue) {
+-        User user = User.currentUser();
+-        calibrationInterface().createCalibration(user.uuid, calibrationSendQueue.calibration, new Callback<Gson>() {
+-                    @Override
+-                    public void success(Gson gsonResponse, Response response) {
+-                        calibrationSendQueue.success = true;
+-                        calibrationSendQueue.save();
+-                        Calibration calibration = calibrationSendQueue.calibration;
+-                        calibration.save();
+-                    }
+-                    @Override
+-                    public void failure(RetrofitError error) {
+-                        Response response = error.getResponse();
+-                        Log.w("REST CALL REASON:", response.getReason());
+-                    }
+-                }
+-        );
+-    }
+-
+-
+-    public static void sendSensor(final SensorSendQueue sensorSendQueue) {
+-        User user = User.currentUser();
+-        sensorInterface().createSensor(user.uuid, sensorSendQueue.sensor, new Callback<Gson>() {
+-                    @Override
+-                    public void success(Gson gsonResponse, Response response) {
+-                        sensorSendQueue.success = true;
+-                        sensorSendQueue.save();
+-                        Sensor sensor = sensorSendQueue.sensor;
+-                        sensor.save();
+-                    }
+-                    @Override
+-                    public void failure(RetrofitError error) {
+-                        Response response = error.getResponse();
+-                        Log.w("REST CALL REASON:", response.getReason());
+-                    }
+-                }
+-        );
+-    }
+-
+-    public static BgReadingInterface bgReadingInterface() {
+-        RestAdapter adapter = adapterBuilder().build();
+-            BgReadingInterface bgReadingInterface =
+-                adapter.create(BgReadingInterface.class);
+-        return bgReadingInterface;
+-    }
+-
+-    public static SensorInterface sensorInterface() {
+-
+-        RestAdapter adapter = adapterBuilder().build();
+-        SensorInterface sensorInterface =
+-                adapter.create(SensorInterface.class);
+-        return sensorInterface;
+-    }
+-
+-    public static CalibrationInterface calibrationInterface() {
+-        RestAdapter adapter = adapterBuilder().build();
+-        CalibrationInterface calibrationInterface =
+-                adapter.create(CalibrationInterface.class);
+-        return calibrationInterface;
+-    }
+-
+-    public static RestAdapter.Builder adapterBuilder() {
+-        RestAdapter.Builder adapterBuilder = new RestAdapter.Builder();
+-        adapterBuilder
+-                .setEndpoint(baseUrl)
+-                .setConverter(new GsonConverter(gson))
+-                .setRequestInterceptor(requestInterceptor());
+-        return adapterBuilder;
+-    }
+-
+-    public static RequestInterceptor requestInterceptor(){
+-        RequestInterceptor requestInterceptor = new RequestInterceptor() {
+-            User currentUser = User.currentUser();
+-            @Override
+-            public void intercept(RequestFacade request) {
+-                request.addHeader("email", currentUser.email);
+-                request.addHeader("token", currentUser.token);
+-            }
+-        };
+-        return requestInterceptor;
+-    }
+-}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/WidgetUpdateService.java b/app/src/main/java/com/eveningoutpost/dexdrip/WidgetUpdateService.java
+new file mode 100644
+index 0000000..86ec85f
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/WidgetUpdateService.java
+@@ -0,0 +1,99 @@
++package com.eveningoutpost.dexdrip;
++
++import android.app.Service;
++import android.appwidget.AppWidgetManager;
++import android.content.BroadcastReceiver;
++import android.content.ComponentName;
++import android.content.Context;
++import android.content.Intent;
++import android.content.IntentFilter;
++import android.os.Build;
++import android.os.IBinder;
++import android.os.PowerManager;
++
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
++
++public class WidgetUpdateService extends Service {
++    public String TAG = "WidgetUpdateService";
++
++    private boolean isRegistered = false;
++
++    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
++        @Override
++        public void onReceive(Context ctx, Intent intent) {
++            Log.d(TAG, "onReceive("+intent.getAction()+")");
++            if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
++                updateCurrentBgInfo();
++            } else if (intent.getAction().compareTo(Intent.ACTION_SCREEN_ON) == 0) {
++                enableClockTicks();
++                updateCurrentBgInfo();
++            } else if (intent.getAction().compareTo(Intent.ACTION_SCREEN_OFF) == 0) {
++                disableClockTicks();
++            }
++        }
++    };
++
++    public WidgetUpdateService() {}
++    @Override
++    public IBinder onBind(Intent intent) { throw new UnsupportedOperationException("Not yet implemented"); }
++
++    @Override
++    public void onCreate() {
++        super.onCreate();
++        PowerManager pm = (PowerManager) getSystemService(Service.POWER_SERVICE);
++        Log.d(TAG, "onCreate");
++        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && pm.isInteractive()) ||
++                (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP && pm.isScreenOn()))
++            enableClockTicks();
++        else
++            disableClockTicks();
++    }
++
++    private void enableClockTicks() {
++        Log.d(TAG, "enableClockTicks");
++        IntentFilter intentFilter = new IntentFilter();
++        intentFilter.addAction(Intent.ACTION_TIME_TICK);
++        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
++        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
++        if (isRegistered)
++            unregisterReceiver(broadcastReceiver);
++        registerReceiver(broadcastReceiver, intentFilter);
++        isRegistered = true;
++    }
++
++    private void disableClockTicks() {
++        Log.d(TAG, "disableClockTicks");
++        IntentFilter intentFilter = new IntentFilter();
++        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
++        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
++        if (isRegistered)
++            unregisterReceiver(broadcastReceiver);
++        registerReceiver(broadcastReceiver, intentFilter);
++        isRegistered = true;
++    }
++
++    @Override
++    public int onStartCommand(Intent intent, int flags, int startId) {
++        updateCurrentBgInfo();
++        return START_STICKY;
++    }
++
++    @Override
++    public void onDestroy() {
++        super.onDestroy();
++        if (broadcastReceiver != null) {
++            unregisterReceiver(broadcastReceiver);
++            isRegistered = false;
++        }
++    }
++
++    public void updateCurrentBgInfo() {
++        Log.d(TAG, "Sending update flag to widget");
++        int ids[] = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), xDripWidget.class));
++        Log.d(TAG, "Updating " + ids.length + " widgets");
++        Intent intent = new Intent(this,xDripWidget.class);
++        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
++        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,ids);
++        sendBroadcast(intent);
++    }
++}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/widgetUpdateService.java b/app/src/main/java/com/eveningoutpost/dexdrip/widgetUpdateService.java
+deleted file mode 100644
+index c1eac41..0000000
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/widgetUpdateService.java
++++ /dev/null
+@@ -1,85 +0,0 @@
+-package com.eveningoutpost.dexdrip;
+-
+-import android.app.AlarmManager;
+-import android.app.PendingIntent;
+-import android.app.Service;
+-import android.appwidget.AppWidgetManager;
+-import android.bluetooth.BluetoothDevice;
+-import android.content.BroadcastReceiver;
+-import android.content.ComponentName;
+-import android.content.Context;
+-import android.content.Intent;
+-import android.content.IntentFilter;
+-import android.os.IBinder;
+-import android.preference.PreferenceManager;
+-import com.eveningoutpost.dexdrip.Models.UserError.Log;
+-
+-import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.ReadDataShare;
+-import com.eveningoutpost.dexdrip.Models.BgReading;
+-import com.eveningoutpost.dexdrip.Services.DexShareCollectionService;
+-import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+-import com.eveningoutpost.dexdrip.UtilityModels.Intents;
+-
+-import java.util.Calendar;
+-import java.util.Date;
+-
+-public class widgetUpdateService extends Service {
+-    public String TAG = "widgetUpdateService";
+-    BroadcastReceiver _broadcastReceiver;
+-    public widgetUpdateService() {}
+-
+-    @Override
+-    public IBinder onBind(Intent intent) { throw new UnsupportedOperationException("Not yet implemented"); }
+-
+-    @Override
+-    public void onCreate() {
+-        super.onCreate();
+-        setFailoverTimer();
+-        _broadcastReceiver = new BroadcastReceiver() {
+-            @Override
+-            public void onReceive(Context ctx, Intent intent) {
+-                if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
+-                    updateCurrentBgInfo();
+-                }
+-            }
+-        };
+-        registerReceiver(_broadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+-    }
+-
+-    @Override
+-    public int onStartCommand(Intent intent, int flags, int startId) {
+-        setFailoverTimer();
+-        updateCurrentBgInfo();
+-        return START_STICKY;
+-    }
+-
+-    @Override
+-    public void onDestroy() {
+-        super.onDestroy();
+-        if (_broadcastReceiver != null) {
+-            unregisterReceiver(_broadcastReceiver);
+-        }
+-    }
+-
+-    public void setFailoverTimer() { //Keep it alive!
+-        if(AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), xDripWidget.class)).length > 0) {
+-            long retry_in = (1000 * 60 * 5);
+-            Log.d(TAG, "Fallover Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
+-            Calendar calendar = Calendar.getInstance();
+-            AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+-            alarm.set(alarm.RTC_WAKEUP, calendar.getTimeInMillis() + retry_in, PendingIntent.getService(this, 0, new Intent(this, widgetUpdateService.class), 0));
+-        } else {
+-            stopSelf();
+-        }
+-    }
+-
+-    public void updateCurrentBgInfo() {
+-        Log.d(TAG, "Sending update flag to widget");
+-        int ids[] = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), xDripWidget.class));
+-        Log.d(TAG, "Updating " + ids.length + " widgets");
+-        Intent intent = new Intent(this,xDripWidget.class);
+-        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,ids);
+-        sendBroadcast(intent);
+-    }
+-}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java b/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java
+index 0f8f574..d7d8387 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java
+@@ -40,7 +40,7 @@ public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] a
+     @Override
+     public void onEnabled(Context context) {
+         Log.d(TAG, "Widget enabled");
+-        context.startService(new Intent(context, widgetUpdateService.class));
++        context.startService(new Intent(context, WidgetUpdateService.class));
+     }
+ 
+     @Override
+diff --git a/app/src/main/res/values/arrays.xml b/app/src/main/res/values/arrays.xml
+index b450c67..67e3f5a 100644
+--- a/app/src/main/res/values/arrays.xml
++++ b/app/src/main/res/values/arrays.xml
+@@ -30,9 +30,9 @@
+ <!--     make sure to keep this values in sync with AlertPlayer.getAlertProfile -->
+     <string-array name="BgAlertProfileEntries">
+         <item>High</item>
+-        <item>ascending</item>
+-        <item>medium</item>
+-        <item>vibrate only</item>
++        <item>Ascending (disables reraise)</item>
++        <item>Medium</item>
++        <item>Vibrate only</item>
+         <item>Silent</item>
+     </string-array>
+ 
+diff --git a/app/src/main/res/xml/pref_advanced_settings.xml b/app/src/main/res/xml/pref_advanced_settings.xml
+index cf11771..7f9e363 100644
+--- a/app/src/main/res/xml/pref_advanced_settings.xml
++++ b/app/src/main/res/xml/pref_advanced_settings.xml
+@@ -40,6 +40,11 @@
+             android:title="Show Datatables"
+             android:summary="Show Calibration and BG datatables in the app drawer."
+             android:defaultValue="false" />
++        <CheckBoxPreference
++            android:key="disable_battery_warning"
++            android:title="Disable Battery Warning"
++            android:summary="Disable the warning for low transmitter battery state on the home screen. (Only relevant for DIY receivers.)"
++            android:defaultValue="false" />
+         <Preference
+             android:title="View Recent Errors/Warnings"
+             android:key="recent_errors">
+diff --git a/build.gradle b/build.gradle
+index 9783c15..e7f32fe 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -6,7 +6,7 @@ buildscript {
+         mavenCentral()
+     }
+     dependencies {
+-        classpath 'com.android.tools.build:gradle:1.1.3'
++        classpath 'com.android.tools.build:gradle:1.3.0'
+         apply plugin: 'java'
+         apply plugin: 'maven'
+         // NOTE: Do not place your application dependencies here; they belong

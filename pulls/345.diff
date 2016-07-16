@@ -1,0 +1,186 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Tables/BgReadingTable.java b/app/src/main/java/com/eveningoutpost/dexdrip/Tables/BgReadingTable.java
+index 0613ccd..61bb03f 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Tables/BgReadingTable.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Tables/BgReadingTable.java
+@@ -53,15 +53,17 @@ private void getData() {
+     }
+ 
+     public static class BgReadingCursorAdapterViewHolder {
+-        TextView raw_data_id;
+-        TextView raw_data_value;
+-        TextView raw_data_slope;
++        TextView calculated_value;
++        TextView filtered_calculated_value;
++        TextView age_adjusted_raw_value;
++        TextView raw_data;
+         TextView raw_data_timestamp;
+ 
+         public BgReadingCursorAdapterViewHolder(View root) {
+-            raw_data_id = (TextView) root.findViewById(R.id.raw_data_id);
+-            raw_data_value = (TextView) root.findViewById(R.id.raw_data_value);
+-            raw_data_slope = (TextView) root.findViewById(R.id.raw_data_slope);
++        	calculated_value = (TextView) root.findViewById(R.id.calculated_value);
++        	filtered_calculated_value = (TextView) root.findViewById(R.id.filtered_calculated_value);
++        	age_adjusted_raw_value = (TextView) root.findViewById(R.id.age_adjusted_raw_value);
++        	raw_data = (TextView) root.findViewById(R.id.raw_data);
+             raw_data_timestamp = (TextView) root.findViewById(R.id.raw_data_timestamp);
+         }
+     }
+@@ -79,7 +81,7 @@ public BgReadingAdapter(Context context, List<BgReading> readings) {
+         }
+ 
+         public View newView(Context context, ViewGroup parent) {
+-            final View view = LayoutInflater.from(context).inflate(R.layout.raw_data_list_item, parent, false);
++            final View view = LayoutInflater.from(context).inflate(R.layout.bg_table_list_item, parent, false); //???? list_item
+ 
+             final BgReadingCursorAdapterViewHolder holder = new BgReadingCursorAdapterViewHolder(view);
+             view.setTag(holder);
+@@ -89,9 +91,10 @@ public View newView(Context context, ViewGroup parent) {
+ 
+         public void bindView(View view, Context context, BgReading bgReading) {
+             final BgReadingCursorAdapterViewHolder tag = (BgReadingCursorAdapterViewHolder) view.getTag();
+-            tag.raw_data_id.setText(Double.toString(bgReading.calculated_value));
+-            tag.raw_data_value.setText(Double.toString(bgReading.age_adjusted_raw_value));
+-            tag.raw_data_slope.setText(Double.toString(bgReading.raw_data));
++            tag.calculated_value.setText(Double.toString(bgReading.calculated_value));
++            tag.filtered_calculated_value.setText(Double.toString(bgReading.filtered_calculated_value));
++            tag.age_adjusted_raw_value.setText(Double.toString(bgReading.age_adjusted_raw_value));
++            tag.raw_data.setText(Double.toString(bgReading.raw_data));
+             tag.raw_data_timestamp.setText(new Date(bgReading.timestamp).toString());
+         }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+index f6dbfa8..9d117a8 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+@@ -34,11 +34,29 @@
+ import lecho.lib.hellocharts.model.Viewport;
+ import lecho.lib.hellocharts.util.ChartUtils;
+ import lecho.lib.hellocharts.view.Chart;
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ 
+ /**
+  * Created by stephenblack on 11/15/14.
+  */
++
++class PointValueExtended extends PointValue {
++	
++	public PointValueExtended(float x, float y, float filtered) {
++		set(x, y);
++		calculatedFilteredValue = filtered;
++	}
++	   public PointValueExtended(float x, float y) {
++	        set(x, y);
++	        calculatedFilteredValue = -1;
++	    }
++	
++	float calculatedFilteredValue;
++}
++
++
+ public class BgGraphBuilder {
++	private static final String TAG = BgGraphBuilder.class.getSimpleName();
+     public static final int FUZZER = (1000 * 30 * 5);
+     public static final int MAX_SLOPE_MINUTES = 21;
+     public long  end_time;
+@@ -233,25 +251,25 @@ private void addBgReadingValues() {
+ 
+         for (BgReading bgReading : bgReadings) {
+             if (bgReading.raw_calculated != 0 && prefs.getBoolean("interpret_raw", false)) {
+-                rawInterpretedValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.raw_calculated)));
++                rawInterpretedValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.raw_calculated),(float) unitized(bgReading.filtered_calculated_value)));
+             } else if (bgReading.calculated_value >= 400) {
+-                highValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(400)));
++                highValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(400),(float) unitized(bgReading.filtered_calculated_value)));
+             } else if (unitized(bgReading.calculated_value) >= highMark) {
+-                highValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value)));
++                highValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value), (float) unitized(bgReading.filtered_calculated_value)));
+             } else if (unitized(bgReading.calculated_value) >= lowMark) {
+-                inRangeValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value)));
++                inRangeValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value), (float) unitized(bgReading.filtered_calculated_value)));
+             } else if (bgReading.calculated_value >= 40) {
+-                lowValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value)));
++                lowValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value),(float) unitized(bgReading.filtered_calculated_value)));
+             } else if (bgReading.calculated_value > 13) {
+-                lowValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(40)));
++                lowValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(40), (float) unitized(bgReading.filtered_calculated_value)));
+             }
+ 
+             if ((show_filtered) && (bgReading.filtered_calculated_value > 0) && (bgReading.filtered_calculated_value != bgReading.calculated_value)) {
+-                filteredValues.add(new PointValue((float) ((bgReading.timestamp - timeshift) / FUZZER), (float) unitized(bgReading.filtered_calculated_value)));
++                filteredValues.add(new PointValueExtended((float) ((bgReading.timestamp - timeshift) / FUZZER), (float) unitized(bgReading.filtered_calculated_value)));
+             }
+         }
+         for (Calibration calibration : calibrations) {
+-            calibrationValues.add(new PointValue((float) (calibration.timestamp / FUZZER), (float) unitized(calibration.bg)));
++            calibrationValues.add(new PointValueExtended((float) (calibration.timestamp / FUZZER), (float) unitized(calibration.bg)));
+         }
+     }
+ 
+@@ -504,13 +522,23 @@ public OnValueSelectTooltipListener getOnValueSelectTooltipListener(){
+ 
+         @Override
+         public synchronized void onValueSelected(int i, int i1, PointValue pointValue) {
++        	
++        	String filtered = "";
++        	try {
++        		PointValueExtended pve = (PointValueExtended) pointValue;
++        		if(pve.calculatedFilteredValue != -1) {
++        			filtered = " (" + Math.round(pve.calculatedFilteredValue*10) / 10d +")";
++        		}
++        	} catch (ClassCastException e) {
++        		Log.e(TAG, "Error casting a point from pointValue to PointValueExtended", e);
++        	}
+             final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(context);
+             //Won't give the exact time of the reading but the time on the grid: close enough.
+             Long time = ((long)pointValue.getX())*FUZZER;
+             if(tooltip!= null){
+                 tooltip.cancel();
+             }
+-            tooltip = Toast.makeText(context, timeFormat.format(time)+ ": " + Math.round(pointValue.getY()*10)/ 10d , Toast.LENGTH_LONG);
++            tooltip = Toast.makeText(context, timeFormat.format(time)+ ": " + Math.round(pointValue.getY()*10)/ 10d + filtered, Toast.LENGTH_LONG);
+             tooltip.show();
+         }
+ 
+diff --git a/app/src/main/res/layout/bg_table_list_item.xml b/app/src/main/res/layout/bg_table_list_item.xml
+new file mode 100644
+index 0000000..d80baae
+--- /dev/null
++++ b/app/src/main/res/layout/bg_table_list_item.xml
+@@ -0,0 +1,35 @@
++<?xml version="1.0" encoding="utf-8"?>
++
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:orientation="vertical"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:id="@+id/bg_table_data_list">
++
++    <TextView android:id="@+id/calculated_value"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:textSize="24sp" />
++    
++    <TextView android:id="@+id/filtered_calculated_value"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:textSize="12sp" />
++
++    <TextView android:id="@+id/age_adjusted_raw_value"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:textSize="12sp"/>
++
++    <TextView android:id="@+id/raw_data"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:textSize="12sp"/>
++
++    <TextView android:id="@+id/raw_data_timestamp"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:textSize="12sp"/>
++
++
++</LinearLayout>
+\ No newline at end of file

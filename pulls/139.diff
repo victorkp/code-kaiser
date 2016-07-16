@@ -1,0 +1,541 @@
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 9327b14..2314a24 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -69,6 +69,10 @@
+             android:label="Sensor Table" >
+         </activity>
+         <activity
++            android:name=".ImportDatabaseActivity"
++            android:label="Import Database" >
++        </activity>
++        <activity
+             android:name=".AddCalibration"
+             android:label="@string/title_activity_add_calibration" >
+         </activity>
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index 3eeda91..ce1b37c 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -422,9 +422,15 @@ protected void onPostExecute(String filename) {
+             return true;
+         }
+ 
++        if (item.getItemId() == R.id.action_import_db) {
++            startActivity(new Intent(this, ImportDatabaseActivity.class));
++            return true;
++        }
+ 
+-        if (item.getItemId() == R.id.action_export_csv) {
+-            new AsyncTask<Void, Void, String>() {
++
++
++        if (item.getItemId() == R.id.action_export_csv_sidiary) {
++          new AsyncTask<Void, Void, String>() {
+                 @Override
+                 protected String doInBackground(Void... params) {
+                     return DatabaseUtil.saveCSV(getBaseContext());
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ImportDatabaseActivity.java b/app/src/main/java/com/eveningoutpost/dexdrip/ImportDatabaseActivity.java
+new file mode 100644
+index 0000000..99cf50e
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ImportDatabaseActivity.java
+@@ -0,0 +1,279 @@
++package com.eveningoutpost.dexdrip;
++
++import android.app.AlertDialog;
++import android.content.DialogInterface;
++import android.content.Intent;
++import android.content.pm.ApplicationInfo;
++import android.content.pm.PackageManager;
++import android.database.sqlite.SQLiteDatabase;
++import android.database.sqlite.SQLiteException;
++import android.os.AsyncTask;
++import android.os.Bundle;
++import android.os.Handler;
++import android.view.LayoutInflater;
++import android.view.View;
++import android.widget.ArrayAdapter;
++import android.widget.ListView;
++
++import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
++import com.eveningoutpost.dexdrip.utils.DatabaseUtil;
++import com.eveningoutpost.dexdrip.utils.FileUtils;
++import com.eveningoutpost.dexdrip.utils.ListActivityWithMenu;
++
++import java.io.File;
++import java.io.FileFilter;
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.Comparator;
++
++public class ImportDatabaseActivity extends ListActivityWithMenu {
++    private final static String TAG = ImportDatabaseActivity.class.getSimpleName();
++    public static String menu_name = "Import Database";
++    AlertDialog progressDialog;
++    private Handler mHandler;
++    private ArrayList<String> databaseNames;
++    private ArrayList<File> databases;
++
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        mHandler = new Handler();
++        setContentView(R.layout.activity_import_db);
++
++        showWarningAndInstructions();
++    }
++
++    private void generateDBGui() {
++        if (findAllDatabases()) {
++            sortDatabasesAlphabetically();
++            showDatabasesInList();
++        } else {
++            postImportDB("\'xdrip\' is not a directory... aborting.");
++        }
++    }
++
++    private void showWarningAndInstructions() {
++        LayoutInflater inflater= LayoutInflater.from(this);
++        View view=inflater.inflate(R.layout.import_db_warning, null);
++        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
++        alertDialog.setTitle("Import Instructions");
++        alertDialog.setView(view);
++        alertDialog.setCancelable(false);
++        alertDialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
++            @Override
++            public void onClick(DialogInterface dialog, int which) {
++                generateDBGui();
++            }
++        });
++        AlertDialog alert = alertDialog.create();
++        alert.show();
++    }
++
++    private void sortDatabasesAlphabetically() {
++        Collections.sort(databases, new Comparator<File>() {
++            @Override
++            public int compare(File lhs, File rhs) {
++                //descending sort
++                return rhs.getName().compareTo(lhs.getName());
++            }
++        });
++    }
++
++    private boolean findAllDatabases() {
++        databases = new ArrayList<File>();
++
++        File file = new File(FileUtils.getExternalDir());
++        if (!FileUtils.makeSureDirectoryExists(file.getAbsolutePath())) {
++            return false;
++        }
++
++        // add from "root"
++        addAllDatabases(file, databases);
++
++        // add from level below (Andriod usually unzips to a subdirectory)
++        File[] subdirectories = file.listFiles(new FileFilter() {
++            @Override
++            public boolean accept(File path) {
++                return path.isDirectory();
++            }
++        });
++        for (int i = 0; i < subdirectories.length; i++) {
++            addAllDatabases(subdirectories[i], databases);
++        }
++        return true;
++    }
++
++    private void showDatabasesInList() {
++        databaseNames = new ArrayList<String>();
++
++        //show found databases in List
++        for (File db : databases) {
++            databaseNames.add(db.getName());
++        }
++
++        final ArrayAdapter adapter = new ArrayAdapter(this,
++                android.R.layout.simple_list_item_1, databaseNames);
++        setListAdapter(adapter);
++
++        if (databaseNames.size() == 0) {
++            postImportDB("No databases found.");
++        }
++    }
++
++    private void addAllDatabases(File file, ArrayList<File> databases) {
++        File[] files = file.listFiles(new FileFilter() {
++            @Override
++            public boolean accept(File pathname) {
++                if (pathname.getPath().endsWith(".sqlite")) return true;
++                return false;
++            }
++        });
++
++        for (int i = 0; i < files.length; i++) {
++            databases.add(files[i]);
++        }
++    }
++
++    @Override
++    protected void onListItemClick(ListView l, View v, final int position, long id) {
++
++        AlertDialog.Builder builder = new AlertDialog.Builder(this);
++        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
++            public void onClick(DialogInterface dialog, int id) {
++                importDB(position);
++            }
++        });
++        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
++            public void onClick(DialogInterface dialog, int id) {
++                //do nothing
++            }
++        });
++        builder.setTitle("Confirm Import");
++        builder.setMessage("Do you really want to import '" + databases.get(position).getName() + "'?\n This may negatively affect the data integrity of your system!");
++        AlertDialog dialog = builder.create();
++        dialog.show();
++
++
++    }
++
++    @Override
++    protected void onPause() {
++        super.onPause();
++    }
++
++    @Override
++    public String getMenuName() {
++        return menu_name;
++    }
++
++    public int getDBVersion() {
++
++        ApplicationInfo ai = null;
++        int version = -1;
++        try {
++            ai = getPackageManager().getApplicationInfo(this.getPackageName(), PackageManager.GET_META_DATA);
++            Bundle bundle = ai.metaData;
++            version = bundle.getInt("AA_DB_VERSION");
++        } catch (PackageManager.NameNotFoundException e) {
++            e.printStackTrace();
++        } finally {
++            return version;
++        }
++    }
++
++
++    public void importDB(int position) {
++        AlertDialog.Builder builder = new AlertDialog.Builder(this);
++        builder.setTitle("Importing, please wait");
++        builder.setMessage("Importing, please wait");
++        AlertDialog dialog = builder.create();
++        dialog.show();
++        dialog.setMessage("Step 1: checking prerequisites");
++        dialog.setCancelable(false);
++        LoadTask lt = new LoadTask(dialog, databases.get(position));
++        lt.execute();
++    }
++
++    protected void postImportDB(String result) {
++        AlertDialog.Builder builder = new AlertDialog.Builder(this);
++        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
++            public void onClick(DialogInterface dialog, int id) {
++                returnToHome();
++            }
++        });
++        builder.setTitle("Import Result");
++        builder.setMessage(result);
++        AlertDialog dialog = builder.create();
++        dialog.show();
++
++    }
++
++    public void returnToHome() {
++        Intent intent = new Intent(this, Home.class);
++        CollectionServiceStarter.restartCollectionService(getApplicationContext());
++        startActivity(intent);
++        finish();
++    }
++
++    private class LoadTask extends AsyncTask<Void, Void, String> {
++
++        private final AlertDialog statusDialog;
++        private final File dbFile;
++
++        LoadTask(AlertDialog statusDialog, File dbFile) {
++            super();
++            this.statusDialog = statusDialog;
++            this.dbFile = dbFile;
++        }
++
++
++        protected String doInBackground(Void... args) {
++            //Check if db has the correct version:
++            try {
++                SQLiteDatabase db = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
++                int version = db.getVersion();
++                db.close();
++                if (getDBVersion() != version) {
++                    statusDialog.dismiss();
++                    return "Wrong Database version.\n(" + version + " instead of " + getDBVersion() + ")";
++                }
++            } catch (SQLiteException e){
++                statusDialog.dismiss();
++                return "Database cannot be opened... aborting.";
++            }
++            mHandler.post(new Runnable() {
++                @Override
++                public void run() {
++                    statusDialog.setMessage("Step 2: exporting current DB");
++                }
++            });
++
++            String export = DatabaseUtil.saveSql(getBaseContext());
++
++
++            if (export == null) {
++                statusDialog.dismiss();
++                return "Exporting database not successfull... aborting.";
++            }
++
++            mHandler.post(new Runnable() {
++                @Override
++                public void run() {
++                    statusDialog.setMessage("Step 3: importing DB");
++                }
++            });
++
++            String result = DatabaseUtil.loadSql(getBaseContext(), dbFile.getAbsolutePath());
++
++            statusDialog.dismiss();
++            return result;
++        }
++
++        @Override
++        protected void onPostExecute(String result) {
++            super.onPostExecute(result);
++            postImportDB(result);
++
++        }
++    }
++}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/DatabaseUtil.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/DatabaseUtil.java
+index 767ebce..16bb1d2 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/DatabaseUtil.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/DatabaseUtil.java
+@@ -3,7 +3,6 @@
+ import android.content.Context;
+ import android.database.Cursor;
+ import android.database.sqlite.SQLiteDatabase;
+-import android.net.Uri;
+ import android.os.Environment;
+ import android.text.format.DateFormat;
+ import android.util.Log;
+@@ -11,7 +10,6 @@
+ 
+ import com.activeandroid.Cache;
+ import com.activeandroid.Configuration;
+-import com.eveningoutpost.dexdrip.stats.BgReadingStats;
+ 
+ import java.io.BufferedInputStream;
+ import java.io.BufferedOutputStream;
+@@ -23,8 +21,6 @@
+ import java.nio.channels.FileChannel;
+ import java.text.SimpleDateFormat;
+ import java.util.Date;
+-import java.util.List;
+-import java.util.Vector;
+ import java.util.zip.ZipEntry;
+ import java.util.zip.ZipOutputStream;
+ 
+@@ -85,11 +81,13 @@ public static String saveSql(Context context) {
+             } else {
+                 Toast.makeText(context, "SD card not writable!", Toast.LENGTH_LONG).show();
+                 Log.d(TAG, "SD card not writable!");
++                zipFilename = null;
+             }
+ 
+         } catch (IOException e) {
+             Toast.makeText(context, "SD card not writable!", Toast.LENGTH_LONG).show();
+             Log.e(TAG, "Exception while writing DB", e);
++            zipFilename = null;
+         } finally {
+             if (biStream != null) try {
+                 biStream.close();
+@@ -262,20 +260,22 @@ public static String saveCSV(Context context) {
+ 
+ 
+ 
+-    public static void loadSql(Context context, String path) {
++    public static String loadSql(Context context, String path) {
+ 
+         FileInputStream srcStream = null;
+         FileChannel src = null;
+         FileOutputStream destStream = null;
+         FileChannel dst = null;
+ 
++        String returnString = "";
++
+         try {
+             String databaseName = new Configuration.Builder(context).create().getDatabaseName();
+             File currentDB = context.getDatabasePath(databaseName);
+             File replacement = new File(path);
+             if (!replacement.exists()) {
+                 Log.d(TAG, "File does not exist: " + path);
+-                return;
++                return "File does not exist: " + path;
+             }
+             if (currentDB.canWrite()) {
+                 srcStream = new FileInputStream(replacement);
+@@ -283,11 +283,15 @@ public static void loadSql(Context context, String path) {
+                 destStream = new FileOutputStream(currentDB);
+                 dst = destStream.getChannel();
+                 dst.transferFrom(src, 0, src.size());
++                returnString = "Successfully imported database";
+             } else {
+                 Log.v(TAG, "loadSql: No Write access");
++                returnString = "loadSql: No Write access";
+             }
+         } catch (IOException e) {
+             Log.e(TAG, "Something went wrong importing Database", e);
++            returnString = "Something went wrong importing database";
++
+ 
+         } finally {
+             if (src != null) try {
+@@ -311,6 +315,7 @@ public static void loadSql(Context context, String path) {
+                 Log.e(TAG, "Something went wrong closing: ", e1);
+ 
+             }
++            return returnString;
+         }
+     }
+ }
+diff --git a/app/src/main/res/layout/activity_import_db.xml b/app/src/main/res/layout/activity_import_db.xml
+new file mode 100644
+index 0000000..e2c1984
+--- /dev/null
++++ b/app/src/main/res/layout/activity_import_db.xml
+@@ -0,0 +1,29 @@
++<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:tools="http://schemas.android.com/tools" android:id="@+id/drawer_layout"
++    android:layout_width="match_parent" android:layout_height="match_parent"
++    tools:context="com.eveningoutpost.dexdrip.Home">
++
++<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
++    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
++    android:paddingRight="@dimen/activity_horizontal_margin"
++    android:paddingTop="@dimen/activity_vertical_margin"
++    android:paddingBottom="@dimen/activity_vertical_margin"
++    >
++
++    <ListView xmlns:android="http://schemas.android.com/apk/res/android"
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:id="@android:id/list"
++        >
++    </ListView>
++
++</RelativeLayout>
++    <fragment android:id="@+id/navigation_drawer"
++        android:layout_width="@dimen/navigation_drawer_width" android:layout_height="match_parent"
++        android:layout_gravity="start"
++        android:name="com.eveningoutpost.dexdrip.NavigationDrawerFragment"
++        tools:layout="@layout/fragment_navigation_drawer" />
++
++</android.support.v4.widget.DrawerLayout>
++
+diff --git a/app/src/main/res/layout/import_db_warning.xml b/app/src/main/res/layout/import_db_warning.xml
+new file mode 100644
+index 0000000..44e0629
+--- /dev/null
++++ b/app/src/main/res/layout/import_db_warning.xml
+@@ -0,0 +1,17 @@
++<ScrollView
++    xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="fill_parent"
++    android:layout_height="fill_parent" >
++
++    <LinearLayout
++        android:layout_width="fill_parent"
++        android:layout_height="fill_parent" >
++
++        <TextView
++            android:id="@+id/textmsg"
++            android:layout_width="fill_parent"
++            android:layout_height="fill_parent"
++            android:text="@string/import_db_warning" />
++
++    </LinearLayout>
++</ScrollView>
+\ No newline at end of file
+diff --git a/app/src/main/res/menu/menu_home.xml b/app/src/main/res/menu/menu_home.xml
+index 2174f39..e6927da 100644
+--- a/app/src/main/res/menu/menu_home.xml
++++ b/app/src/main/res/menu/menu_home.xml
+@@ -6,9 +6,16 @@
+         android:orderInCategory="1"
+         android:showAsAction="never"/>
+ 
+-    <item android:id="@+id/action_export_csv"
++    <item android:id="@+id/action_import_db"
++        android:title="@string/menu_import_db"
++        android:checkable="false"
++        android:orderInCategory="1"
++        android:showAsAction="never"/>
++
++    <item android:id="@+id/action_export_csv_sidiary"
+         android:title="@string/menu_export_csv_sidiary"
+         android:checkable="false"
+         android:orderInCategory="1"
+         android:showAsAction="never"/>
++
+ </menu>
+\ No newline at end of file
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 300cb56..5df902e 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -14,6 +14,7 @@
+     <string name="menu_refresh">Refresh</string>
+     <string name="menu_export_database">Export database</string>
+     <string name="menu_export_csv_sidiary">Export CSV (SiDiary format)</string>
++    <string name="menu_import_db">Import database</string>
+     <string name="error_bluetooth_not_supported">Error: Bluetooth not supported by this device</string>
+     <string name="unknown_device">Unrecognized Device</string>
+     <string name="connecting_to_device">Connecting to device</string>
+@@ -38,6 +39,10 @@
+     <string name="title_activity_usb_connected">UsbConnectedActivity</string>
+     <string name="snooze">Snooze</string>
+     <string name="snooze_hint">Snooze alert for x minutes</string>
++    <string name="ok">OK</string>
++    <string name="cancel">Cancel</string>
++
++
+ 
+     <string-array name="menu_options">
+         <item>Dex Drip</item>
+@@ -103,5 +108,20 @@
+     <string name="appwidget_text">EXAMPLE</string>
+     <string name="add_widget">Add widget</string>
+     <string name="title_activity_alert_list">AlertList</string>
+-
++    <string name="import_db_warning">
++        WARNING: Importing a database might cause SEVERE DATA LOSS. If you don\'t know why you want to use the import, don\'t use it.
++        In regular operation of xDrip it is not needed. Just use it in case of previous data loss.
++        If you are not sure what to do, in case you still want to use the import, please ask an expert user.\n\n
++        Instructions:\n
++        Place the database you want to install in the directory \'xdrip\' on your primary external storage
++        (sometimes called \'internal storage\' by the file browser).
++        It is the same directory xDrip exports to.\n
++        In case you have a zipped export in this directory, unzip it (usually longpress->extract on the file in the file browser).
++        If it gets extracted to a subdirectory it will still be found by the import.\n\n
++        After having placed the file, start this import routine.
++        Scroll to the correct database name, click on it and follow the instructions on the screen.  \n\n
++        ATTENTION: A Database can only be imported if it has the same database version number currently needed for this xDrip version.
++        The database verions number may change with xDrip updates.
++        It is best to import the database with the same version of the xDrip app it was exported and then update xDrip.
++    </string>
+ </resources>

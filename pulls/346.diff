@@ -1,0 +1,459 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java b/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
+index 992dada..3ba7c39 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/BluetoothScan.java
+@@ -299,7 +299,7 @@ protected void onListItemClick(ListView l, View v, int position, long id) {
+             } else returnToHome();
+ 
+         } else if(device.getName().toLowerCase().contains("bridge")) {
+-            if(!CollectionServiceStarter.isDexbridgeWixel(getApplicationContext()))
++            if(!CollectionServiceStarter.isDexbridgeWixelorWifiandDexbridgeWixel(getApplicationContext()))
+                 prefs.edit().putString("dex_collection_method", "DexbridgeWixel").apply();
+             if(prefs.getString("dex_txid", "00000").compareTo("00000") == 0 || prefs.getString("dex_txid", "00000").length() < 5) {
+                 requestTransmitterId(prefs);
+@@ -307,8 +307,7 @@ protected void onListItemClick(ListView l, View v, int position, long id) {
+ 
+         } else if(device.getName().toLowerCase().contains("drip")) {
+             if (!
+-                    (CollectionServiceStarter.isBTWixel(getApplicationContext())
+-                            || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())
++                    (CollectionServiceStarter.isBteWixelorWifiandBtWixel(getApplicationContext())
+                     ) || CollectionServiceStarter.isLimitter(getApplicationContext())) {
+                 prefs.edit().putString("dex_collection_method", "BluetoothWixel").apply();
+             }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index 8b78d95..0f2cbda 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -256,9 +256,8 @@ private void updateCurrentBgInfo() {
+         final TextView notificationText = (TextView) findViewById(R.id.notices);
+         notificationText.setText("");
+         notificationText.setTextColor(Color.parseColor("#FF0000"));
+-        boolean isBTWixel = CollectionServiceStarter.isBTWixel(getApplicationContext());
+-        boolean isDexbridgeWixel = CollectionServiceStarter.isDexbridgeWixel(getApplicationContext());
+-        boolean isWifiBluetoothWixel = CollectionServiceStarter.isWifiandBTWixel(getApplicationContext());
++        boolean isBTWixel = CollectionServiceStarter.isBteWixelorWifiandBtWixel(getApplicationContext());
++        boolean isDexbridgeWixel = CollectionServiceStarter.isDexbridgeWixelorWifiandDexbridgeWixel(getApplicationContext());
+         isBTShare = CollectionServiceStarter.isBTShare(getApplicationContext());
+         isG5Share = CollectionServiceStarter.isBTG5(getApplicationContext());
+         boolean isWifiWixel = CollectionServiceStarter.isWifiWixel(getApplicationContext());
+@@ -270,9 +269,9 @@ private void updateCurrentBgInfo() {
+             updateCurrentBgInfoForxDripViewer(notificationText);
+         } else if (isBTShare) {
+             updateCurrentBgInfoForBtShare(notificationText);
+-        } else if (isBTWixel || isDexbridgeWixel ||  isWifiBluetoothWixel) {
++        } else if (isBTWixel || isDexbridgeWixel) {
+             updateCurrentBgInfoForBtBasedWixel(notificationText);
+-        } else if (isWifiWixel || isWifiBluetoothWixel) {
++        } else if (isWifiWixel) {
+             updateCurrentBgInfoForWifiWixel(notificationText);
+         }
+         if (isG5Share) {
+@@ -406,7 +405,7 @@ private void displayCurrentInfo() {
+         DecimalFormat df = new DecimalFormat("#");
+         df.setMaximumFractionDigits(0);
+ 
+-        boolean isDexbridge = CollectionServiceStarter.isDexbridgeWixel(getApplicationContext());
++        boolean isDexbridge = CollectionServiceStarter.isDexbridgeWixelorWifiandDexbridgeWixel(getApplicationContext());
+         boolean displayBattery = mPreferences.getBoolean("display_bridge_battery",false);
+         int bridgeBattery = mPreferences.getInt("bridge_battery", 0);
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java b/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
+index ea554ea..7ab5b61 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/NavDrawerBuilder.java
+@@ -90,7 +90,7 @@ public NavDrawerBuilder(Context aContext) {
+         }
+ 
+         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+-            if(CollectionServiceStarter.isBTWixel(context) || CollectionServiceStarter.isDexbridgeWixel(context)|| CollectionServiceStarter.isBTShare(context) ||CollectionServiceStarter.isWifiandBTWixel(context)) {
++            if(CollectionServiceStarter.isBteWixelorWifiandBtWixel(context) || CollectionServiceStarter.isDexbridgeWixelorWifiandDexbridgeWixel(context)|| CollectionServiceStarter.isBTShare(context) ) {
+                 this.nav_drawer_options.add(BluetoothScan.menu_name);
+                 this.nav_drawer_intents.add(new Intent(context, BluetoothScan.class));
+             }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+index 1866b67..43f8136 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+@@ -91,7 +91,7 @@ public void onCreate() {
+         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+         listenForChangeInSettings();
+         bgToSpeech = BgToSpeech.setupTTS(mContext); //keep reference to not being garbage collected
+-        if(CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())){
++        if(CollectionServiceStarter.isDexbridgeWixelorWifiandDexbridgeWixel(getApplicationContext())){
+             Log.i(TAG,"onCreate: resetting bridge_battery preference to 0");
+             prefs.edit().putInt("bridge_battery",0).apply();
+         }
+@@ -104,9 +104,8 @@ public int onStartCommand(Intent intent, int flags, int startId) {
+             stopSelf();
+             return START_NOT_STICKY;
+         }
+-        if (CollectionServiceStarter.isBTWixel(getApplicationContext())
+-                || CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())
+-                || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())) {
++        if (CollectionServiceStarter.isBteWixelorWifiandBtWixel(getApplicationContext())
++                || CollectionServiceStarter.isDexbridgeWixelorWifiandDexbridgeWixel(getApplicationContext())) {
+             setFailoverTimer();
+         } else {
+             stopSelf();
+@@ -154,11 +153,10 @@ public void listenForChangeInSettings() {
+     }
+ 
+     public void setRetryTimer() {
+-        if (CollectionServiceStarter.isBTWixel(getApplicationContext())
+-                || CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())
+-                || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())) {
++        if (CollectionServiceStarter.isBteWixelorWifiandBtWixel(getApplicationContext())
++                || CollectionServiceStarter.isDexbridgeWixelorWifiandDexbridgeWixel(getApplicationContext())) {
+             long retry_in;
+-            if(CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
++            if(CollectionServiceStarter.isDexbridgeWixelorWifiandDexbridgeWixel(getApplicationContext())) {
+                 retry_in = (1000 * 25);
+             }else {
+                 retry_in = (1000*65);
+@@ -178,9 +176,8 @@ public void setRetryTimer() {
+     }
+ 
+     public void setFailoverTimer() {
+-        if (CollectionServiceStarter.isBTWixel(getApplicationContext())
+-                || CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())
+-                || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())) {
++        if (CollectionServiceStarter.isBteWixelorWifiandBtWixel(getApplicationContext())
++                || CollectionServiceStarter.isDexbridgeWixelorWifiandDexbridgeWixel(getApplicationContext())) {
+ 
+             long retry_in = (1000 * 60 * 6);
+             Log.d(TAG, "setFailoverTimer: Fallover Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
+@@ -433,7 +430,7 @@ public void close() {
+ 
+     public void setSerialDataToTransmitterRawData(byte[] buffer, int len) {
+         long timestamp = new Date().getTime();
+-        if (CollectionServiceStarter.isDexbridgeWixel(getApplicationContext())) {
++        if (CollectionServiceStarter.isDexbridgeWixelorWifiandDexbridgeWixel(getApplicationContext())) {
+             Log.i(TAG, "setSerialDataToTransmitterRawData: Dealing with Dexbridge packet!");
+             int DexSrc;
+             int TransmitterID;
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WifiCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WifiCollectionService.java
+index 128b57b..ccee289 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WifiCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WifiCollectionService.java
+@@ -56,7 +56,8 @@ public int onStartCommand(Intent intent, int flags, int startId) {
+             return START_NOT_STICKY;
+         }
+         if (CollectionServiceStarter.isWifiWixel(getApplicationContext())
+-                || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())) {
++                || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())
++                || CollectionServiceStarter.isWifiandDexbridgeWixel(getApplicationContext())) {
+             runWixelReader();
+             // For simplicity done here, would better happen once we know if we have a packet or not...
+             setFailoverTimer();
+@@ -96,7 +97,8 @@ public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+ 
+     public void setFailoverTimer() {
+         if (CollectionServiceStarter.isWifiWixel(getApplicationContext())
+-                || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())) {
++                || CollectionServiceStarter.isWifiandBTWixel(getApplicationContext())
++                || CollectionServiceStarter.isWifiandDexbridgeWixel(getApplicationContext())) {
+             long retry_in = WixelReader.timeForNextRead();
+             Log.d(TAG, "setFailoverTimer: Fallover Restarting in: " + (retry_in / (60 * 1000)) + " minutes");
+             Calendar calendar = Calendar.getInstance();
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Tables/BgReadingTable.java b/app/src/main/java/com/eveningoutpost/dexdrip/Tables/BgReadingTable.java
+index 0613ccd..56a0113 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Tables/BgReadingTable.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Tables/BgReadingTable.java
+@@ -53,15 +53,17 @@ private void getData() {
+     }
+ 
+     public static class BgReadingCursorAdapterViewHolder {
+-        TextView raw_data_id;
+-        TextView raw_data_value;
+-        TextView raw_data_slope;
++        TextView calculated_value;
++        TextView filtered_calculated_value;
++        TextView age_adjusted_raw_value;
++        TextView raw_data;
+         TextView raw_data_timestamp;
+ 
+         public BgReadingCursorAdapterViewHolder(View root) {
+-            raw_data_id = (TextView) root.findViewById(R.id.raw_data_id);
+-            raw_data_value = (TextView) root.findViewById(R.id.raw_data_value);
+-            raw_data_slope = (TextView) root.findViewById(R.id.raw_data_slope);
++        	calculated_value = (TextView) root.findViewById(R.id.calculated_value);
++        	filtered_calculated_value = (TextView) root.findViewById(R.id.filtered_calculated_value);
++        	age_adjusted_raw_value = (TextView) root.findViewById(R.id.age_adjusted_raw_value);
++        	raw_data = (TextView) root.findViewById(R.id.raw_data);
+             raw_data_timestamp = (TextView) root.findViewById(R.id.raw_data_timestamp);
+         }
+     }
+@@ -79,7 +81,7 @@ public BgReadingAdapter(Context context, List<BgReading> readings) {
+         }
+ 
+         public View newView(Context context, ViewGroup parent) {
+-            final View view = LayoutInflater.from(context).inflate(R.layout.raw_data_list_item, parent, false);
++            final View view = LayoutInflater.from(context).inflate(R.layout.bg_table_list_item, parent, false);
+ 
+             final BgReadingCursorAdapterViewHolder holder = new BgReadingCursorAdapterViewHolder(view);
+             view.setTag(holder);
+@@ -89,9 +91,10 @@ public View newView(Context context, ViewGroup parent) {
+ 
+         public void bindView(View view, Context context, BgReading bgReading) {
+             final BgReadingCursorAdapterViewHolder tag = (BgReadingCursorAdapterViewHolder) view.getTag();
+-            tag.raw_data_id.setText(Double.toString(bgReading.calculated_value));
+-            tag.raw_data_value.setText(Double.toString(bgReading.age_adjusted_raw_value));
+-            tag.raw_data_slope.setText(Double.toString(bgReading.raw_data));
++            tag.calculated_value.setText(Double.toString(bgReading.calculated_value));
++            tag.filtered_calculated_value.setText(Double.toString(bgReading.filtered_calculated_value));
++            tag.age_adjusted_raw_value.setText(Double.toString(bgReading.age_adjusted_raw_value));
++            tag.raw_data.setText(Double.toString(bgReading.raw_data));
+             tag.raw_data_timestamp.setText(new Date(bgReading.timestamp).toString());
+         }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+index f6dbfa8..9d117a8 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgGraphBuilder.java
+@@ -34,11 +34,29 @@
+ import lecho.lib.hellocharts.model.Viewport;
+ import lecho.lib.hellocharts.util.ChartUtils;
+ import lecho.lib.hellocharts.view.Chart;
++import com.eveningoutpost.dexdrip.Models.UserError.Log;
+ 
+ /**
+  * Created by stephenblack on 11/15/14.
+  */
++
++class PointValueExtended extends PointValue {
++	
++	public PointValueExtended(float x, float y, float filtered) {
++		set(x, y);
++		calculatedFilteredValue = filtered;
++	}
++	   public PointValueExtended(float x, float y) {
++	        set(x, y);
++	        calculatedFilteredValue = -1;
++	    }
++	
++	float calculatedFilteredValue;
++}
++
++
+ public class BgGraphBuilder {
++	private static final String TAG = BgGraphBuilder.class.getSimpleName();
+     public static final int FUZZER = (1000 * 30 * 5);
+     public static final int MAX_SLOPE_MINUTES = 21;
+     public long  end_time;
+@@ -233,25 +251,25 @@ private void addBgReadingValues() {
+ 
+         for (BgReading bgReading : bgReadings) {
+             if (bgReading.raw_calculated != 0 && prefs.getBoolean("interpret_raw", false)) {
+-                rawInterpretedValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.raw_calculated)));
++                rawInterpretedValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.raw_calculated),(float) unitized(bgReading.filtered_calculated_value)));
+             } else if (bgReading.calculated_value >= 400) {
+-                highValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(400)));
++                highValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(400),(float) unitized(bgReading.filtered_calculated_value)));
+             } else if (unitized(bgReading.calculated_value) >= highMark) {
+-                highValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value)));
++                highValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value), (float) unitized(bgReading.filtered_calculated_value)));
+             } else if (unitized(bgReading.calculated_value) >= lowMark) {
+-                inRangeValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value)));
++                inRangeValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value), (float) unitized(bgReading.filtered_calculated_value)));
+             } else if (bgReading.calculated_value >= 40) {
+-                lowValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value)));
++                lowValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value),(float) unitized(bgReading.filtered_calculated_value)));
+             } else if (bgReading.calculated_value > 13) {
+-                lowValues.add(new PointValue((float) (bgReading.timestamp / FUZZER), (float) unitized(40)));
++                lowValues.add(new PointValueExtended((float) (bgReading.timestamp / FUZZER), (float) unitized(40), (float) unitized(bgReading.filtered_calculated_value)));
+             }
+ 
+             if ((show_filtered) && (bgReading.filtered_calculated_value > 0) && (bgReading.filtered_calculated_value != bgReading.calculated_value)) {
+-                filteredValues.add(new PointValue((float) ((bgReading.timestamp - timeshift) / FUZZER), (float) unitized(bgReading.filtered_calculated_value)));
++                filteredValues.add(new PointValueExtended((float) ((bgReading.timestamp - timeshift) / FUZZER), (float) unitized(bgReading.filtered_calculated_value)));
+             }
+         }
+         for (Calibration calibration : calibrations) {
+-            calibrationValues.add(new PointValue((float) (calibration.timestamp / FUZZER), (float) unitized(calibration.bg)));
++            calibrationValues.add(new PointValueExtended((float) (calibration.timestamp / FUZZER), (float) unitized(calibration.bg)));
+         }
+     }
+ 
+@@ -504,13 +522,23 @@ public OnValueSelectTooltipListener getOnValueSelectTooltipListener(){
+ 
+         @Override
+         public synchronized void onValueSelected(int i, int i1, PointValue pointValue) {
++        	
++        	String filtered = "";
++        	try {
++        		PointValueExtended pve = (PointValueExtended) pointValue;
++        		if(pve.calculatedFilteredValue != -1) {
++        			filtered = " (" + Math.round(pve.calculatedFilteredValue*10) / 10d +")";
++        		}
++        	} catch (ClassCastException e) {
++        		Log.e(TAG, "Error casting a point from pointValue to PointValueExtended", e);
++        	}
+             final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(context);
+             //Won't give the exact time of the reading but the time on the grid: close enough.
+             Long time = ((long)pointValue.getX())*FUZZER;
+             if(tooltip!= null){
+                 tooltip.cancel();
+             }
+-            tooltip = Toast.makeText(context, timeFormat.format(time)+ ": " + Math.round(pointValue.getY()*10)/ 10d , Toast.LENGTH_LONG);
++            tooltip = Toast.makeText(context, timeFormat.format(time)+ ": " + Math.round(pointValue.getY()*10)/ 10d + filtered, Toast.LENGTH_LONG);
+             tooltip.show();
+         }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
+index fc3f456..e179dbe 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/CollectionServiceStarter.java
+@@ -48,6 +48,29 @@ private static boolean isWifiandBTWixel(String collection_method, Context contex
+         return collection_method.equals("WifiBlueToothWixel"); 
+     }
+ 
++    
++    public static boolean isWifiandDexbridgeWixel(Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return false;
++        }
++        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
++        String collection_method = prefs.getString("dex_collection_method", "BluetoothWixel");
++        if(collection_method.compareTo("WifiDexbridgeWixel") == 0) {
++            return true;
++        }
++        return false;
++    }
++  
++    private static boolean isWifiandDexbridgeWixel(String collection_method, Context context) {
++        if(XDripViewer.isxDripViewerMode(context)) {
++            return false;
++        }
++        return collection_method.equals("WifiDexbridgeWixel"); 
++    }
++
++    
++    
++    
+     public static boolean isBTWixel(Context context) {
+         if(XDripViewer.isxDripViewerMode(context)) {
+             return false;
+@@ -85,8 +108,18 @@ private static boolean isBTWixel(String collection_method, Context context) {
+         //LimiTTer hardware emulates BTWixel packages
+         return collection_method.equals("BluetoothWixel")||collection_method.equals("LimiTTer");
+     }
++    
++    // returns true if this DexBridge or DexBrige + wifi togeather.
++    public static boolean isBteWixelorWifiandBtWixel(Context context) {
++      return isBTWixel(context) || isWifiandBTWixel(context);
++    }
+ 
+-    public static boolean isDexbridgeWixel(Context context) {
++    // returns true if this DexBridge or DexBrige + wifi togeather.
++    public static boolean isDexbridgeWixelorWifiandDexbridgeWixel(Context context) {
++      return isDexbridgeWixel(context) || isWifiandDexbridgeWixel(context);
++    }
++    
++    private static boolean isDexbridgeWixel(Context context) {
+         if(XDripViewer.isxDripViewerMode(context)) {
+             return false;
+         }
+@@ -191,7 +224,7 @@ public void start(Context context, String collection_method) {
+             stopWifWixelThread();
+             stopBtShareService();
+             startBtG5Service();
+-        } else if (isWifiandBTWixel(collection_method, context)) {
++        } else if (isWifiandBTWixel(collection_method, context) || isWifiandDexbridgeWixel(collection_method, context)) {
+             Log.d("DexDrip", "Starting wifi and bt wixel collector");
+             stopBtWixelService();
+             stopWifWixelThread();
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+index f79b258..72ed615 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+@@ -348,7 +348,8 @@ public boolean onPreferenceChange(Preference preference, Object newValue) {
+ 
+ 
+             if ((prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("WifiWixel") != 0)
+-                    && (prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("WifiBlueToothWixel") != 0)) {
++                    && (prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("WifiBlueToothWixel") != 0)
++                    && (prefs.getString("dex_collection_method", "BluetoothWixel").compareTo("WifiDexbridgeWixel") != 0)) {
+                 String receiversIpAddresses;
+                 receiversIpAddresses = prefs.getString("wifi_recievers_addresses", "");
+                 // only hide if non wifi wixel mode and value not previously set to cope with
+@@ -430,6 +431,7 @@ public boolean onPreferenceChange(Preference preference, Object newValue) {
+                             && ((String) newValue).compareTo("DexcomShare") != 0
+                             && ((String) newValue).compareTo("DexbridgeWixel") != 0
+                             && ((String) newValue).compareTo("WifiBlueToothWixel") != 0
++                            && ((String) newValue).compareTo("WifiDexbridgeWixel") != 0
+                             && ((String) newValue).compareTo("LimiTTer") != 0) {
+                         collectionCategory.removePreference(runInForeground);
+                     } else {
+@@ -438,7 +440,8 @@ public boolean onPreferenceChange(Preference preference, Object newValue) {
+ 
+                     // jamorham always show wifi receivers option if populated as we may switch modes dynamically
+                     if ((((String) newValue).compareTo("WifiWixel") != 0)
+-                            && (((String) newValue).compareTo("WifiBlueToothWixel") != 0)) {
++                            && (((String) newValue).compareTo("WifiBlueToothWixel") != 0)
++                            && (((String) newValue).compareTo("WifiDexbridgeWixel") != 0)) {
+                         String receiversIpAddresses;
+                         receiversIpAddresses = prefs.getString("wifi_recievers_addresses", "");
+                         if (receiversIpAddresses == null || receiversIpAddresses.equals("")) {
+diff --git a/app/src/main/res/layout/bg_table_list_item.xml b/app/src/main/res/layout/bg_table_list_item.xml
+new file mode 100644
+index 0000000..d80baae
+--- /dev/null
++++ b/app/src/main/res/layout/bg_table_list_item.xml
+@@ -0,0 +1,35 @@
++<?xml version="1.0" encoding="utf-8"?>
++
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:orientation="vertical"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:id="@+id/bg_table_data_list">
++
++    <TextView android:id="@+id/calculated_value"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:textSize="24sp" />
++    
++    <TextView android:id="@+id/filtered_calculated_value"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:textSize="12sp" />
++
++    <TextView android:id="@+id/age_adjusted_raw_value"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:textSize="12sp"/>
++
++    <TextView android:id="@+id/raw_data"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:textSize="12sp"/>
++
++    <TextView android:id="@+id/raw_data_timestamp"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:textSize="12sp"/>
++
++
++</LinearLayout>
+\ No newline at end of file
+diff --git a/app/src/main/res/values/arrays.xml b/app/src/main/res/values/arrays.xml
+index c7ea960..14bcbc8 100644
+--- a/app/src/main/res/values/arrays.xml
++++ b/app/src/main/res/values/arrays.xml
+@@ -5,6 +5,7 @@
+         <item>xBridge Wixel</item>
+         <item>Wifi Wixel</item>
+         <item>Wifi Wixel + BT Wixel</item>
++        <item>Wifi Wixel + xBridge Wixel</item>
+         <item>G4 Share Receiver</item>
+         <item>G5 Transmitter</item>
+         <item>LimiTTer</item>
+@@ -15,6 +16,7 @@
+         <item>DexbridgeWixel</item>
+         <item>WifiWixel</item>
+         <item>WifiBlueToothWixel</item>
++        <item>WifiDexbridgeWixel</item>
+         <item>DexcomShare</item>
+         <item>DexcomG5</item>
+         <item>LimiTTer</item>

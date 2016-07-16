@@ -1,0 +1,73 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+index 112b35e..fc9a147 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/BgReading.java
+@@ -353,13 +353,7 @@ public static BgReading create(double raw_data, double filtered_data, Context co
+                 }
+                 bgReading.calculated_value = ((calibration.slope * bgReading.age_adjusted_raw_value) + calibration.intercept);
+             }
+-            if (bgReading.calculated_value < 10) {
+-                bgReading.calculated_value = 9;
+-                bgReading.hide_slope = true;
+-            } else {
+-                bgReading.calculated_value = Math.min(400, Math.max(39, bgReading.calculated_value));
+-            }
+-            Log.i(TAG, "NEW VALUE CALCULATED AT: " + bgReading.calculated_value);
++            updateCalculatedValue(bgReading);
+ 
+             bgReading.save();
+             bgReading.perform_calculations();
+@@ -371,7 +365,17 @@ public static BgReading create(double raw_data, double filtered_data, Context co
+ 
+         return bgReading;
+     }
+-    
++
++    static void updateCalculatedValue(BgReading bgReading ) {
++        if (bgReading.calculated_value < 10) {
++            bgReading.calculated_value = 38;
++            bgReading.hide_slope = true;
++        } else {
++            bgReading.calculated_value = Math.min(400, Math.max(39, bgReading.calculated_value));
++        }
++        Log.i(TAG, "NEW VALUE CALCULATED AT: " + bgReading.calculated_value);
++    }
++
+     // Used by xDripViewer
+     public static void create(Context context, double raw_data, double age_adjusted_raw_value, double filtered_data, Long timestamp,
+             double calculated_bg,  double calculated_current_slope, boolean hide_slope) {
+@@ -414,14 +418,6 @@ public static void create(Context context, double raw_data, double age_adjusted_
+             bgReading.calculated_value_slope = calculated_current_slope;
+             bgReading.hide_slope = hide_slope;
+ 
+-            if (bgReading.calculated_value < 10) {
+-                bgReading.calculated_value = 9;
+-                bgReading.hide_slope = true;
+-            } else {
+-                bgReading.calculated_value = Math.min(400, Math.max(39, bgReading.calculated_value));
+-            }
+-            Log.i(TAG, "NEW VALUE CALCULATED AT: " + bgReading.calculated_value);
+-
+             bgReading.save();
+         }
+         BgSendQueue.handleNewBgReading(bgReading, "create", context);
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+index f0b97fb..327ed2c 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/Calibration.java
+@@ -555,6 +555,7 @@ private double calculateWeight() {
+     public static void adjustRecentBgReadings() {// This just adjust the last 30 bg readings transition from one calibration point to the next
+         adjustRecentBgReadings(30);
+     }
++
+     public static void adjustRecentBgReadings(int adjustCount) {
+         //TODO: add some handling around calibration overrides as they come out looking a bit funky
+         List<Calibration> calibrations = Calibration.latest(3);
+@@ -575,6 +576,7 @@ public static void adjustRecentBgReadings(int adjustCount) {
+             for (BgReading bgReading : bgReadings) {
+                 double newYvalue = (bgReading.age_adjusted_raw_value * latestCalibration.slope) + latestCalibration.intercept;
+                 bgReading.calculated_value = newYvalue;
++                BgReading.updateCalculatedValue(bgReading);
+                 bgReading.save();
+ 
+             }

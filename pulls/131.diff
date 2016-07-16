@@ -1,0 +1,154 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+index 3b97a3f..2ac2c41 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Home.java
+@@ -5,13 +5,17 @@
+ import android.content.Intent;
+ import android.content.IntentFilter;
+ import android.content.SharedPreferences;
++import android.graphics.Canvas;
+ import android.graphics.Color;
++import android.graphics.ColorFilter;
+ import android.graphics.Paint;
++import android.graphics.drawable.Drawable;
+ import android.net.Uri;
+ import android.os.AsyncTask;
+ import android.os.Bundle;
+ import android.preference.PreferenceManager;
+ import android.support.v4.widget.DrawerLayout;
++import android.util.DisplayMetrics;
+ import android.view.Menu;
+ import android.view.MenuItem;
+ import android.view.View;
+@@ -19,6 +23,7 @@
+ import android.widget.TextView;
+ import android.widget.Toast;
+ 
++import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.Constants;
+ import com.eveningoutpost.dexdrip.Models.ActiveBluetoothDevice;
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.eveningoutpost.dexdrip.Models.Calibration;
+@@ -149,6 +154,40 @@ public void setupCharts() {
+ 
+         chart.setZoomType(ZoomType.HORIZONTAL);
+ 
++        //Transmitter Battery Level
++        final Sensor sensor = Sensor.currentSensor();
++        if (sensor != null && sensor.latest_battery_level != 0 && sensor.latest_battery_level <= Constants.TRANSMITTER_BATTERY_LOW) {
++            Drawable background = new Drawable() {
++
++                @Override
++                public void draw(Canvas canvas) {
++
++                    DisplayMetrics metrics = getApplicationContext().getResources().getDisplayMetrics();
++                    int px = (int) (30 * (metrics.densityDpi / 160f));
++                    Paint paint = new Paint();
++                    paint.setTextSize(px);
++                    paint.setAntiAlias(true);
++                    paint.setColor(Color.parseColor("#FFFFAA"));
++                    paint.setStyle(Paint.Style.STROKE);
++                    paint.setAlpha(100);
++                    canvas.drawText("transmitter battery", 10, chart.getHeight() / 3 - (int) (1.2 * px), paint);
++                    if(sensor.latest_battery_level <= Constants.TRANSMITTER_BATTERY_EMPTY){
++                        paint.setTextSize((int)(px*1.5));
++                        canvas.drawText("VERY LOW", 10, chart.getHeight() / 3, paint);
++                    } else {
++                        canvas.drawText("low", 10, chart.getHeight() / 3, paint);
++                    }
++                }
++
++                @Override
++                public void setAlpha(int alpha) {}
++                @Override
++                public void setColorFilter(ColorFilter cf) {}
++                @Override
++                public int getOpacity() {return 0;}
++            };
++            chart.setBackground(background);
++        }
+         previewChart = (PreviewLineChartView) findViewById(R.id.chart_preview);
+         previewChart.setZoomType(ZoomType.HORIZONTAL);
+ 
+@@ -470,3 +509,4 @@ public void onActionClicked(Snackbar snackbar) {
+         }
+     }
+ }
++
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/Constants.java b/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/Constants.java
+index ace3f7c..5c81447 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/Constants.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/Constants.java
+@@ -55,6 +55,8 @@
+     public final static int EGV_NOISE_MASK = 112;
+     public final static float MG_DL_TO_MMOL_L = 0.05556f;
+     public final static int CRC_LEN = 2;
++    public static final int TRANSMITTER_BATTERY_LOW = 210;
++    public static final int TRANSMITTER_BATTERY_EMPTY = 207;
+ 
+     public enum BATTERY_STATES {
+         NONE,
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Sensor.java b/app/src/main/java/com/eveningoutpost/dexdrip/Sensor.java
+index faf63e3..a92fc01 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Sensor.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Sensor.java
+@@ -27,6 +27,7 @@
+     public long stopped_at;
+ 
+ //    @Expose
++    //latest minimal battery level
+     @Column(name = "latest_battery_level")
+     public int latest_battery_level;
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+index cdc568c..138f98b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+@@ -492,7 +492,7 @@ private void processNewTransmitterData(TransmitterData transmitterData, long tim
+             return;
+         }
+ 
+-        sensor.latest_battery_level = transmitterData.sensor_battery_level;
++        sensor.latest_battery_level = (sensor.latest_battery_level!=0)?Math.min(sensor.latest_battery_level, transmitterData.sensor_battery_level):transmitterData.sensor_battery_level;
+         sensor.save();
+ 
+         BgReading.create(transmitterData.raw_data, transmitterData.filtered_data, this, timestamp);
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+index 6ac90bf..3ee853d 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+@@ -411,7 +411,7 @@ public void setSerialDataToTransmitterRawData(int raw_data, int filtered_data ,i
+             Sensor sensor = Sensor.currentSensor();
+             if (sensor != null) {
+                 BgReading bgReading = BgReading.create(transmitterData.raw_data, filtered_data, mContext, CaptureTime);
+-                sensor.latest_battery_level = transmitterData.sensor_battery_level;
++                sensor.latest_battery_level = (sensor.latest_battery_level!=0)?Math.min(sensor.latest_battery_level, transmitterData.sensor_battery_level):transmitterData.sensor_battery_level;;
+                 sensor.save();
+             } else {
+                 Log.w(TAG, "No Active Sensor, Data only stored in Transmitter Data");
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java b/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java
+index 14897ff..ca41ffb 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java
+@@ -19,6 +19,7 @@
+ import android.widget.LinearLayout;
+ import android.widget.TextView;
+ 
++import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.Constants;
+ import com.eveningoutpost.dexdrip.Models.ActiveBluetoothDevice;
+ import com.eveningoutpost.dexdrip.Models.TransmitterData;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+@@ -125,10 +126,10 @@ private void setTransmitterStatus() {
+         } else {
+             transmitter_status_view.setText("" + td.sensor_battery_level);
+ 
+-            if (td.sensor_battery_level <= 207) {
+-                transmitter_status_view.append(" - empty");
+-            } else if (td.sensor_battery_level <= 210) {
+-                transmitter_status_view.append(" - ok - rather low");
++            if (td.sensor_battery_level <= Constants.TRANSMITTER_BATTERY_EMPTY) {
++                transmitter_status_view.append(" - very low");
++            } else if (td.sensor_battery_level <= Constants.TRANSMITTER_BATTERY_LOW) {
++                transmitter_status_view.append(" - low");
+                 transmitter_status_view.append("\n(experimental interpretation)");
+             } else {
+                 transmitter_status_view.append(" - ok");

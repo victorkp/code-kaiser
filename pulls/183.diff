@@ -1,0 +1,196 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java b/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java
+index 6bef3a2..dc7d977 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/EditAlertActivity.java
+@@ -413,7 +413,7 @@ public void onClick(View v) {
+                     Toast.makeText(getApplicationContext(), "Reraise Value must be 1 minute or greater", Toast.LENGTH_LONG).show();
+                     return;
+                 } else if (alertReraise >= defaultSnooze) {
+-                    Toast.makeText(getApplicationContext(), "Reraise Value must less than snooze length", Toast.LENGTH_LONG).show();
++                    Toast.makeText(getApplicationContext(), "Reraise Value must be less than snooze length", Toast.LENGTH_LONG).show();
+                     return;
+                 }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java
+index f0d9232..09da3dc 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/ActiveBgAlert.java
+@@ -162,5 +162,10 @@ public int getUpdatePlayTime() {
+         Long timeSeconds =  (new Date().getTime() - alert_started_at) / 1000;
+         return (int)Math.round(timeSeconds / 60.0);
+     }
++
++    public void updateNextAlertAt(long nextAlertTime){
++        next_alert_at = nextAlertTime;
++        save();
++    }
+ }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+index 9bb871f..0569470 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Models/AlertType.java
+@@ -1,12 +1,12 @@
+ package com.eveningoutpost.dexdrip.Models;
+ 
++import android.app.AlarmManager;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.preference.PreferenceManager;
+ import android.provider.BaseColumns;
+ import com.eveningoutpost.dexdrip.Models.UserError.Log;
+-
+ import com.activeandroid.Model;
+ import com.activeandroid.annotation.Column;
+ import com.activeandroid.annotation.Table;
+@@ -437,6 +437,15 @@ private boolean trending_to_threshold(double bg) {
+         }
+         return false;
+     }
++    
++     public long getNextAlertTime(Context ctx) {
++         int time = minutes_between;
++         if (time < 1 || AlertPlayer.isAscendingMode(ctx)) {
++             time = 1;
++         }
++         Calendar calendar = Calendar.getInstance();
++         return calendar.getTimeInMillis() + (time * 60000);
++     }
+ 
+     public boolean should_alarm(double bg) {
+ //        Log.e(TAG, "should_alarm called active =  " + active );
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
+index bbf5e55..ddd0383 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
+@@ -29,7 +29,6 @@
+     private MediaPlayer mediaPlayer;
+     int volumeBeforeAlert;
+     int volumeForThisAlert;
+-    Context context;
+ 
+     final static int ALERT_PROFILE_HIGH = 1;
+     final static int ALERT_PROFILE_ASCENDING = 2;
+@@ -59,9 +58,9 @@ public synchronized  void startAlert(Context ctx, boolean trendingToAlertEnd, Al
+         }
+ 
+         stopAlert(ctx, true, false);
+-        int alertIn = newAlert.minutes_between;
+-        if(alertIn < 1) { alertIn = 1; }
+-        ActiveBgAlert.Create(newAlert.uuid, false, new Date().getTime() + alertIn * 60000 );
++
++        long nextAlertTime = newAlert.getNextAlertTime(ctx);
++        ActiveBgAlert.Create(newAlert.uuid, false, nextAlertTime );
+         Vibrate(ctx, newAlert, bgValue, newAlert.override_silent_mode, 0);
+     }
+ 
+@@ -128,12 +127,15 @@ public void ClockTick(Context ctx, boolean trendingToAlertEnd, String bgValue)
+                 return;
+             }
+             Log.d(TAG,"ClockTick: Playing the alert again");
++            long nextAlertTime = alert.getNextAlertTime(ctx);
++            activeBgAlert.updateNextAlertAt(nextAlertTime);
++            
+             Vibrate(ctx, alert, bgValue, alert.override_silent_mode, timeFromStartPlaying);
+         }
+ 
+     }
+ 
+-    private void PlayFile(Context ctx, String FileName, float VolumeFrac) {
++    private void PlayFile(final Context ctx, String FileName, float VolumeFrac) {
+         Log.i(TAG, "PlayFile: called FileName = " + FileName);
+         if(mediaPlayer != null) {
+             Log.i(TAG, "ERROR, PlayFile:going to leak a mediaplayer !!!");
+@@ -151,13 +153,12 @@ private void PlayFile(Context ctx, String FileName, float VolumeFrac) {
+             volumeBeforeAlert = manager.getStreamVolume(AudioManager.STREAM_MUSIC);
+             volumeForThisAlert = (int)(maxVolume * VolumeFrac);
+             manager.setStreamVolume(AudioManager.STREAM_MUSIC, volumeForThisAlert, 0);
+-            context = ctx;
+ 
+             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                 @Override
+                 public void onCompletion(MediaPlayer mp) {
+                     Log.i(TAG, "PlayFile: onCompletion called (finished playing) ");
+-                    AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
++                    AudioManager manager = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
+                     int currentVolume = manager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                     if(volumeForThisAlert == currentVolume) {
+                         // If the user has changed the volume, don't change it again.
+@@ -209,6 +210,11 @@ static private int getAlertProfile(Context ctx){
+         return ALERT_PROFILE_ASCENDING;
+ 
+     }
++    
++    public static boolean isAscendingMode(Context ctx){
++        Log.d("Adrian", "(getAlertProfile(ctx) == ALERT_PROFILE_ASCENDING): " + (getAlertProfile(ctx) == ALERT_PROFILE_ASCENDING));
++        return getAlertProfile(ctx) == ALERT_PROFILE_ASCENDING;
++    }
+ 
+     private void Vibrate(Context ctx, AlertType alert, String bgValue, Boolean overrideSilent, int timeFromStartPlaying) {
+         Log.d(TAG, "Vibrate called timeFromStartPlaying = " + timeFromStartPlaying);
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+index 47eb60e..4b94af2 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+@@ -99,7 +99,7 @@ protected void onHandleIntent(Intent intent) {
+         Log.d("Notifications", "Running Notifications Intent Service");
+         ReadPerfs(getApplicationContext());
+         notificationSetter(getApplicationContext());
+-        ArmTimer();
++        ArmTimer(getApplicationContext());
+         wl.release();
+     }
+ 
+@@ -129,7 +129,7 @@ public void ReadPerfs(Context context) {
+  */
+ 
+ 
+-    public void FileBasedNotifications(Context context) {
++    private void FileBasedNotifications(Context context) {
+         ReadPerfs(context);
+         Sensor sensor = Sensor.currentSensor();
+ 
+@@ -285,22 +285,17 @@ public void notificationSetter(Context context) {
+         }
+     }
+ 
+-    private void ArmTimer() {
++    private void ArmTimer(Context ctx) {
+         Log.d(TAG, "ArmTimer called");
+         ActiveBgAlert activeBgAlert = ActiveBgAlert.getOnly();
+         if (activeBgAlert != null) {
+             AlertType alert = AlertType.get_alert(activeBgAlert.alert_uuid);
+             if (alert != null) {
+-                int time = alert.minutes_between;
+-                if (time < 1) {
+-                    time = 1;
+-                }
+                 Calendar calendar = Calendar.getInstance();
+                 AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+                 // sleep longer if the alert is snoozed.
+-                long wakeTime = activeBgAlert.is_snoozed ? activeBgAlert.next_alert_at :
+-                        calendar.getTimeInMillis() + (time * 60000);
+-                Log.d(TAG , "ArmTimer waking at: "+ wakeTime);
++                long wakeTime = activeBgAlert.next_alert_at;
++                Log.d(TAG , "ArmTimer waking at: "+ new Date(wakeTime) +" in " +  (wakeTime - calendar.getTimeInMillis())/60000d + " minutes");
+                 if (wakeIntent != null)
+                     alarm.cancel(wakeIntent);
+                 wakeIntent = PendingIntent.getService(this, 0, new Intent(this, this.getClass()), 0);
+diff --git a/app/src/main/res/values/arrays.xml b/app/src/main/res/values/arrays.xml
+index b450c67..67e3f5a 100644
+--- a/app/src/main/res/values/arrays.xml
++++ b/app/src/main/res/values/arrays.xml
+@@ -30,9 +30,9 @@
+ <!--     make sure to keep this values in sync with AlertPlayer.getAlertProfile -->
+     <string-array name="BgAlertProfileEntries">
+         <item>High</item>
+-        <item>ascending</item>
+-        <item>medium</item>
+-        <item>vibrate only</item>
++        <item>Ascending (disables reraise)</item>
++        <item>Medium</item>
++        <item>Vibrate only</item>
+         <item>Silent</item>
+     </string-array>
+ 

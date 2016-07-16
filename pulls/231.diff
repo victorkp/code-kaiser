@@ -1,0 +1,83 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/NavigationDrawerFragment.java b/app/src/main/java/com/eveningoutpost/dexdrip/NavigationDrawerFragment.java
+index 5111685..dd9f1f4 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/NavigationDrawerFragment.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/NavigationDrawerFragment.java
+@@ -84,8 +84,8 @@ public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+ 
+         mDrawerListView.setAdapter(new ArrayAdapter<String>(
+                 getActionBar().getThemedContext(),
+-                android.R.layout.simple_list_item_activated_1,
+-                android.R.id.text1,
++                R.layout.listitem_navigation_drawer,
++                R.id.text_navdraw,
+                 menu_options
+                 ));
+         return mDrawerListView;
+@@ -128,8 +128,8 @@ public void setUp(int fragmentId, DrawerLayout drawerLayout, String current_acti
+ 
+         mDrawerListView.setAdapter(new ArrayAdapter<String>(
+                 getActionBar().getThemedContext(),
+-                android.R.layout.simple_list_item_activated_1,
+-                android.R.id.text1,
++                R.layout.listitem_navigation_drawer,
++                R.id.text_navdraw,
+                 menu_options
+         ));
+ 
+diff --git a/app/src/main/res/layout/fragment_navigation_drawer.xml b/app/src/main/res/layout/fragment_navigation_drawer.xml
+index 232f480..2d7013c 100644
+--- a/app/src/main/res/layout/fragment_navigation_drawer.xml
++++ b/app/src/main/res/layout/fragment_navigation_drawer.xml
+@@ -2,5 +2,5 @@
+     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+     android:layout_height="match_parent" android:choiceMode="singleChoice"
+     android:divider="@android:color/transparent" android:dividerHeight="0dp"
+-    android:background="#cccc"
++    android:background="#fff"
+     tools:context="com.eveningoutpost.dexdrip.NavigationDrawerFragment" />
+diff --git a/app/src/main/res/layout/item_user_error.xml b/app/src/main/res/layout/item_user_error.xml
+index 7f0c2fc..ea9372f 100644
+--- a/app/src/main/res/layout/item_user_error.xml
++++ b/app/src/main/res/layout/item_user_error.xml
+@@ -12,6 +12,7 @@
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:id="@+id/errorShort"
++            android:textColor="#000"
+             android:textSize="14dp"/>
+         <TextView
+             android:layout_width="fill_parent"
+@@ -19,6 +20,7 @@
+             android:layout_gravity="right"
+             android:gravity="right"
+             android:id="@+id/errorTimestamp"
++            android:textColor="#000"
+             android:textSize="12dp"/>
+     </LinearLayout>
+ 
+@@ -26,5 +28,6 @@
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         android:id="@+id/errorLong"
++        android:textColor="#000"
+         android:textSize="10dp"/>
+ </LinearLayout>
+diff --git a/app/src/main/res/layout/listitem_navigation_drawer.xml b/app/src/main/res/layout/listitem_navigation_drawer.xml
+new file mode 100644
+index 0000000..4a1b55f
+--- /dev/null
++++ b/app/src/main/res/layout/listitem_navigation_drawer.xml
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="utf-8"?>
++
++<TextView xmlns:android="http://schemas.android.com/apk/res/android"
++    android:id="@+id/text_navdraw"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:gravity="center_vertical"
++    android:textAppearance="?android:attr/textAppearanceListItemSmall"
++    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
++    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
++    android:background="?android:attr/activatedBackgroundIndicator"
++    android:minHeight="?android:attr/listPreferredItemHeightSmall"
++    android:textColor="#000"/>

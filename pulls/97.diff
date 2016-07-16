@@ -1,0 +1,171 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
+index 790f123..554d2f0 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/IdempotentMigrations.java
+@@ -2,10 +2,14 @@
+ 
+ import android.content.Context;
+ import android.content.SharedPreferences;
++import android.net.Uri;
+ import android.preference.PreferenceManager;
+ 
+ import com.eveningoutpost.dexdrip.Models.AlertType;
+ 
++import java.util.ArrayList;
++import java.util.Iterator;
++
+ /**
+  * Created by stephenblack on 4/15/15.
+  */
+@@ -20,6 +24,7 @@ public IdempotentMigrations(Context context) {
+ 
+     public void performAll() {
+         migrateBGAlerts();
++        migrateToNewStyleRestUris();
+     }
+ 
+     private void migrateBGAlerts() {
+@@ -44,4 +49,44 @@ private void migrateBGAlerts() {
+             prefs.edit().putBoolean("bg_notifications", false).apply();
+         }
+     }
++
++    private void migrateToNewStyleRestUris() {
++
++        String baseURLSettings = prefs.getString("cloud_storage_api_base", "");
++        ArrayList<String> baseURIs = new ArrayList<String>();
++
++        try {
++            for (String baseURLSetting : baseURLSettings.split(" ")) {
++                String baseURL = baseURLSetting.trim();
++                if (baseURL.isEmpty()) continue;
++                baseURIs.add(baseURL + (baseURL.endsWith("/") ? "" : "/"));
++            }
++        } catch (Exception e) {
++            return;
++        }
++
++        StringBuilder newUris = new StringBuilder();
++
++        for (Iterator<String> i = baseURIs.iterator(); i.hasNext();) {
++            String uriString = i.next();
++            if (uriString.contains("@http")) {
++                String[] uriParts = uriString.split("@");
++                Uri newUri;
++                if (uriParts.length == 2) {
++                    Uri oldUri = Uri.parse(uriParts[1]);
++                    newUri = oldUri.buildUpon().encodedAuthority(uriParts[0] + "@" + oldUri.getEncodedAuthority()).build();
++                } else {
++                    newUri = Uri.parse(uriString);
++                }
++                newUris.append(newUri.toString());
++            } else {
++                newUris.append(uriString);
++            }
++            if (i.hasNext())
++                newUris.append(" ");
++        }
++
++        prefs.edit().putString("cloud_storage_api_base", newUris.toString()).apply();
++    }
++
+ }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+index d740c17..a24dadc 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+@@ -29,6 +29,7 @@
+ import org.apache.http.params.HttpParams;
+ import org.json.JSONObject;
+ 
++import java.net.URI;
+ import java.security.MessageDigest;
+ import java.text.SimpleDateFormat;
+ import java.util.ArrayList;
+@@ -107,7 +108,7 @@ private boolean doRESTUpload(SharedPreferences prefs, List<BgReading> glucoseDat
+ 
+             for (String baseURI : baseURIs) {
+                 try {
+-                    doRESTUploadTo(baseURI, glucoseDataSets, meterRecords, calRecords);
++                    doRESTUploadTo(URI.create(baseURI), glucoseDataSets, meterRecords, calRecords);
+                 } catch (Exception e) {
+                     Log.e(TAG, "Unable to do REST API Upload " + e.getMessage());
+                     Log.e(TAG, "Unable to do REST API Upload", e.getCause());
+@@ -117,22 +118,19 @@ private boolean doRESTUpload(SharedPreferences prefs, List<BgReading> glucoseDat
+             return true;
+         }
+ 
+-        private void doRESTUploadTo(String baseURI, List<BgReading> glucoseDataSets, List<Calibration> meterRecords, List<Calibration> calRecords) {
++        private void doRESTUploadTo(URI baseURI, List<BgReading> glucoseDataSets, List<Calibration> meterRecords, List<Calibration> calRecords) {
+             try {
+                 int apiVersion = 0;
+-                if (baseURI.endsWith("/v1/")) apiVersion = 1;
++                if (baseURI.getPath().endsWith("/v1/")) apiVersion = 1;
+ 
+-                String baseURL = null;
+-                String secret = null;
+-                String[] uriParts = baseURI.split("@");
+-
+-                if (uriParts.length == 1 && apiVersion == 0) {
+-                    baseURL = uriParts[0];
+-                } else if (uriParts.length == 1 && apiVersion > 0) {
++                String secret = baseURI.getUserInfo();
++                String baseURL;
++                if ((secret == null || secret.isEmpty()) && apiVersion == 0) {
++                    baseURL = baseURI.toString();
++                } else if ((secret == null || secret.isEmpty()) && apiVersion > 0) {
+                     throw new Exception("Starting with API v1, a pass phase is required");
+-                } else if (uriParts.length == 2 && apiVersion > 0) {
+-                    secret = uriParts[0];
+-                    baseURL = uriParts[1];
++                } else if ((secret != null && !secret.isEmpty()) && apiVersion > 0) {
++                    baseURL = baseURI.toString().replaceFirst("//[^@]+@", "//");
+                 } else {
+                     throw new Exception("Unexpected baseURI");
+                 }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+index a7ab1f9..f1e1fbb 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+@@ -222,6 +222,10 @@ boolean trendingToAlertEnd(Context context, AlertType Alert) {
+     // only function that is really called from outside...
+     public void notificationSetter(Context context) {
+         ReadPerfs(context);
++        BgGraphBuilder bgGraphBuilder = new BgGraphBuilder(context);
++        if (bg_ongoing && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)) {
++            bgOngoingNotification(bgGraphBuilder);
++        }
+         if(prefs.getLong("alerts_disabled_until", 0) > new Date().getTime()){
+             Log.w("NOTIFICATIONS", "Notifications are currently disabled!!");
+             return;
+@@ -230,7 +234,6 @@ public void notificationSetter(Context context) {
+         BgReading.checkForDropAllert(context);
+         BgReading.checkForRisingAllert(context);
+ 
+-        BgGraphBuilder bgGraphBuilder = new BgGraphBuilder(context);
+         Sensor sensor = Sensor.currentSensor();
+ 
+         List<BgReading> bgReadings = BgReading.latest(3);
+@@ -238,9 +241,6 @@ public void notificationSetter(Context context) {
+         if(bgReadings == null || bgReadings.size() < 3) { return; }
+         if(calibrations == null || calibrations.size() < 2) { return; }
+         BgReading bgReading = bgReadings.get(0);
+-        if (bg_ongoing && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)) {
+-            bgOngoingNotification(bgGraphBuilder);
+-        }
+ 
+         if (calibration_notifications) {
+             if (bgReadings.size() >= 3) {
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 5a48bcc..e48aa0a 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -82,7 +82,7 @@
+     <string name="pref_title_api_url">Base URL</string>
+     <string name="pref_dialog_api_url">Enter Base API URL</string>
+     <string name="pref_message_api_url">This only the base URL, the uploader will automatically append /entries for the POST.  API_SECRET on the server should match yourpassphrase in this setting.</string>
+-    <string name="pref_default_api_url">yourpassphrase@https://{YOUR-SITE}.azurewebsites.net/api/v1</string>
++    <string name="pref_default_api_url">https://yourpassphrase@{YOUR-SITE}.azurewebsites.net/api/v1/</string>
+ 
+     <!-- wifi Settings -->
+     <string name="wifi_recievers_dialog_message">Comma separated list of ip:port (for example 37.142.132.220:50005,37.142.132.220:50010,mongodb://user:pass@ds053958.mongolab.com:53958/db/collection)</string>

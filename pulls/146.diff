@@ -1,0 +1,410 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+index 76110de..a12aca3 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexCollectionService.java
+@@ -44,6 +44,7 @@
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.ForegroundServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.HM10Attributes;
++import com.eveningoutpost.dexdrip.utils.BgToSpeech;
+ 
+ import java.nio.ByteBuffer;
+ import java.nio.ByteOrder;
+@@ -56,7 +57,7 @@
+ public class DexCollectionService extends Service {
+     private final static String TAG = DexCollectionService.class.getSimpleName();
+     private SharedPreferences prefs;
+-
++    private BgToSpeech bgToSpeech;
+     public DexCollectionService dexCollectionService;
+ 
+     private BluetoothAdapter mBluetoothAdapter;
+@@ -89,6 +90,7 @@ public void onCreate() {
+         dexCollectionService = this;
+         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+         listenForChangeInSettings();
++        bgToSpeech = BgToSpeech.setupTTS(mContext); //keep reference to not being garbage collected
+         Log.w(TAG, "onCreate: STARTING SERVICE");
+     }
+ 
+@@ -116,6 +118,7 @@ public void onDestroy() {
+         close();
+         foregroundServiceStarter.stop();
+         setRetryTimer();
++        BgToSpeech.tearDownTTS();
+         Log.w(TAG, "SERVICE STOPPED");
+     }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
+index dc6701f..3a4fdb7 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
+@@ -36,6 +36,7 @@
+ import com.eveningoutpost.dexdrip.UtilityModels.DexShareAttributes;
+ import com.eveningoutpost.dexdrip.UtilityModels.ForegroundServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.HM10Attributes;
++import com.eveningoutpost.dexdrip.utils.BgToSpeech;
+ 
+ import java.nio.charset.StandardCharsets;
+ import java.util.Calendar;
+@@ -98,6 +99,7 @@
+     public boolean shouldDisconnect = false;
+     public boolean share2 = false;
+     public Service service;
++    private BgToSpeech bgToSpeech;
+ 
+     @Override
+     public void onCreate() {
+@@ -110,6 +112,7 @@ public void onCreate() {
+         registerReceiver(mPairReceiver, bondintent);
+         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+         listenForChangeInSettings();
++        bgToSpeech = BgToSpeech.setupTTS(getApplicationContext()); //keep reference to not being garbage collected
+     }
+ 
+     @Override
+@@ -149,6 +152,7 @@ public void onDestroy() {
+         setRetryTimer();
+         foregroundServiceStarter.stop();
+         unregisterReceiver(mPairReceiver);
++        BgToSpeech.tearDownTTS();
+         Log.w(TAG, "SERVICE STOPPED");
+     }
+ 
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+index 3ee853d..8009c1b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/WixelReader.java
+@@ -16,6 +16,7 @@
+ import android.preference.PreferenceManager;
+ import android.util.Log;
+ 
++import com.eveningoutpost.dexdrip.utils.BgToSpeech;
+ import com.google.gson.Gson;
+ import com.google.gson.GsonBuilder;
+ import com.eveningoutpost.dexdrip.Sensor;
+@@ -26,6 +27,7 @@
+ 
+     private final static String TAG = WixelReader.class.getName();
+     private static WixelReader singleton;
++    private static BgToSpeech bgToSpeech;
+ 
+     public synchronized static WixelReader getInstance(Context ctx) {
+         if(singleton == null) {
+@@ -47,6 +49,7 @@ public static void sStart(Context ctx) {
+         if(sStarted) {
+             return;
+         }
++        bgToSpeech = BgToSpeech.setupTTS(ctx); //keep reference to not being garbage collected
+         WixelReader theWixelReader =  getInstance(ctx);
+         theWixelReader.start();
+         sStarted = true;
+@@ -57,6 +60,7 @@ public static void sStop() {
+         if(!sStarted) {
+             return;
+         }
++        BgToSpeech.tearDownTTS();
+         WixelReader theWixelReader =  getInstance(null);
+         theWixelReader.Stop();
+         try {
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java
+index 78c8db8..062706e 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/BgSendQueue.java
+@@ -20,6 +20,7 @@
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+ import com.eveningoutpost.dexdrip.Services.SyncService;
+ import com.eveningoutpost.dexdrip.ShareModels.ShareRest;
++import com.eveningoutpost.dexdrip.utils.BgToSpeech;
+ import com.eveningoutpost.dexdrip.widgetUpdateService;
+ import com.eveningoutpost.dexdrip.xDripWidget;
+ 
+@@ -134,6 +135,12 @@ public static void addToQueue(BgReading bgReading, String operation_type, Contex
+                 context.startService(shareIntent);
+             }
+             context.startService(new Intent(context, SyncService.class));
++
++            //Text to speech
++            Log.d("BgToSpeech", "gonna call speak");
++            BgToSpeech.speak(bgReading.calculated_value, bgReading.timestamp);
++
++
+         } finally {
+             wakeLock.release();
+         }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/BgToSpeech.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/BgToSpeech.java
+new file mode 100644
+index 0000000..77f5c82
+--- /dev/null
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/BgToSpeech.java
+@@ -0,0 +1,142 @@
++package com.eveningoutpost.dexdrip.utils;
++
++import android.content.Context;
++import android.content.Intent;
++import android.content.SharedPreferences;
++import android.preference.PreferenceManager;
++import android.speech.tts.TextToSpeech;
++import android.util.Log;
++
++import com.eveningoutpost.dexdrip.UtilityModels.Constants;
++
++import java.text.DecimalFormat;
++import java.util.Locale;
++
++/**
++ * Created by adrian on 07/09/15.
++ */
++public class BgToSpeech {
++
++    private static BgToSpeech instance;
++    private final Context context;
++
++    private TextToSpeech tts = null;
++
++    public static BgToSpeech setupTTS(Context context){
++        if(instance == null) {
++            instance = new BgToSpeech(context);
++            return instance;
++        } else {
++            tearDownTTS();
++            instance = new BgToSpeech(context);
++            return instance;
++        }
++    }
++
++    public static void tearDownTTS(){
++        if(instance!=null){
++            instance.tearDown();
++            instance = null;
++        } else {
++            Log.e("BgToSpeech", "tearDownTTS() called but instance is null!");
++
++        }
++    }
++
++    public static void speak(final double value, long timestamp){
++        if(instance == null){
++            Log.e("BgToSpeech", "speak() called but instance is null!");
++        } else {
++            instance.speakInternal(value, timestamp);
++        }
++    }
++
++    private void tearDown() {
++        tts.shutdown();
++        tts = null;
++    }
++
++    private BgToSpeech(Context context){
++        this.context = context;
++        this.tts = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
++            @Override
++            public void onInit(int status) {
++
++                Log.d("BgToSpeech", "Calling onInit()");
++                if (status == TextToSpeech.SUCCESS) {
++                    Log.d("BgToSpeech", "status == TextToSpeech.SUCCESS");
++                    //try local language
++                    int result = tts.setLanguage(Locale.getDefault());
++                    if (result == TextToSpeech.LANG_MISSING_DATA
++                            || result == TextToSpeech.LANG_NOT_SUPPORTED) {
++                        Log.e("BgToSpeech", "Default system language is not supported");
++                        result = tts.setLanguage(Locale.ENGLISH);
++                    }
++                    //try any english
++                    if (result == TextToSpeech.LANG_MISSING_DATA
++                            || result == TextToSpeech.LANG_NOT_SUPPORTED) {
++                        Log.e("BgToSpeech", "English is not supported");
++                        tts = null;
++                    }
++                } else {
++                    Log.e("BgToSpeech", "status != TextToSpeech.SUCCESS; status: " + status);
++                    tts= null;
++                }
++            }
++        });
++    }
++
++    private void speakInternal(final double value, long timestamp){
++        if(timestamp < System.currentTimeMillis()-4*60*1000){
++            // don't read old values.
++            return;
++        }
++
++        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
++        if (! prefs.getBoolean("bg_to_speech", false)){
++            return;
++        }
++
++        int result = tts.speak(calculateText(value, prefs), TextToSpeech.QUEUE_FLUSH, null);
++            if(result == TextToSpeech.SUCCESS){
++                Log.d("BgToSpeech", "successfully spoken");
++            } else {
++                Log.d("BgToSpeech", "error " + result + ". trying again with new tts-object.");
++            }
++    }
++
++    private String calculateText(double value, SharedPreferences prefs) {
++        boolean doMgdl = (prefs.getString("units", "mgdl").equals("mgdl"));
++
++        String text = "";
++
++        DecimalFormat df = new DecimalFormat("#");
++        if (value >= 400) {
++            text = "high";
++        } else if (value >= 40) {
++            if(doMgdl) {
++                df.setMaximumFractionDigits(0);
++                text =  df.format(value);
++            } else {
++                df.setMaximumFractionDigits(1);
++                df.setMinimumFractionDigits(1);
++                text =  df.format(value* Constants.MGDL_TO_MMOLL);
++            }
++        } else if (value > 12) {
++            text =  "low";
++        } else {
++            text = "error";
++        }
++        Log.d("BgToSpeech", "text: " + text);
++        return text;
++    }
++
++
++    public static void installTTSData(Context ctx){
++        Intent intent = new Intent();
++        intent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
++        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
++        ctx.startActivity(intent);
++    }
++
++}
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+index 7b8417c..c03d3dc 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+@@ -1,6 +1,8 @@
+ package com.eveningoutpost.dexdrip.utils;
+ 
++import android.app.AlertDialog;
+ import android.content.Context;
++import android.content.DialogInterface;
+ import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.content.res.Configuration;
+@@ -14,7 +16,6 @@
+ import android.preference.PreferenceActivity;
+ import android.preference.PreferenceCategory;
+ import android.preference.PreferenceFragment;
+-import android.preference.PreferenceGroup;
+ import android.preference.PreferenceManager;
+ import android.preference.PreferenceScreen;
+ import android.preference.RingtonePreference;
+@@ -24,7 +25,6 @@
+ 
+ import com.eveningoutpost.dexdrip.R;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+-import com.eveningoutpost.dexdrip.UtilityModels.ForegroundServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.PebbleSync;
+ import com.google.zxing.integration.android.IntentIntegrator;
+ import com.google.zxing.integration.android.IntentResult;
+@@ -127,9 +127,9 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
+     @Override
+     public void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-
++        preferenceFragment = new AllPrefsFragment();
+         getFragmentManager().beginTransaction().replace(android.R.id.content,
+-                new AllPrefsFragment()).commit();
++                preferenceFragment).commit();
+     }
+ 
+     @Override
+@@ -228,6 +228,7 @@ private static void bindPreferenceSummaryToValueAndEnsureNumeric(Preference pref
+                         .getString(preference.getKey(), ""));
+     }
+ 
++
+     public static class AllPrefsFragment extends PreferenceFragment {
+        @Override
+         public void onCreate(Bundle savedInstanceState) {
+@@ -261,7 +262,7 @@ public void onCreate(Bundle savedInstanceState) {
+             bindPreferenceSummaryToValue(findPreference("cloud_storage_api_base"));
+ 
+             addPreferencesFromResource(R.xml.pref_advanced_settings);
+-
++            bindTTSListener();
+             final Preference collectionMethod = findPreference("dex_collection_method");
+             final Preference runInForeground = findPreference("run_service_in_foreground");
+             final Preference wifiRecievers = findPreference("wifi_recievers_addresses");
+@@ -405,6 +406,30 @@ public boolean onPreferenceClick(Preference preference) {
+             });
+         }
+ 
++        private void bindTTSListener(){
++            findPreference("bg_to_speech").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
++                @Override
++                public boolean onPreferenceChange(Preference preference, Object newValue) {
++                    if ((Boolean)newValue) {
++                        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
++                        alertDialog.setTitle("Install Text-To-Speech Data?");
++                        alertDialog.setMessage("Install Text-To-Speech Data?\n(After installation of languages you might have to press \"Restart Collector\" in System Status.)");
++                        alertDialog.setCancelable(true);
++                        alertDialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
++                            @Override
++                            public void onClick(DialogInterface dialog, int which) {
++                                BgToSpeech.installTTSData(getActivity());
++                            }
++                        });
++                        alertDialog.setNegativeButton(R.string.no, null);
++                        AlertDialog alert = alertDialog.create();
++                        alert.show();
++                    }
++                    return true;
++                }
++            });
++        }
++
+     }
+ 
+     public static boolean isNumeric(String str) {
+@@ -416,3 +441,4 @@ public static boolean isNumeric(String str) {
+         return true;
+     }
+ }
++
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 5df902e..5f0c1ea 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -41,8 +41,7 @@
+     <string name="snooze_hint">Snooze alert for x minutes</string>
+     <string name="ok">OK</string>
+     <string name="cancel">Cancel</string>
+-
+-
++    <string name="no">No</string>
+ 
+     <string-array name="menu_options">
+         <item>Dex Drip</item>
+diff --git a/app/src/main/res/xml/pref_advanced_settings.xml b/app/src/main/res/xml/pref_advanced_settings.xml
+index 4a4de5b..a56095f 100644
+--- a/app/src/main/res/xml/pref_advanced_settings.xml
++++ b/app/src/main/res/xml/pref_advanced_settings.xml
+@@ -26,9 +26,15 @@
+             android:summary="If using Share, DexDrip will show values when they are normally hidden on the receiver."
+             android:defaultValue="false" />
+         <CheckBoxPreference
++            android:key="bg_to_speech"
++            android:title="Speak Readings"
++            android:summary="If the phone has text-to-speech capabilities it will read new readings out loud."
++            android:defaultValue="false" />
++        <CheckBoxPreference
+             android:key="store_logs"
+             android:title="Store logs for troubleshooting"
+             android:summary="Only enable if you are having trouble with the app."
+             android:defaultValue="false" />
+     </PreferenceCategory>
+ </PreferenceScreen>
++

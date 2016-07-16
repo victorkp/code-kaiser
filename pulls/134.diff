@@ -1,0 +1,49 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/Constants.java b/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/Constants.java
+index ace3f7c..5c81447 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/Constants.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/ImportedLibraries/dexcom/Constants.java
+@@ -55,6 +55,8 @@
+     public final static int EGV_NOISE_MASK = 112;
+     public final static float MG_DL_TO_MMOL_L = 0.05556f;
+     public final static int CRC_LEN = 2;
++    public static final int TRANSMITTER_BATTERY_LOW = 210;
++    public static final int TRANSMITTER_BATTERY_EMPTY = 207;
+ 
+     public enum BATTERY_STATES {
+         NONE,
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java b/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java
+index 14897ff..79c572d 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/SystemStatus.java
+@@ -19,6 +19,7 @@
+ import android.widget.LinearLayout;
+ import android.widget.TextView;
+ 
++import com.eveningoutpost.dexdrip.ImportedLibraries.dexcom.Constants;
+ import com.eveningoutpost.dexdrip.Models.ActiveBluetoothDevice;
+ import com.eveningoutpost.dexdrip.Models.TransmitterData;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+@@ -125,10 +126,10 @@ private void setTransmitterStatus() {
+         } else {
+             transmitter_status_view.setText("" + td.sensor_battery_level);
+ 
+-            if (td.sensor_battery_level <= 207) {
+-                transmitter_status_view.append(" - empty");
+-            } else if (td.sensor_battery_level <= 210) {
+-                transmitter_status_view.append(" - ok - rather low");
++            if (td.sensor_battery_level <= Constants.TRANSMITTER_BATTERY_EMPTY) {
++                transmitter_status_view.append(" - very low");
++            } else if (td.sensor_battery_level <= Constants.TRANSMITTER_BATTERY_LOW) {
++                transmitter_status_view.append(" - low");
+                 transmitter_status_view.append("\n(experimental interpretation)");
+             } else {
+                 transmitter_status_view.append(" - ok");
+@@ -170,7 +171,7 @@ private void setVersionName(){
+     }
+ 
+     private void setCollectionMethod() {
+-        collection_method.setText(prefs.getString("dex_collection_method", "BluetoothWixel"));
++        collection_method.setText(prefs.getString("dex_collection_method", "BluetoothWixel").replace("Dexbridge", "xBridge"));
+     }
+ 
+     public void setCurrentDevice() {

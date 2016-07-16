@@ -1,0 +1,132 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java b/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java
+index d892bff..4d85639 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/SnoozeActivity.java
+@@ -117,6 +117,11 @@ protected void onCreate(Bundle savedInstanceState) {
+             buttonSnooze.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
+         }
+         displayStatus();
++
++        if(getIntent().getBooleanExtra("SNOOZE", false))
++        {
++            doDefaultSnoozeAndFinish();
++        }
+     }
+ 
+     @Override
+@@ -132,6 +137,17 @@ public String getMenuName() {
+         return menu_name;
+     }
+ 
++    public void doDefaultSnoozeAndFinish()
++    {
++        int intValue = getTimeFromSnoozeValue(snoozeValue.getValue());
++        AlertPlayer.getPlayer().Snooze(getApplicationContext(), intValue);
++        Intent intent = new Intent(getApplicationContext(), Home.class);
++        if (ActiveBgAlert.getOnly() != null) {
++            startActivity(intent);
++        }
++        finish();
++    }
++
+     public void addListenerOnButton() {
+         buttonSnooze = (Button)findViewById(R.id.button_snooze);
+ 
+@@ -148,13 +164,7 @@ public void addListenerOnButton() {
+         clearDisabled = (Button)findViewById(R.id.enable_alerts);
+         buttonSnooze.setOnClickListener(new View.OnClickListener() {
+             public void onClick(View v) {
+-                int intValue = getTimeFromSnoozeValue(snoozeValue.getValue());
+-                AlertPlayer.getPlayer().Snooze(getApplicationContext(), intValue);
+-                Intent intent = new Intent(getApplicationContext(), Home.class);
+-                if (ActiveBgAlert.getOnly() != null) {
+-                    startActivity(intent);
+-                }
+-                finish();
++                doDefaultSnoozeAndFinish();
+             }
+ 
+         });
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
+index 490aa54..b36b14b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/AlertPlayer.java
+@@ -1,5 +1,6 @@
+ package com.eveningoutpost.dexdrip.UtilityModels;
+ 
++import android.app.Notification;
+ import android.app.NotificationManager;
+ import android.app.PendingIntent;
+ import android.content.Context;
+@@ -363,12 +364,20 @@ private void Vibrate(Context ctx, AlertType alert, String bgValue, Boolean overr
+         String content = "BG LEVEL ALERT: " + bgValue;
+         Intent intent = new Intent(ctx, SnoozeActivity.class);
+ 
++        // Create an intent that will snooze the current alarm
++        Intent snoozeIntent = new Intent(ctx, SnoozeActivity.class);
++        snoozeIntent.putExtra("SNOOZE", true);
++        PendingIntent pendingSnoozeIntent = PendingIntent.getActivity(ctx, (int) System.currentTimeMillis(), snoozeIntent, 0);
++
+         NotificationCompat.Builder  builder = new NotificationCompat.Builder(ctx)
+             .setSmallIcon(R.drawable.ic_action_communication_invert_colors_on)
+             .setContentTitle(title)
+             .setContentText(content)
+             .setContentIntent(notificationIntent(ctx, intent))
+-            .setDeleteIntent(snoozeIntent(ctx));
++            .setDeleteIntent(snoozeIntent(ctx))
++            .setPriority(Notification.PRIORITY_MAX)
++            .addAction(R.drawable.ic_snooze, "Snooze", pendingSnoozeIntent);
++
+         if (profile != ALERT_PROFILE_VIBRATE_ONLY && profile != ALERT_PROFILE_SILENT) {
+             if (timeFromStartPlaying >= MAX_VIBRATING) {
+                 // Before this, we only vibrate...
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+index 8616a28..145a34c 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/Notifications.java
+@@ -38,6 +38,7 @@
+ import com.eveningoutpost.dexdrip.Services.MissedReadingService;
+ 
+ import com.eveningoutpost.dexdrip.R;
++import com.eveningoutpost.dexdrip.SnoozeActivity;
+ 
+ import java.util.Calendar;
+ import java.util.Date;
+@@ -430,10 +431,13 @@ public Notification createOngoingNotification(Context context) {
+                         PendingIntent.FLAG_UPDATE_CURRENT
+                 );
+ 
++
+         NotificationCompat.Builder b = new NotificationCompat.Builder(mContext);
+         //b.setOngoing(true);
+         b.setCategory(NotificationCompat.CATEGORY_STATUS);
++        b.setPriority(Notification.PRIORITY_MAX);
+         String titleString = lastReading == null ? "BG Reading Unavailable" : (lastReading.displayValue(mContext) + " " + lastReading.slopeArrow());
++
+         b.setContentTitle(titleString)
+                 .setContentText("xDrip Data collection service is running.")
+                 .setSmallIcon(R.drawable.ic_action_communication_invert_colors_on)
+@@ -613,11 +617,19 @@ private static void OtherAlert(Context context, String type, String message, int
+             }
+             UserNotification.create(message, type);
+             Intent intent = new Intent(context, Home.class);
++
++            // Create an intent that will snooze the current alarm
++            Intent snoozeIntent = new Intent(context, SnoozeActivity.class);
++            snoozeIntent.putExtra("SNOOZE", true);
++            PendingIntent pendingSnoozeIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), snoozeIntent, 0);
++
+             NotificationCompat.Builder mBuilder =
+                     new NotificationCompat.Builder(context)
+                             .setSmallIcon(R.drawable.ic_action_communication_invert_colors_on)
+                             .setContentTitle(message)
+                             .setContentText(message)
++                            .setPriority(Notification.PRIORITY_MAX)
++                            .addAction(R.drawable.ic_snooze, "Snooze", pendingSnoozeIntent)
+                             .setContentIntent(PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+             mBuilder.setVibrate(vibratePattern);
+             mBuilder.setLights(0xff00ff00, 300, 1000);
+diff --git a/app/src/main/res/drawable-xxxhdpi/ic_snooze.png b/app/src/main/res/drawable-xxxhdpi/ic_snooze.png
+new file mode 100644
+index 0000000..c3cdb92
+Binary files /dev/null and b/app/src/main/res/drawable-xxxhdpi/ic_snooze.png differ

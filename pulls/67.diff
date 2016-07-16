@@ -1,0 +1,13 @@
+diff --git a/app/src/main/res/values/arrays.xml b/app/src/main/res/values/arrays.xml
+index c6461dd..b450c67 100644
+--- a/app/src/main/res/values/arrays.xml
++++ b/app/src/main/res/values/arrays.xml
+@@ -2,7 +2,7 @@
+ <resources>
+     <string-array name="DexCollectionMethods">
+         <item>Bluetooth Wixel</item>
+-        <item>Dexbridge</item>
++        <item>xBridge Wixel</item>
+         <item>Wifi Wixel</item>
+         <item>DexcomShare</item>
+     </string-array>

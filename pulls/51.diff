@@ -1,0 +1,13 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java b/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java
+index 5b1dfe0..96b7533 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java
+@@ -96,7 +96,7 @@ public static void displayCurrentInfo(AppWidgetManager appWidgetManager, int app
+             List<BgReading> bgReadingList =  BgReading.latest(2);
+             if(bgReadingList != null && bgReadingList.size() == 2) {
+ 
+-                views.setTextViewText(R.id.widgetDelta, bgGraphBuilder.unitizedDeltaString(lastBgreading.calculated_value - bgReadingList.get(1).calculated_value));
++                views.setTextViewText(R.id.widgetDelta, bgGraphBuilder.unitizedDeltaString(lastBgreading.calculated_value_slope*5*60*1000));
+             } else {
+                 views.setTextViewText(R.id.widgetDelta, "--");
+             }

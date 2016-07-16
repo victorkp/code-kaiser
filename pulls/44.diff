@@ -1,0 +1,104 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
+index 62decc0..3c1af74 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/Services/DexShareCollectionService.java
+@@ -174,7 +174,7 @@ public void setRetryTimer() {
+             BgReading bgReading = BgReading.last();
+             long retry_in;
+             if (bgReading != null) {
+-                retry_in = Math.min(Math.max((1000 * 30), (1000 * 60 * 5) - (new Date().getTime() - bgReading.timestamp) + (1000 * 15)), (1000 * 60 * 5));
++                retry_in = Math.min(Math.max((1000 * 30), (1000 * 60 * 5) - (new Date().getTime() - bgReading.timestamp) + (1000 * 5)), (1000 * 60 * 5));
+             } else {
+                 retry_in = (1000 * 20);
+             }
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+index 6f3aac5..f04463b 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/UtilityModels/NightscoutUploader.java
+@@ -110,7 +110,8 @@ private boolean doRESTUpload(SharedPreferences prefs, List<BgReading> glucoseDat
+                 try {
+                     doRESTUploadTo(baseURI, glucoseDataSets, meterRecords, calRecords);
+                 } catch (Exception e) {
+-                    Log.e(TAG, "Unable to do REST API Upload");
++                    Log.e(TAG, "Unable to do REST API Upload " + e.getMessage());
++                    Log.e(TAG, "Unable to do REST API Upload", e.getCause());
+                     return false;
+                 }
+             }
+@@ -424,7 +425,8 @@ private boolean doMongoUpload(SharedPreferences prefs, List<BgReading> glucoseDa
+                     return true;
+ 
+                 } catch (Exception e) {
+-                    Log.e(TAG, "Unable to upload data to mongo");
++                    Log.e(TAG, "Unable to upload data to mongo " + e.getMessage());
++                    Log.e(TAG, "Unable to upload data to mongo", e.getCause());
+                 }
+             }
+             return false;
+diff --git a/app/src/main/res/layout/x_drip_widget.xml b/app/src/main/res/layout/x_drip_widget.xml
+index 60aca0c..5427558 100644
+--- a/app/src/main/res/layout/x_drip_widget.xml
++++ b/app/src/main/res/layout/x_drip_widget.xml
+@@ -14,7 +14,8 @@
+             android:paddingLeft="10dp"
+             android:paddingTop="2dp"
+             android:paddingBottom="10dp"
+-            android:paddingRight="10dp">
++            android:paddingRight="10dp"
++        android:layout_gravity="center">
+         <LinearLayout
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+diff --git a/app/src/main/res/xml/pref_data_sync.xml b/app/src/main/res/xml/pref_data_sync.xml
+index 3719f55..ee21449 100644
+--- a/app/src/main/res/xml/pref_data_sync.xml
++++ b/app/src/main/res/xml/pref_data_sync.xml
+@@ -65,25 +65,30 @@
+ 
+         </PreferenceScreen>
+ 
+-        <!--<CheckBoxPreference-->
+-        <!--android:key="share_upload"-->
+-        <!--android:title="Upload BG values as Dexcom Share"-->
+-        <!--android:summary="If you are using Dexcom Share, choose this option."-->
+-        <!--android:defaultValue="false" />-->
+-        <!--<EditTextPreference-->
+-        <!--android:dependency="share_upload"-->
+-        <!--android:key="dexcom_account_name"-->
+-        <!--android:title="Dexcom Account Login"-->
+-        <!--android:summary="Your login for Dexcoms Website"-->
+-        <!--android:defaultValue=""/>-->
+-        <!--<EditTextPreference-->
+-        <!--android:dependency="share_upload"-->
+-        <!--android:key="dexcom_account_password"-->
+-        <!--android:title="Dexcom Account Password"-->
+-        <!--android:inputType="textPassword"-->
+-        <!--android:summary="Your password for Dexcoms Website"-->
+-        <!--android:defaultValue=""/>-->
++        <PreferenceScreen
++            android:key="dexcom_server_upload_screen"
++            android:title="Dexcom Share Server Upload"
++            android:summary="Upload data to Dexcoms Servers so you can use your data with Dexcoms apps">
+ 
++            <CheckBoxPreference
++                android:key="share_upload"
++                android:title="Upload BG values as Dexcom Share"
++                android:summary="Enable this to upload to dexcoms servers"
++                android:defaultValue="false" />
++            <EditTextPreference
++                android:dependency="share_upload"
++                android:key="dexcom_account_name"
++                android:title="Dexcom Account Login"
++                android:summary="Your login for Dexcoms Website"
++                android:defaultValue=""/>
++            <EditTextPreference
++                android:dependency="share_upload"
++                android:key="dexcom_account_password"
++                android:title="Dexcom Account Password"
++                android:inputType="textPassword"
++                android:summary="Your password for Dexcoms Website"
++                android:defaultValue=""/>
++        </PreferenceScreen>
+ 
+     </PreferenceCategory>
+ 

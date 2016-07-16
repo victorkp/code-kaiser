@@ -1,0 +1,104 @@
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+index 0db00ee..f4e9cf9 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/utils/Preferences.java
+@@ -1,6 +1,8 @@
+ package com.eveningoutpost.dexdrip.utils;
+ 
+ import android.app.AlertDialog;
++import android.appwidget.AppWidgetManager;
++import android.content.ComponentName;
+ import android.content.Context;
+ import android.content.DialogInterface;
+ import android.content.Intent;
+@@ -28,6 +30,8 @@
+ import com.eveningoutpost.dexdrip.R;
+ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
+ import com.eveningoutpost.dexdrip.UtilityModels.PebbleSync;
++import com.eveningoutpost.dexdrip.WidgetUpdateService;
++import com.eveningoutpost.dexdrip.xDripWidget;
+ import com.google.zxing.integration.android.IntentIntegrator;
+ import com.google.zxing.integration.android.IntentResult;
+ import com.nightscout.core.barcode.NSBarcodeConfig;
+@@ -308,6 +312,8 @@ public boolean onPreferenceChange(Preference preference, Object newValue) {
+             final PreferenceScreen calibrationAlertsScreen = (PreferenceScreen) findPreference("calibration_alerts_screen");
+             final PreferenceCategory alertsCategory = (PreferenceCategory) findPreference("alerts_category");
+             final Preference disableAlertsStaleDataMinutes = findPreference("disable_alerts_stale_data_minutes");
++            final Preference widgetRangeLines = findPreference("widget_range_lines");
++
+             disableAlertsStaleDataMinutes.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                 @Override
+                 public boolean onPreferenceChange(Preference preference, Object newValue) {
+@@ -362,6 +368,16 @@ public boolean onPreferenceChange(Preference preference, Object newValue) {
+                     return true;
+                 }
+             });
++            widgetRangeLines.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
++                @Override
++                public boolean onPreferenceChange(Preference preference, Object newValue) {
++                    Context context = preference.getContext();
++                    if(AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, xDripWidget.class)).length > 0){
++                        context.startService(new Intent(context, WidgetUpdateService.class));
++                    }
++                    return true;
++                }
++            });
+             bindPreferenceSummaryToValue(collectionMethod);
+             bindPreferenceSummaryToValue(shareKey);
+             bindPreferenceSummaryToValue(wifiRecievers);
+diff --git a/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java b/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java
+index d7d8387..e86fbef 100644
+--- a/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java
++++ b/app/src/main/java/com/eveningoutpost/dexdrip/xDripWidget.java
+@@ -5,9 +5,12 @@
+ import android.appwidget.AppWidgetProvider;
+ import android.content.Context;
+ import android.content.Intent;
++import android.content.SharedPreferences;
+ import android.graphics.Color;
+ import android.graphics.Paint;
+ import com.eveningoutpost.dexdrip.Models.UserError.Log;
++
++import android.preference.PreferenceManager;
+ import android.widget.RemoteViews;
+ 
+ import com.eveningoutpost.dexdrip.Models.BgReading;
+@@ -65,13 +68,17 @@ private static void updateAppWidget(Context context, AppWidgetManager appWidgetM
+     private static void displayCurrentInfo(AppWidgetManager appWidgetManager, int appWidgetId, Context context, RemoteViews views) {
+         BgGraphBuilder bgGraphBuilder = new BgGraphBuilder(context);
+         BgReading lastBgreading = BgReading.lastNoSenssor();
++
++        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
++        boolean showLines = settings.getBoolean("widget_range_lines", false);
++
+         if (lastBgreading != null) {
+             double estimate = 0;
+             int height = appWidgetManager.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
+             int width = appWidgetManager.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH);
+             views.setImageViewBitmap(R.id.widgetGraph, new BgSparklineBuilder(context)
+                     .setBgGraphBuilder(bgGraphBuilder)
+-                    .setHeight(height).setWidth(width).build());
++                    .setHeight(height).setWidth(width).showHighLine(showLines).showLowLine(showLines).build());
+ 
+             if ((new Date().getTime()) - (60000 * 11) - lastBgreading.timestamp > 0) {
+                 estimate = lastBgreading.calculated_value;
+diff --git a/app/src/main/res/xml/pref_advanced_settings.xml b/app/src/main/res/xml/pref_advanced_settings.xml
+index ea068ce..0ab4c68 100644
+--- a/app/src/main/res/xml/pref_advanced_settings.xml
++++ b/app/src/main/res/xml/pref_advanced_settings.xml
+@@ -127,10 +127,11 @@
+                 android:defaultValue="false"/>
+ 
+         </PreferenceScreen>
+-
+-
+-
+-
++        <CheckBoxPreference
++            android:key="widget_range_lines"
++            android:title="Widget Range Lines"
++            android:summary="Show a high and low line on the widget."
++            android:defaultValue="false" />
+         <CheckBoxPreference
+             android:key="xDripViewer_upload_mode"
+             android:title="xDripViewer upload mode"
