@@ -114,33 +114,38 @@ for my $f (keys %files) {
     $files{$f}{hotspot_score} = $files{$f}{changes_score} * $files{$f}{pr_count}**2;
 }
 
-my @sorted = sort { $files{$a}{hotspot_score} 
-                    <=> $files{$b}{hotspot_score} } keys %files;
-foreach my $file (@sorted) {
-    print "$file \n";
-    print Dumper $files{$file};
-}
+my @labels = sort { $files{$b}{hotspot_score} 
+                    <=> $files{$a}{hotspot_score} } keys %files;
 
-
-#### Show a chart demonstrating hotspots
-
-
-# Create dataset object and specify the properties of the dataset
 my @scores;
-
-foreach my $f (@sorted) {
-    print $f . "\n";
+open CSV, ">hotspots.csv" or die "Couldn't open output CSV file: $!";
+foreach my $f (@labels) {
+    # TODO does sqrt of score scale ideally for a chart?
+    push(@scores, sqrt($files{$f}{hotspot_score}));
+    print CSV $f . " : ". $files{$f}{hotspot_score} . "\r\n";
 }
-foreach my $f (@sorted) {
-    printf $files{$f}{hotspot_score} . "\n";
-    push(@scores, $files{$f}{hotspot_score});
+close CSV;
+
+my $chart = new GD::Graph::pie(800, 600);
+$chart->set(title => 'Recent Code Hotspots') or die $chart->error;
+$chart->set(dclrs => ['#dF0000', '#e04000', '#e07500', '#e0a800', '#e0e000', '#a8e000']);
+$chart->set_title_font('fonts/arial.ttf', 24);
+$chart->set_label_font('fonts/arial.ttf', 16);
+$chart->set_value_font('fonts/arial.ttf', 16);
+
+my $FILE_COUNT_IN_CHART = 6;
+my $top_index  = (scalar(@labels) < $FILE_COUNT_IN_CHART) ? (scalar(@labels)) : ($FILE_COUNT_IN_CHART);
+my @top_files  = @labels[0 .. $top_index];
+
+my @top_files_shortened;
+for(my $i = 0; $i < $top_index; $i++) {
+    push(@top_files_shortened, substr($labels[$i], rindex($labels[$i], '/') + 1));
 }
+my @top_scores = @scores[0 .. $top_index];
 
-my $chart = GD::Graph::pie->new(400, 300);
-$chart->set( 
-            title             => 'Some simple graph'
-        ) or die $chart->error;
+my @data = ([@top_files_shortened], [@top_scores]);
 
-my @data = [ \@sorted, \@scores, \@scores];
-
-my $gd = $chart->plot(\@data) or die $chart->error;
+open OUT, ">hotspots.png" or die "Couldn't open output file: $!";
+binmode(OUT);
+print OUT $chart->plot(\@data)->png;
+close OUT;
