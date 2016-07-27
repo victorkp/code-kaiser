@@ -1,15 +1,48 @@
 #!/bin/perl
 use GD::Graph::Map;
 use GD::Graph::pie;
+use File::Slurp;
 use Text::Diff::Parser;
+use Storable;
 use Data::Dumper qw(Dumper);
 use strict;
 use warnings;
 
-# Iterate through diff files in ../pulls/, 
-# keeping track of file changes. Try to identify
-# files or areas that have been modified often
+# Mild indentation on dumper
+$Data::Dumper::Indent = 1;
+
+# Iterate through diff files, keeping track of
+# file change statistics for each file here
 my %files;
+
+# Start processing file "$start_file.diff"
+my $last_diff_processed = -1;
+
+my $save_file = undef;
+
+sub load_from_save_file() {
+    if($save_file) {
+        my $last_save_hash = retrieve($save_file);
+
+        $last_diff_processed = $$last_save_hash{last_diff_processed};
+        %files               = %{$$last_save_hash{files}};
+    }
+}
+
+sub store_to_save_file() {
+    if($save_file) {
+        store({ last_diff_processed => $last_diff_processed,
+                 files               => \%files }, $save_file)
+    }
+}
+
+if(scalar(@ARGV)) {
+    $save_file = $ARGV[0];
+    if(-f $save_file) {
+        # Load previously processed statistics
+        load_from_save_file();
+    }
+}
 
 opendir(PULLS, "../pulls");
 my @dir_files = readdir(PULLS);
@@ -23,10 +56,15 @@ foreach my $f (@dir_files) {
     }
 }
 my @diff_files = sort { $a <=> $b } @files;
-
-my $PR_LAST = @diff_files[-1];
+my $LAST_DIFF_NUMBER = $diff_files[-1]; # Last diff number
 
 foreach my $diff_file (@diff_files) {
+    # Don't reprocess already seen files
+    if($diff_file <= $last_diff_processed) {
+        next;
+    }
+    $last_diff_processed = $diff_file;
+
     print "Processing file $diff_file.diff\n";
 
     # Strip one directory, because GitHub uses 'a/' and 'b/'
@@ -106,7 +144,7 @@ foreach my $diff_file (@diff_files) {
     foreach my $f (keys %files_changed_by_diff) {
         # Changes_Score for this PR is changes^2 * recency
         my $changes = $files_changed_by_diff{$f}{changes};
-        $files{$f}{changes_score} += ($changes**2) * ($diff_file / $PR_LAST)**2;
+        $files{$f}{changes_score} += ($changes**2) * ($diff_file / $LAST_DIFF_NUMBER)**2;
     }
 }
 
@@ -114,6 +152,8 @@ foreach my $diff_file (@diff_files) {
 for my $f (keys %files) {
     $files{$f}{hotspot_score} = $files{$f}{changes_score} * $files{$f}{pr_count}**2;
 }
+
+store_to_save_file();
 
 my @labels = sort { $files{$b}{hotspot_score} 
                     <=> $files{$a}{hotspot_score} } keys %files;

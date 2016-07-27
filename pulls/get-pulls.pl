@@ -4,9 +4,13 @@ use warnings;
 
 my $url = "https://patch-diff.githubusercontent.com/raw/StephenBlackWasAlreadyTaken/xDrip-Experimental/pull/";
 
-# Get the last 200 pull requests
+# Get the last XX pull requests
 for(my $i = 355; $i > 0; $i--) {
-    system "wget ${url}${i}.diff > /dev/null 2>&1";
+    # Only get missing pulls
+    if(! -f "${i}.diff") { 
+        print "Getting ${i}.diff";
+        system "wget ${url}${i}.diff > /dev/null 2>&1";
+    }
 }
 
 system "rm -f wget.log";
