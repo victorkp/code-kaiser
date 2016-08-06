@@ -103,6 +103,12 @@
         return $self->make_request($API_REPO);
     }
 
+    sub get_comments {
+        my ($self) = @_;
+        $self->assert_values();
+        return $self->make_request($API_COMMENTS);
+    }
+
     sub get_diff {
         my ($self, $diff_number) = @_;
         $self->assert_values();
@@ -125,9 +131,10 @@ print $api->token . "\n";
 print $api->repo_owner . "\n";
 print $api->repo_name . "\n\n";
 
-my $response = $api->get_repo;
+my $response = $api->get_comments;
 print $response->request()->uri() . "\n";
 print $response->status_line() . "\n";
 if ($response->is_success) {
     print $response->decoded_content;  # or whatever
+    print "\n\n"
 }

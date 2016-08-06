@@ -85,5 +85,5 @@
 
 
 # start the server on port 4567
-# my $pid = CodeKaiser->new(4567)->run();
+CodeKaiser->new(4567)->run();
 
