@@ -12,16 +12,26 @@
     $VERSION     = 1.00;
     @ISA         = qw(Exporter);
     @EXPORT      = ();
-    @EXPORT_OK   = qw(new assert_values token repo_owner repo_name
+    @EXPORT_OK   = qw(STATUS_FAILURE, STATUS_PENDING, STATUS_SUCCESS, STATUS_ERROR,
+                      new assert_values token repo_owner repo_name
                       get_repo get_comments get_issue_comments get_diff);
 
+    my $STATUS_URL     = "https://www.google.com";
+    my $STATUS_CONTEXT = "Code Kaiser";
+
     my $CONTENT_TYPE_DIFF  = 'application/vnd.github.diff';
+
+    my $STATUS_PENDING     = 'pending';
+    my $STATUS_SUCCESS     = 'success';
+    my $STATUS_FAILURE     = 'failure';
+    my $STATUS_ERROR       = 'error';
 
     my $BASE               = "https://api.github.com";
     my $API_REPO           = "$BASE/repos/:owner/:repo";
     my $API_COMMENTS       = "$BASE/repos/:owner/:repo/comments";
     my $API_ISSUE_COMMENTS = "$BASE/repos/:owner/:repo/issues/:number/comments";
     my $API_PULL           = "$BASE/repos/:owner/:repo/pulls";
+    my $API_STATUS         = "$BASE/repos/:owner/:repo/statuses";
     
     # Expects { token => $<my_token>,
     #           repo_owner => <owner>,
@@ -94,7 +104,7 @@
 
     ## Helper to make an API request, replacing
     ## values in the URL based on this GitHubApi
-    # Argument: URL
+    # Argument: URL, [content-type-accepted]
     # Return:   HTTP::Response
     sub make_request {
         my ($self, $url, $content_type) = @_;
@@ -109,6 +119,35 @@
 
         if(@_ == 3) {
             $request->header('Accept' => $content_type);
+        }
+
+        my $ua = LWP::UserAgent->new;
+        my $response = $ua->request($request);
+
+        return $response;
+    }
+
+    ## Helper to make an API post, replacing
+    ## values in the URL based on this GitHubApi
+    # Argument: URL, payload, [content-type]
+    # Return:   HTTP::Response
+    sub make_post {
+        my ($self, $url, $content, $content_type) = @_;
+        $self->assert_values();
+
+        if(@_ < 3) {
+            die "Usage: make_request(<url>, payload, [<Accept-Header>]) $!";
+        }
+
+        my $request = HTTP::Request->new(POST => $self->get_url($url));
+        $request->header('Authorization' => "token $self->{'token'}");
+
+        print $content, "\n";
+
+        $request->content($content);
+
+        if(@_ == 4) {
+            $request->header('Content-Type' => $content_type);
         }
 
         my $ua = LWP::UserAgent->new;
@@ -161,6 +200,22 @@
         }
 
         return $self->make_request("$API_PULL/$diff_number", $CONTENT_TYPE_DIFF);
+    }
+
+    ## Post status for a commit
+    # Argument: commit_sha, status, description
+    # Return:   HTTP::Response
+    sub post_status {
+        my ($self, $commit_sha, $status, $description) = @_;
+        $self->assert_values();
+
+        if(@_ != 4) {
+            die "Usage: post_status(<commit_sha>, <status>, <description>) $!";
+        }
+
+        my $status_json = "{ \"state\" : \"$status\", \"target_url\" : \"$STATUS_URL\","
+                          . " \"description\" : \"$description\", \"context\" : \"$STATUS_CONTEXT\" }";
+        return $self->make_post("$API_STATUS/$commit_sha", $status_json, 'application/json');
     }
 
     1;

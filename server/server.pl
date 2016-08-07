@@ -89,37 +89,33 @@ use JSON qw( decode_json encode_json );
 #CodeKaiser->new(4567)->run();
 
 my $api = CodeKaiser::GitHubApi->new(token      => '236ceea5c4582dbdd71400ad2166e298a9b7c822',
-                                     repo_owner => 'augmate',
-                                     repo_name  => 'augmate-wear');
+                                     repo_owner => 'victorkp',
+                                     repo_name  => 'dummy-test');
 
 print $api->token . "\n";
 print $api->repo_owner . "\n";
 print $api->repo_name . "\n\n";
 
-### Get PR comments
-# my $response = $api->get_issue_comments(2);
-# print $response->request()->uri() . "\n";
-# print $response->status_line() . "\n";
-# if ($response->is_success) {
-#     my @payload = @{decode_json($response->decoded_content)};
-# 
-#     for my $comment(@payload){
-#         print "Comment:\n";
-#         printf "    User: %s\n", $comment->{user}{login};
-#         printf "    Body: %s\n", $comment->{body};
-#         printf "    Time: %s\n", $comment->{updated_at};
-#         printf "    Time: %s\n", $comment->{html_url};
-#     }
-# }
+my $response = $api->get_issue_comments(2);
+print $response->request()->uri() . "\n";
+print $response->status_line() . "\n";
+if ($response->is_success) {
+    my @payload = @{decode_json($response->decoded_content)};
 
-for(my $i = 20; $i < 114; $i++) {
-    my $response = $api->get_diff($i);
-    print $response->request()->uri() . "\n";
-    print $response->status_line() . "\n";
-
-    if ($response->is_success) {
-        open(FILE, ">$i.diff") or die;
-        print FILE $response->decoded_content;
-        close FILE
+    for my $comment(@payload){
+        print "Comment:\n";
+        printf "    User: %s\n", $comment->{user}{login};
+        printf "    Body: %s\n", $comment->{body};
+        printf "    Time: %s\n", $comment->{updated_at};
+        printf "    Time: %s\n", $comment->{html_url};
     }
 }
+
+print "\n\n";
+$response = $api->post_status("144fe97f8bc30ea81138509e7cbce2432d836d78",
+                              "failure", 
+                              "victorkp blocked merge");
+print $response->request()->uri() . "\n";
+print $response->status_line() . "\n";
+    print $response->decoded_content;
+
