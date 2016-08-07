@@ -1,15 +1,16 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -Ilib
+use JSON qw( decode_json encode_json );
+
 {
     package CodeKaiser;
 
     use HTTP::Server::Simple::CGI;
     use base qw(HTTP::Server::Simple::CGI);
 
-    use lib `pwd` . '/lib';
     use CodeKaiser::GitHubApi;
 
     use Data::Dumper;
-    use JSON;
+    use JSON qw( decode_json encode_json );
 
     use strict;
     use warnings;
@@ -85,5 +86,36 @@
 
 
 # start the server on port 4567
-CodeKaiser->new(4567)->run();
+#CodeKaiser->new(4567)->run();
 
+my $api = CodeKaiser::GitHubApi->new(token      => '236ceea5c4582dbdd71400ad2166e298a9b7c822',
+                                     repo_owner => 'victorkp',
+                                     repo_name  => 'dummy-test');
+
+print $api->token . "\n";
+print $api->repo_owner . "\n";
+print $api->repo_name . "\n\n";
+
+### Get PR comments
+# my $response = $api->get_issue_comments(2);
+# print $response->request()->uri() . "\n";
+# print $response->status_line() . "\n";
+# if ($response->is_success) {
+#     my @payload = @{decode_json($response->decoded_content)};
+# 
+#     for my $comment(@payload){
+#         print "Comment:\n";
+#         printf "    User: %s\n", $comment->{user}{login};
+#         printf "    Body: %s\n", $comment->{body};
+#         printf "    Time: %s\n", $comment->{updated_at};
+#         printf "    Time: %s\n", $comment->{html_url};
+#     }
+# }
+
+my $response = $api->get_diff(2);
+print $response->request()->uri() . "\n";
+print $response->status_line() . "\n";
+
+if ($response->is_success) {
+    print $response->decoded_content;
+}
