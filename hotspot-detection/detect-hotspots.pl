@@ -204,6 +204,7 @@ print OUT $image_final->png;
 close OUT;
 
 # Create HTML Map for hover-over information
+$chart = new GD::Graph::pie(800, 600); # Use smaller scale for HTML map
 my $html_map = new GD::Graph::Map($chart, newWindow => 1);
 $html_map->set(info => "%x is %.1p% hot");
 $html_map->set(mapName => "hotspot_map");

@@ -89,8 +89,8 @@ use JSON qw( decode_json encode_json );
 #CodeKaiser->new(4567)->run();
 
 my $api = CodeKaiser::GitHubApi->new(token      => '236ceea5c4582dbdd71400ad2166e298a9b7c822',
-                                     repo_owner => 'victorkp',
-                                     repo_name  => 'dummy-test');
+                                     repo_owner => 'augmate',
+                                     repo_name  => 'augmate-wear');
 
 print $api->token . "\n";
 print $api->repo_owner . "\n";
@@ -112,10 +112,14 @@ print $api->repo_name . "\n\n";
 #     }
 # }
 
-my $response = $api->get_diff(2);
-print $response->request()->uri() . "\n";
-print $response->status_line() . "\n";
+for(my $i = 20; $i < 114; $i++) {
+    my $response = $api->get_diff($i);
+    print $response->request()->uri() . "\n";
+    print $response->status_line() . "\n";
 
-if ($response->is_success) {
-    print $response->decoded_content;
+    if ($response->is_success) {
+        open(FILE, ">$i.diff") or die;
+        print FILE $response->decoded_content;
+        close FILE
+    }
 }
