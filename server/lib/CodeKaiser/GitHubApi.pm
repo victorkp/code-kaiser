@@ -12,7 +12,7 @@
     $VERSION     = 1.00;
     @ISA         = qw(Exporter);
     @EXPORT      = ();
-    @EXPORT_OK   = qw(STATUS_FAILURE, STATUS_PENDING, STATUS_SUCCESS, STATUS_ERROR,
+    @EXPORT_OK   = qw(STATUS_FAILURE STATUS_PENDING STATUS_SUCCESS STATUS_ERROR
                       new assert_values token repo_owner repo_name
                       get_repo get_comments get_issue_comments get_diff);
 

@@ -1,0 +1,7 @@
+diff --git a/pr-file-1 b/pr-file-1
+new file mode 100644
+index 0000000..8a74fe8
+--- /dev/null
++++ b/pr-file-1
+@@ -0,0 +1 @@
++I am a new file
