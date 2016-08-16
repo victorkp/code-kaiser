@@ -8,14 +8,13 @@ use JSON qw( decode_json encode_json );
     use base qw(HTTP::Server::Simple::CGI);
 
     use CodeKaiser::GitHubApi;
+    use CodeKaiser::DataManager;
 
     use Data::Dumper;
     use JSON qw( decode_json encode_json );
 
     use strict;
     use warnings;
-
-    my $DATA_DIR = 'data';
 
     my $PR_OPENED      = 'opened';
     my $PR_REOPENED    = 'reopened';
@@ -141,10 +140,8 @@ use JSON qw( decode_json encode_json );
                         return 0;
                     }
 
-                    mkdir $DATA_DIR;
-                    mkdir "$DATA_DIR/$owner";
-                    mkdir "$DATA_DIR/$owner/$repo_name";
-                    open(my $OUT, ">$DATA_DIR/$owner/$repo_name/$pr_number.diff") or die "Couldn't open output for diff file: $!";
+                    open(my $OUT, '>',CodeKaiser::DataManager->get_diff_path($owner, $repo_name, $pr_number))
+                            or die "Couldn't open output for diff file: $!";
                     print $OUT $diff_body;
                     close $OUT;
 

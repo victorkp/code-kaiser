@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 use GD::Graph::Map;
 use GD::Graph::pie;
 use File::Slurp;
@@ -18,7 +18,7 @@ my %files;
 # Start processing file "$start_file.diff"
 my $last_diff_processed = -1;
 
-my $save_file = undef;
+my ($diff_dir, $save_file) = @ARGV;
 
 sub load_from_save_file() {
     if($save_file) {
@@ -36,17 +36,16 @@ sub store_to_save_file() {
     }
 }
 
-if(scalar(@ARGV)) {
-    $save_file = $ARGV[0];
-    if(-f $save_file) {
-        # Load previously processed statistics
-        load_from_save_file();
-    }
+if(-f $save_file) {
+    # Load previously processed statistics
+    load_from_save_file();
 }
 
-opendir(PULLS, "../pulls");
-my @dir_files = readdir(PULLS);
-closedir(PULLS);
+scalar(@ARGV) == 2 or die "Required parameters: <diff-directory> <save-file>\n";
+
+opendir(DIFF_DIR, $diff_dir) or die "Could not open diff directory: $diff_dir\n";
+my @dir_files = readdir(DIFF_DIR);
+closedir(DIFF_DIR);
 
 # Sort pull request diff files to be in order
 my @files;
@@ -155,63 +154,3 @@ for my $f (keys %files) {
 
 store_to_save_file();
 
-my @labels = sort { $files{$b}{hotspot_score} 
-                    <=> $files{$a}{hotspot_score} } keys %files;
-
-my @scores;
-open CSV, ">hotspots.csv" or die "Couldn't open output CSV file: $!";
-foreach my $f (@labels) {
-    # TODO does sqrt of score scale ideally for a chart?
-    push(@scores, sqrt($files{$f}{hotspot_score}));
-    print CSV $f . " : ". $files{$f}{hotspot_score} . "\r\n";
-}
-close CSV;
-
-my @CHART_COLORS = ['#dF0000', '#e04000', '#e07500', '#e0a800', '#e0e000', '#a8e000'];
-my @CHART_COLORS_SHADOWS = ['#dF0000', '#e04000', '#e07500', '#e0a800', '#e0e000', '#a8e000'];
-my $chart = new GD::Graph::pie(3200, 2400);
-$chart->set(title => 'Recent Code Hotspots') or die $chart->error;
-$chart->set(dclrs => @CHART_COLORS);
-$chart->set(transparent => 0);
-$chart->set_title_font('fonts/arial.ttf', 24*4);
-$chart->set_label_font('fonts/arial.ttf', 16*4);
-$chart->set_value_font('fonts/arial.ttf', 16*4);
-
-my $FILE_COUNT_IN_CHART = 6;
-my $top_index  = (scalar(@labels) < $FILE_COUNT_IN_CHART) ? (scalar(@labels)) : ($FILE_COUNT_IN_CHART);
-my @top_files  = @labels[0 .. $top_index];
-
-my @top_files_shortened;
-for(my $i = 0; $i < $top_index; $i++) {
-    push(@top_files_shortened, substr($labels[$i], rindex($labels[$i], '/') + 1));
-}
-my @top_scores = @scores[0 .. $top_index];
-
-my @data = ([@top_files_shortened], [@top_scores]);
-
-open OUT, ">hotspots-large.png" or die "Couldn't open output file: $!";
-binmode(OUT);
-print OUT $chart->plot(\@data)->png;
-close OUT;
-
-# Resample image down (dumb antialiasing)
-my $image_large = new GD::Image("hotspots-large.png");
-my $image_final = new GD::Image(800, 600);
-$image_final->copyResampled($image_large, 0, 0, 0, 0, 800, 600, 3200, 2400);
-open OUT, ">hotspots.png" or die "Couldn't open output file: $!";
-binmode(OUT);
-print OUT $image_final->png;
-close OUT;
-
-# Create HTML Map for hover-over information
-$chart = new GD::Graph::pie(800, 600); # Use smaller scale for HTML map
-my $html_map = new GD::Graph::Map($chart, newWindow => 1);
-$html_map->set(info => "%x is %.1p% hot");
-$html_map->set(mapName => "hotspot_map");
-$html_map->set(noImgMarkup => 1);
-open HTML, ">hotspots.html" or die "Couldn't open HTML output file: $!";
-print HTML "<!DOCTYPE html><html><body>\n";
-print HTML $html_map->imagemap("hotspots.png", \@data);
-print HTML "<Img UseMap=#hotspot_map Src=\"hotspots.png\" border=0 Height=600 Width=800>\n";
-print HTML "</body></html>\n";
-close HTML;

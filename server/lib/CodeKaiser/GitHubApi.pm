@@ -52,7 +52,7 @@
             die "Usage: get_url(<url>0: $!";
         }
 
-        $self->assert_values();
+        $self->assert_values;
 
         $base =~ s/:owner/$self->{repo_owner}/;
         $base =~ s/:repo/$self->{repo_name}/;
@@ -108,7 +108,7 @@
     # Return:   HTTP::Response
     sub make_request {
         my ($self, $url, $content_type) = @_;
-        $self->assert_values();
+        $self->assert_values;
 
         if(@_ < 2) {
             die "Usage: make_request(<url>, [<Accept-Header>]) $!";
@@ -133,7 +133,7 @@
     # Return:   HTTP::Response
     sub make_post {
         my ($self, $url, $content, $content_type) = @_;
-        $self->assert_values();
+        $self->assert_values;
 
         if(@_ < 3) {
             die "Usage: make_request(<url>, payload, [<Accept-Header>]) $!";
@@ -160,7 +160,7 @@
     # Return: HTTP::Response
     sub get_repo {
         my ($self) = @_;
-        $self->assert_values();
+        $self->assert_values;
         return $self->make_request($API_REPO);
     }
 
@@ -168,7 +168,7 @@
     # Return: HTTP::Response
     sub get_comments {
         my ($self) = @_;
-        $self->assert_values();
+        $self->assert_values;
         return $self->make_request($API_COMMENTS);
     }
 
@@ -177,7 +177,7 @@
     # Return:   HTTP::Response
     sub get_issue_comments {
         my ($self, $issue_number) = @_;
-        $self->assert_values();
+        $self->assert_values;
 
         if(@_ != 2) {
             die "Usage: get_issue_comments(<issue-or-pull-number>) $!";
@@ -193,7 +193,7 @@
     # Return:   HTTP::Response
     sub get_diff {
         my ($self, $diff_number) = @_;
-        $self->assert_values();
+        $self->assert_values;
 
         if(@_ != 2) {
             die "Usage: get_diff(<pull_number>) $!";
@@ -207,7 +207,7 @@
     # Return:   HTTP::Response
     sub post_status {
         my ($self, $commit_sha, $status, $description) = @_;
-        $self->assert_values();
+        $self->assert_values;
 
         if(@_ != 4) {
             die "Usage: post_status(<commit_sha>, <status>, <description>) $!";

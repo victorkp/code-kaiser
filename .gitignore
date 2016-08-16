@@ -3,3 +3,5 @@ hotspot-detection/*.png
 hotspot-detection/*.csv
 hotspot-detection/*.html
 pulls/*.diff
+server/data/*
+server/test/tmp
