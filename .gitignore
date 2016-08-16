@@ -2,6 +2,7 @@ hotspot-detection/*.gif
 hotspot-detection/*.png
 hotspot-detection/*.csv
 hotspot-detection/*.html
+hotspot-detection/data
 pulls/*.diff
 server/data/*
 server/test/tmp
