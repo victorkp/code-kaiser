@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 { 
-    package CodeKaiser::DiffProcessor
+    package CodeKaiser::DiffProcessor;
 
     use File::Slurp;
     use Text::Diff::Parser;
@@ -153,7 +153,7 @@
 
         # Store everything to save file
         store({ last_diff_processed => $last_diff_processed,
-                 files               => \%files }, $save_file)
+                 files               => \%files }, $save_file);
 
         return \%files;
     }

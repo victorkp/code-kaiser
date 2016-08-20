@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 {
+    package CodeKaiser::ChartGenerator;
+
     use GD::Graph::Map;
     use GD::Graph::pie;
     use Storable;
@@ -19,7 +21,7 @@
     ## using the hash reference returned from
     ## CodeKaiser::DiffProcessor->process_diffs
     # Arguments: save-file, output-directory
-    sub chart_hotspot_from_struct(\%$) {
+    sub chart_hotspot_from_struct {
         my ($files_ref, $output_dir) = @_;
         my %files = %{$files_ref};
 
