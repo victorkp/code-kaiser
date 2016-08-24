@@ -1,14 +1,17 @@
 #!/bin/perl
 {
-    package CodeKaiser::PullRulesConfig;
+    package CodeKaiser::RepoConfig;
     use strict;
     use warnings;
      
-    use Exporter;
     use File::Spec;
     use File::Basename;
     use Scalar::Util;
     use Data::Dumper;
+
+    use CodeKaiser::Logger qw(log_debug log_error log_verbose log_line);
+
+    use Exporter;
     use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
     $VERSION     = 1.00;
@@ -185,33 +188,33 @@
 
     sub parse_config_line($) {
         my ($self, $line) = @_;
-
+        
         if($line =~ m/^$GITHUB_TOKEN\s*:\s*(.+)\s*/) {
-            if($1 =~ /^[0-9a-fA-F]+$/) {           
+            if($1 =~ /^([0-9a-fA-F]+)$/) {           
                 $self->{$GITHUB_TOKEN} = $1;
             } else {
-                print "Bad configuration line, non-hex token: $line\n";
+                log_error "Bad configuration line, non-hex token: $line\n";
             }
         } elsif ($line =~ m/^$REVIEWERS_NEEDED\s*:\s*(.+)\s*/) {
             if(Scalar::Util::looks_like_number($1)) {           
                 $self->{$REVIEWERS_NEEDED} = $1;
             } else {
-                print "Bad configuration line, non-numeric: $line\n";
+                log_error "Bad configuration line, non-numeric: $line\n";
             }
         } elsif ($line =~ m/^$BLOCKING_ENABLED\s*:\s*(\d+)\s*/) {
             if(Scalar::Util::looks_like_number($1)) {           
                 $self->{$BLOCKING_ENABLED} = $1;
             } else {
-                print "Bad configuration line, non-numeric: $line\n";
+                log_error "Bad configuration line, non-numeric: $line\n";
             }
         } elsif ($line =~ m/^$BLOCKING_TIMEOUT\s*:\s*(\d+)\s*/) {
             if(Scalar::Util::looks_like_number($1)) {           
                 $self->{$BLOCKING_TIMEOUT} = $1;
             } else {
-                print "Bad configuration line, non-numeric: $line\n";
+                log_error "Bad configuration line, non-numeric: $line\n";
             }
         } else {
-            print "Bad configuration line: $line\n";
+            log_error "Bad configuration line: $line\n";
         }
     }
     

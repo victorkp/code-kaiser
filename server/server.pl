@@ -9,6 +9,10 @@ use JSON qw( decode_json encode_json );
 
     use CodeKaiser::GitHubApi;
     use CodeKaiser::DataManager;
+    use CodeKaiser::Dispatcher;
+    use CodeKaiser::Logger qw(log_debug log_error log_verbose log_line);
+
+    use Async;
 
     use Data::Dumper;
     use JSON qw( decode_json encode_json );
@@ -32,13 +36,6 @@ use JSON qw( decode_json encode_json );
     my %dispatch_github = ('pull_request' => \&github_pr_handler,
                            'issue_comment' => \&github_pr_handler);
 
-    # Open logfile, and make it "hot", so that flushes happen frequently
-    open(my $LOG, ">", "logfile") or die "Couldn't open logfile";
-    { my $ofh = select $LOG;
-      $| = 1;
-      select $ofh;
-    }
-    
     sub handle_request {
         my ($self, $cgi) = @_;
       
@@ -67,7 +64,7 @@ use JSON qw( decode_json encode_json );
 
         my $event = $cgi->http('X-GitHub-Event');
         my $payload = $cgi->param('payload');
-        print $LOG "New Event: $event\n";
+        log_verbose "New Event: $event";
 
         my $success = 1;
 
@@ -97,10 +94,11 @@ use JSON qw( decode_json encode_json );
                   $cgi->header('application/json');
             print '{ "reason" : "No \'payload\' parameter given"}';
 
-            print $LOG "Bad request";
+            log_error "Bad request";
         }
 
-        log_event($payload);
+        # log_event($payload);
+        log_line;
     }
 
     # Given a PR event, determine appropriate
@@ -113,21 +111,29 @@ use JSON qw( decode_json encode_json );
         my $payload = $coder->decode($payload_json);
 
         my $action = $$payload{'action'};
-        print $LOG "Action: $action\n";
+        log_debug "Action: $action";
 
         if($action eq $PR_CLOSED) {
             # If PR was closed and merged, then
             # get and store the diff, so that further
             # processing can be done on the diff
-            print $LOG "Payload merged: $$payload{'pull_request'}{'merged'}\n";
             if($$payload{'pull_request'}{'merged'}) {
+                log_debug "Payload was merged";
+
                 # Get and store PR's diff
                 my ($owner, $repo_name) = split /\//, $$payload{'repository'}{'full_name'}, 2;
                 my $pr_number = $$payload{'number'};
+                my $sha = $$payload{'sha'};
                 if($owner && $repo_name && $pr_number) {
-                    # TODO lookup OAuth token for owner/repo
-                    my $token = '236ceea5c4582dbdd71400ad2166e298a9b7c822';
-                    my $api = CodeKaiser::GitHubApi->new(token      => $token,
+                    my $repo_config = CodeKaiser::DataManager->get_repo_config($owner, $repo_name);
+                    my $token = $repo_config->github_token();
+
+                    if(! $repo_config || ! $repo_config->github_token()) {
+                        log_error "Bad configuration, or no access token for $owner/$repo_name";
+                        return;
+                    }
+
+                    my $api = CodeKaiser::GitHubApi->new(token      => $repo_config->github_token,
                                                          repo_owner => $owner,
                                                          repo_name  => $repo_name); 
 
@@ -140,19 +146,21 @@ use JSON qw( decode_json encode_json );
                         return 0;
                     }
 
-                    open(my $OUT, '>',CodeKaiser::DataManager->get_diff_path($owner, $repo_name, $pr_number))
+                    open(my $OUT, '>', CodeKaiser::DataManager->get_diff_path($owner, $repo_name, $pr_number))
                             or die "Couldn't open output for diff file: $!";
                     print $OUT $diff_body;
                     close $OUT;
 
-                    # TODO kick off processing on diff
+                    CodeKaiser::Dispatcher->dispatch_diff_process($owner, $repo_name);
+
+                    # Success
+                    return 1;
                 } else {
-                    my $sha = $$payload{'sha'};
-                    print $LOG "Bad owner or repo name from $$payload{'name'}\n";
+                    log_error "Bad owner or repo name from $$payload{'name'}";
                     return 0;
                 }
             } else {
-                print $LOG "PR was not merged\n";
+                log_debug "PR was not merged";
             }
         } else {
             # Otherwise, determine if the PR should
@@ -171,14 +179,14 @@ use JSON qw( decode_json encode_json );
         my $coder = JSON->new->utf8->pretty->allow_nonref;
         my $payload = $coder->decode($payload_json);
 
-        print $LOG "Got Event: ";
-        print $LOG $coder->encode($payload), "\n\n";
+        log_verbose "Got Event: ";
+        log_verbose $coder->encode($payload), "\n\n";
     }
 } 
 
 
-# start the server on port 4567
-CodeKaiser->new(4567)->run();
+# start the server on port 8080
+CodeKaiser->new(8080)->run();
 
 # my $api = CodeKaiser::GitHubApi->new(token      => '236ceea5c4582dbdd71400ad2166e298a9b7c822',
 #                                      repo_owner => 'victorkp',

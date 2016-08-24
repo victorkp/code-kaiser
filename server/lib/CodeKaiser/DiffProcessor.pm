@@ -8,6 +8,8 @@
     use strict;
     use warnings;
 
+    use CodeKaiser::Logger qw(log_debug log_error log_verbose log_line);
+
     use Exporter;
     use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
@@ -30,7 +32,7 @@
         # Start processing file "$start_file.diff"
         my $last_diff_processed = -1;
 
-        my ($diff_dir, $save_file) = @_;
+        my ($self, $diff_dir, $save_file) = @_;
 
         # Load previously processed statistics, if save file exists
         if(-f $save_file) {
@@ -40,7 +42,7 @@
             %files               = %{$$last_save_hash{files}};
         }
 
-        scalar(@ARGV) == 2 or die "Required parameters: <diff-directory> <save-file>\n";
+        scalar(@_) == 3 or die "Required parameters: <diff-directory> <save-file>\n";
 
         opendir(DIFF_DIR, $diff_dir) or die "Could not open diff directory: $diff_dir\n";
         my @dir_files = readdir(DIFF_DIR);
@@ -67,7 +69,7 @@
 
             # Strip one directory, because GitHub uses 'a/' and 'b/'
             # base branch and branch to merge
-            my $parser = Text::Diff::Parser->new("../pulls/$diff_file.diff");
+            my $parser = Text::Diff::Parser->new("$diff_dir/$diff_file.diff");
             $parser->simplify();
 
             # Used to keep track of changes_score
