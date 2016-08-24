@@ -22,6 +22,7 @@
     ## Check @processes every POLL_TIME seconds
     my $POLL_TIME = 5;
 
+    my $process_id = 0;
     my @processes;
     my @processes_descriptions;
 
@@ -33,24 +34,22 @@
     ## Checks if any processes have exited,
     ## logging to a log file in /var/log
     sub check_processes() {
-        log_line;
-        log_debug "Current Processes:";
+        log_debug "DISPATCHER | Current Processes:";
         my $error;
         for(my $i = scalar(@processes) - 1; $i != -1; $i--) {
             if($processes[$i]->ready) {
                 if ($error = $processes[$i]->error) {
-                    log_debug "ERROR    $processes_descriptions[$i]: $error";
+                    log_debug "DISPATCHER | ERROR    $processes_descriptions[$i]: $error";
                 } else {
-                    log_debug "SUCCESS  $processes_descriptions[$i]: $processes[$i]->result";
+                    log_debug "DISPATCHER | SUCCESS  $processes_descriptions[$i]: ", $processes[$i]->result();
                 }
 
                 splice @processes, $i, 1;
                 splice @processes_descriptions, $i, 1;
             } else {
-                log_debug "WORKING  $processes_descriptions[$i]\n";
+                log_debug "DISPATCHER | WORKING  $processes_descriptions[$i]";
             }
         }
-        log_line;
     }
 
     ## Start processing possibly new diffs
@@ -63,7 +62,8 @@
                                 CodeKaiser::DataManager->get_diff_save_file_path($repo_owner, $repo_name))}) or die "Can't Async execute";
 
         push @processes, $proc;
-        push @processes_descriptions, "dispatch_diff_process($repo_owner, $repo_name)";
+        push @processes_descriptions, "$process_id: dispatch_diff_process($repo_owner, $repo_name)";
+        $process_id++;
 
         log_debug "Dispatched new diff_process for $repo_owner/$repo_name";
         check_processes
