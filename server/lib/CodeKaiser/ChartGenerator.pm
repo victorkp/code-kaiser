@@ -22,6 +22,13 @@
     ## CodeKaiser::DiffProcessor->process_diffs
     # Arguments: save-file, output-directory
     sub chart_hotspot_from_struct {
+        # Shift out context, if needed
+        if(scalar(@_) == 3) {
+            shift @_;
+        }
+
+        scalar(@_) == 2 or die "Required parameters: <save-struct> <output-directory>\n";
+
         my ($files_ref, $output_dir) = @_;
         my %files = %{$files_ref};
 
@@ -95,7 +102,11 @@
     ## using a save-file from CodeKaiser::DiffProcessor
     # Arguments: save-file, output-directory
     sub chart_hotspot_from_file($$) {
-        # Require input file
+        # Shift out context, if needed
+        if(scalar(@_) == 3) {
+            shift @_;
+        }
+
         scalar(@_) == 2 or die "Required parameters: <save-file> <output-dir>\n";
 
         my ($save_file, $output_dir) = @_;

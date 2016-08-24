@@ -12,6 +12,7 @@
 
     use CodeKaiser::DataManager;
     use CodeKaiser::DiffProcessor;
+    use CodeKaiser::ChartGenerator;
     use CodeKaiser::Logger qw(log_debug log_error log_verbose log_line);
 
     $VERSION     = 1.00;
@@ -57,9 +58,12 @@
     sub dispatch_diff_process($$) {
         my ($self, $repo_owner, $repo_name) = @_;
 
-        my $proc = Async->new(sub { CodeKaiser::DiffProcessor->process_diffs(
-                                CodeKaiser::DataManager->get_diff_directory($repo_owner, $repo_name),
-                                CodeKaiser::DataManager->get_diff_save_file_path($repo_owner, $repo_name))}) or die "Can't Async execute";
+        my $proc = Async->new(sub { my $files = CodeKaiser::DiffProcessor->process_diffs(
+                                                    CodeKaiser::DataManager->get_diff_directory($repo_owner, $repo_name),
+                                                    CodeKaiser::DataManager->get_diff_save_file_path($repo_owner, $repo_name));
+                                    CodeKaiser::ChartGenerator->chart_hotspot_from_struct(
+                                                $files, CodeKaiser::DataManager->get_processing_output_path($repo_owner, $repo_name));
+                            }) or die "Can't Async execute";
 
         push @processes, $proc;
         push @processes_descriptions, "$process_id: dispatch_diff_process($repo_owner, $repo_name)";
