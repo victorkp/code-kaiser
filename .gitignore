@@ -6,3 +6,5 @@ hotspot-detection/data
 pulls/*.diff
 server/data/*
 server/test/tmp
+*.swp
+*~
