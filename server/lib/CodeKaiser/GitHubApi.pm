@@ -14,17 +14,17 @@
     @EXPORT      = ();
     @EXPORT_OK   = qw(STATUS_FAILURE STATUS_PENDING STATUS_SUCCESS STATUS_ERROR
                       new assert_values token repo_owner repo_name
-                      get_repo get_comments get_issue_comments get_diff);
+                      get_repo get_comments get_issue_comments get_diff get_pull);
 
     my $STATUS_URL     = "https://www.google.com";
     my $STATUS_CONTEXT = "Code Kaiser";
 
     my $CONTENT_TYPE_DIFF  = 'application/vnd.github.diff';
 
-    my $STATUS_PENDING     = 'pending';
-    my $STATUS_SUCCESS     = 'success';
-    my $STATUS_FAILURE     = 'failure';
-    my $STATUS_ERROR       = 'error';
+    our $STATUS_PENDING     = 'pending';
+    our $STATUS_SUCCESS     = 'success';
+    our $STATUS_FAILURE     = 'failure';
+    our $STATUS_ERROR       = 'error';
 
     my $BASE               = "https://api.github.com";
     my $API_REPO           = "$BASE/repos/:owner/:repo";
@@ -162,6 +162,14 @@
         my ($self) = @_;
         $self->assert_values;
         return $self->make_request($API_REPO);
+    }
+
+    ## Get PR metadata
+    # Return: HTTP::Response
+    sub get_pull {
+        my ($self, $pr_number) = @_;
+        $self->assert_values;
+        return $self->make_request("$API_PULL/$pr_number");
     }
 
     ## Get comments on a repo

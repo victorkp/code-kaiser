@@ -78,6 +78,8 @@ use JSON qw( decode_json encode_json );
             my $github_handler = $dispatch_github{$event};
             if(ref($github_handler) eq 'CODE') {
                 $success = $github_handler->($payload);
+            } else {
+                log_verbose "No ref handler for event $event";
             }
         }
 
@@ -109,9 +111,16 @@ use JSON qw( decode_json encode_json );
 
         my $coder = JSON->new->utf8->pretty->allow_nonref;
         my $payload = $coder->decode($payload_json);
+        my $pr_number = $$payload{'number'};
+        my ($owner, $repo_name) = split /\//, $$payload{'repository'}{'full_name'}, 2;
 
         my $action = $$payload{'action'};
         log_debug "Action: $action";
+
+        if(!$owner || !$repo_name || !$pr_number) {
+            log_error "Bad owner, repo name, or pr number from $$payload{'name'}";
+            return 0;
+        }
 
         if($action eq $PR_CLOSED) {
             # If PR was closed and merged, then
@@ -121,54 +130,44 @@ use JSON qw( decode_json encode_json );
                 log_debug "Payload was merged";
 
                 # Get and store PR's diff
-                my ($owner, $repo_name) = split /\//, $$payload{'repository'}{'full_name'}, 2;
-                my $pr_number = $$payload{'number'};
-                my $sha = $$payload{'sha'};
-                if($owner && $repo_name && $pr_number) {
-                    my $repo_config = CodeKaiser::DataManager->get_repo_config($owner, $repo_name);
-                    my $token = $repo_config->github_token();
+                my $repo_config = CodeKaiser::DataManager->get_repo_config($owner, $repo_name);
+                my $token = $repo_config->github_token();
 
-                    if(! $repo_config || ! $repo_config->github_token()) {
-                        log_error "Bad configuration, or no access token for $owner/$repo_name";
-                        return;
-                    }
-
-                    my $api = CodeKaiser::GitHubApi->new(token      => $repo_config->github_token,
-                                                         repo_owner => $owner,
-                                                         repo_name  => $repo_name); 
-
-                    # Get diff from PR
-                    my $diff_response = $api->get_diff($pr_number);
-                    my $diff_body;
-                    if($diff_response->is_success) {
-                        $diff_body = $diff_response->decoded_content;
-                    } else {
-                        return 0;
-                    }
-
-                    open(my $OUT, '>', CodeKaiser::DataManager->get_diff_path($owner, $repo_name, $pr_number))
-                            or die "Couldn't open output for diff file: $!";
-                    print $OUT $diff_body;
-                    close $OUT;
-
-                    CodeKaiser::Dispatcher->dispatch_diff_process($owner, $repo_name);
-
-                    # Success
-                    return 1;
-                } else {
-                    log_error "Bad owner or repo name from $$payload{'name'}";
+                if(! $repo_config || ! $repo_config->github_token()) {
+                    log_error "Bad configuration, or no access token for $owner/$repo_name";
                     return 0;
                 }
+
+                my $api = CodeKaiser::GitHubApi->new(token      => $repo_config->github_token,
+                                                     repo_owner => $owner,
+                                                     repo_name  => $repo_name); 
+
+                # Get diff from PR
+                my $diff_response = $api->get_diff($pr_number);
+                my $diff_body;
+                if($diff_response->is_success) {
+                    $diff_body = $diff_response->decoded_content;
+                } else {
+                    return 0;
+                }
+
+                open(my $OUT, '>', CodeKaiser::DataManager->get_diff_path($owner, $repo_name, $pr_number))
+                        or die "Couldn't open output for diff file: $!";
+                print $OUT $diff_body;
+                close $OUT;
+
+                CodeKaiser::Dispatcher->dispatch_diff_process($owner, $repo_name);
             } else {
                 log_debug "PR was not merged";
             }
         } else {
             # Otherwise, determine if the PR should
             # be allowed to be merged, and post status
-            # TODO
-            printf "TODO determine if allow merge, and post status"
+            my $pr_sha = $$payload{'pull_request'}{'head'}{'sha'};
+            CodeKaiser::Dispatcher->dispatch_pr_check_process($owner, $repo_name, $pr_number, $pr_sha);
         }
 
+        # Success
         return 1;
     }
 

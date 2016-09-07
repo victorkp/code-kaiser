@@ -73,8 +73,8 @@
     }
 
     ## Get or set GitHub token
-    # Argument: repo_owner (optional)
-    # Return:   repo_owner
+    # Argument: github_token (optional)
+    # Return:   github_token
     sub github_token {
         my ($self, $value) = @_;
         if (@_ == 2) {
@@ -190,7 +190,7 @@
         my ($self, $line) = @_;
         
         if($line =~ m/^$GITHUB_TOKEN\s*:\s*(.+)\s*/) {
-            if($1 =~ /^([0-9a-fA-F]+)$/) {           
+            if($line =~ m/^$GITHUB_TOKEN\s*:\s*([0-9a-fA-F]+)\s*/) {
                 $self->{$GITHUB_TOKEN} = $1;
             } else {
                 log_error "Bad configuration line, non-hex token: $line\n";

@@ -28,15 +28,15 @@
     }
 
     sub log_verbose {
-        print $LOG "Verb. | ", @_, "\n";
+        print $LOG "$$ Verb. | ", @_, "\n";
     }
 
     sub log_debug {
-        print $LOG "Debug | ", @_, "\n";
+        print $LOG "$$ Debug | ", @_, "\n";
     }
     
     sub log_error {
-        print $LOG "Error | ", @_, "\n";
+        print $LOG "$$ Error | ", @_, "\n";
     }
 
 }
