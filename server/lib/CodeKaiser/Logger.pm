@@ -23,20 +23,29 @@
       select $ofh;
     }
 
+    sub get_caller() {
+        my @caller = caller(2);
+        if(@caller) {
+            return sprintf("%-35s", $caller[0] . '::' . $caller[3]);
+        }
+
+        return '';
+    }
+
     sub log_line() {
         print $LOG "\n";
     }
 
     sub log_verbose {
-        print $LOG "$$ Verb. | ", @_, "\n";
+        print $LOG "$$ Verb. | ", get_caller(),' | ', @_, "\n";
     }
 
     sub log_debug {
-        print $LOG "$$ Debug | ", @_, "\n";
+        print $LOG "$$ Debug | ", get_caller(),' | ', @_, "\n";
     }
     
     sub log_error {
-        print $LOG "$$ Error | ", @_, "\n";
+        print $LOG "$$ Error | ", get_caller(),' | ', @_, "\n";
     }
 
 }

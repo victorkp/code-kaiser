@@ -31,7 +31,8 @@ use JSON qw( decode_json encode_json );
     my $PR_UNASSIGNED  = 'unassigned';
 
     # Dispatch various URLs to respective handler subroutines 
-    my %dispatch = ('/event_handler' => \&event_handler);
+    my %dispatch = ('/event_handler' => \&event_handler,
+                    '/log_processes' => \&log_processes);
 
     my %dispatch_github = ('pull_request' => \&github_pr_handler,
                            'issue_comment' => \&github_pr_handler);
@@ -53,6 +54,12 @@ use JSON qw( decode_json encode_json );
                   $cgi->h1('Not found'),
                   $cgi->end_html;
         }
+    }
+
+    # Debug handler that logs the status of dispatched processes
+    sub log_processes {
+        CodeKaiser::Dispatcher->log_processes();
+        print "HTTP/1.0 200 OK\r\n";
     }
     
     # GitHub POSTs to event handler

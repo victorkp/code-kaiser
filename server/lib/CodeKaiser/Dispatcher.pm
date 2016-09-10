@@ -19,7 +19,7 @@
     $VERSION     = 1.00;
     @ISA         = qw(Exporter);
     @EXPORT      = ();
-    @EXPORT_OK   = qw(dispatch_diff_process);
+    @EXPORT_OK   = qw(log_processes dispatch_diff_process dispatch_pr_check_process);
 
     ## Check @processes every POLL_TIME seconds
     my $POLL_TIME = 5;
@@ -30,7 +30,7 @@
 
     # Sets up the re-ocurring timer that checks
     # async process progress
-    # local $SIG{ALRM} = sub { check_processes() };
+    # local $SIG{ALRM} = sub { log_processes() };
     # alarm $POLL_TIME;
     
     ## Push a dispatched process on to @processes,
@@ -45,21 +45,22 @@
 
     ## Checks if any processes have exited,
     ## logging to a log file in /var/log
-    sub check_processes() {
-        log_debug "DISPATCHER | Current Processes:";
+    sub log_processes() {
+        log_line;
+        log_debug "DISPATCHER_CURRENT_PROCESSES:";
         my $error;
         for(my $i = scalar(@processes) - 1; $i != -1; $i--) {
             if($processes[$i]->ready) {
                 if ($error = $processes[$i]->error) {
-                    log_debug "DISPATCHER | ERROR    $processes_descriptions[$i]: $error";
+                    log_debug "           ERROR    $processes_descriptions[$i]: $error";
                 } else {
-                    log_debug "DISPATCHER | SUCCESS  $processes_descriptions[$i]: ", $processes[$i]->result();
+                    log_debug "           SUCCESS  $processes_descriptions[$i]: ", $processes[$i]->result();
                 }
 
                 splice @processes, $i, 1;
                 splice @processes_descriptions, $i, 1;
             } else {
-                log_debug "DISPATCHER | WORKING  $processes_descriptions[$i]";
+                log_debug "           WORKING  $processes_descriptions[$i]";
             }
         }
     }
@@ -76,9 +77,9 @@
                                                 $files, CodeKaiser::DataManager->get_processing_output_path($repo_owner, $repo_name));
                                   }) or die "Can't Async execute";
 
-        $self->push_process($proc, "dispatch_diff_process($repo_owner, $repo_name)");
+        $self->push_process($proc, "diff_process: $repo_owner/$repo_name");
 
-        check_processes
+        log_processes
     }
 
     ## Using a repo's configuration, run a check of all
@@ -92,9 +93,9 @@
                                     CodeKaiser::PRProcessor->process_pr($repo_owner, $repo_name, $pr_number, $pr_sha);
                                   }) or die "Can't Async execute";
 
-        $self->push_process($proc, "dispatch_pr_check_process($repo_owner, $repo_name, $pr_number, $pr_sha)");
+        $self->push_process($proc, "pr_check_process: $repo_owner/$repo_name pr-$pr_number commit-$pr_sha)");
 
-        check_processes
+        log_processes
     }
     
     1;

@@ -25,26 +25,31 @@
     # Arguments: repo_owner, repo_name, pr_number, pr_config, output_directory
     # Return: boolean for success 
     sub process_pr($$$$) {
-        my ($repo_owner, $repo_name, $pr_number, $pr_sha) = @_;
+        my ($self, $repo_owner, $repo_name, $pr_number, $pr_sha) = @_;
 
-        if(!$repo_owner || !$repo_name || !$pr_number) {
-            log_error "PRProcessor::process_pr: an argument was null";
+        if(!$repo_owner || !$repo_name || !$pr_number || !$pr_sha) {
+            log_error "An argument was null: $repo_owner, $repo_name, $pr_number, $pr_sha";
             return 0;
         }
+
+        log_debug "Proccessing PR: number $pr_number, on repo $repo_owner/$repo_name for commit with SHA $pr_sha";
 
         my $repo_config = CodeKaiser::DataManager->get_repo_config($repo_owner, $repo_name);
         my $output_path = CodeKaiser::DataManager->get_pr_output_path($repo_owner, $repo_name);
 
-        if(!$repo_config || !$repo_config->github_token() || !$output_path) {
-            log_error "PRProcessor::process_pr: bad repo config or output directory";
+        if(!$repo_config || !$repo_config->github_token()) {
+            log_error "Bad repo config or token";
+            return 0;
+        }
+
+        if(!$output_path) {
+            log_error "No output path specified";
             return 0;
         }
 
         my $api = CodeKaiser::GitHubApi->new(token      => $repo_config->github_token(),
                                              repo_owner => $repo_owner,
                                              repo_name  => $repo_name); 
-
-        log_verbose "PRProcessor::process_pr: $repo_owner/$repo_name:pr$pr_number/SHA:$pr_sha";
 
         # Start by posting pending status to GitHub
         my $status_response = $api->post_status($pr_sha,
@@ -53,10 +58,13 @@
 
         if(!$status_response->is_success) {
             # TODO surface error
-            log_error "PRProcessor::process_pr: could not post PENDING status";
-            log_error "                         " . $status_response->status_line();
+            log_error "Could not post PENDING status";
+            log_error $status_response->status_line();
+            log_error $status_response->decoded_content();
             return 0;
         }
+
+        log_verbose "Posted pending status";
 
         # Process comments, and run rules
 
