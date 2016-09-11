@@ -67,14 +67,12 @@
             # If blocking expiry is enabled...
             if($repo_config->blocking_timeout() > -1) {
                 # ... then remove blocks older than blocking_timeout hours ago
-                my $timeout = $repo_config->blocking_timeout() * 3600000; # hours to millis
+                my $timeout = $repo_config->blocking_timeout() * 3600; # hours to seconds 
                 
                 my $time_now = DateTime->now()->epoch();
                 foreach my $user (keys %users_blocking) {
                     my $time_comment = DateTime::Format::ISO8601->parse_datetime($users_blocking{$user})->epoch();
-                    log_debug "Time of block is $time_comment, time now is $time_now";
-                    log_debug "Time difference is ", ($time_now - $time_comment);
-                    log_debug "Expire time is $timeout";
+                    # time_now - time_comment yields a difference in seconds
                     if(($time_now - $time_comment) > $timeout) {
                         log_debug "Removing timed-out comment";
                         delete($users_blocking{$user});
