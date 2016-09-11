@@ -10,6 +10,8 @@
 
     use CodeKaiser::Logger qw(log_debug log_error log_verbose log_line);
 
+    use JSON qw( decode_json encode_json );
+
     use Exporter;
     use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
@@ -18,8 +20,10 @@
     @EXPORT      = ();
     @EXPORT_OK   = qw(process_pr);
 
-    my $FAILURE_USER_BLOCKING = "PR is blocked by %s";
-    my $FAILURE_NEED_MORE_APPROVALS = "PR only has %d of %d needed approvals";
+    my $FAILURE_USER_BLOCKING       = "PR is blocked by %s";
+    my $FAILURE_NEED_MORE_APPROVALS = "PR has %d of %d needed approvals";
+    my $SUCCESS_MESSAGE             = "PR can be merged";
+    my $ERROR_MESSAGE               = "Code Kaiser is having issues processing your PR";
 
     ## Given a repo's config file, and comments as a JSON string,
     ## determines if this repo is compliant with the rules set
@@ -57,7 +61,7 @@
         }
 
         # Check if there are users with valid blocks remaining 
-        if(scalar(%users_blocking)) {
+        if(scalar(keys %users_blocking)) {
             # If blocking expiry is enabled...
             if($repo_config->blocking_timeout() > -1) {
                 # ... then remove blocks older than blocking_timeout hours ago
@@ -66,7 +70,8 @@
                 }
             }
 
-            if(scalar(%users_blocking)) {
+            log_debug scalar(keys %users_blocking), " users are blocking merge";
+            if(scalar(keys %users_blocking)) {
                 # If there are still users blocking, then don't allow PR merge
                 my $user_list;
                 foreach $user (keys %users_blocking) {
@@ -81,9 +86,10 @@
         }
 
         # Check if there are enough approvals to continue 
-        if(scalar(%users_approving) < $repo_config->reviewers_needed()) {
+        log_debug scalar(keys %users_approving), " users are approving merge";
+        if(scalar(keys %users_approving) < $repo_config->reviewers_needed()) {
             return sprintf($FAILURE_NEED_MORE_APPROVALS,
-                           scalar(%users_approving),
+                           scalar(keys %users_approving),
                            $repo_config->reviewers_needed());
         }
 
@@ -97,14 +103,12 @@
     # Arguments: repo_owner, repo_name, pr_number, pr_config, output_directory
     # Return: boolean for success 
     sub process_pr($$$$) {
-        my ($self, $repo_owner, $repo_name, $pr_number, $pr_sha) = @_;
+        my ($self, $repo_owner, $repo_name, $pr_number) = @_;
 
-        if(!$repo_owner || !$repo_name || !$pr_number || !$pr_sha) {
-            log_error "An argument was null: $repo_owner, $repo_name, $pr_number, $pr_sha";
+        if(!$repo_owner || !$repo_name || !$pr_number) {
+            log_error "An argument was null: $repo_owner, $repo_name, $pr_number";
             return 0;
         }
-
-        log_debug "Proccessing PR: number $pr_number, on repo $repo_owner/$repo_name for commit with SHA $pr_sha";
 
         my $repo_config = CodeKaiser::DataManager->get_repo_config($repo_owner, $repo_name);
         my $output_path = CodeKaiser::DataManager->get_pr_output_path($repo_owner, $repo_name);
@@ -122,6 +126,22 @@
         my $api = CodeKaiser::GitHubApi->new(token      => $repo_config->github_token(),
                                              repo_owner => $repo_owner,
                                              repo_name  => $repo_name); 
+
+
+        log_debug "Getting PR for $repo_owner/$repo_name, pull $pr_number";
+        my $pr_response = $api->get_pull($pr_number);
+        if(!$pr_response->is_success) {
+            # TODO surface error through some other means
+            log_error "Could get PR details for $repo_owner/$repo_name, pull $pr_number";
+            log_error $pr_response->status_line();
+            log_error $pr_response->decoded_content();
+            return 0;
+        }
+
+        my $pr_details = decode_json($pr_response->decoded_content());
+        my $pr_sha = $pr_details->{'head'}{'sha'};
+
+        log_debug "Proccessing PR: number $pr_number, on repo $repo_owner/$repo_name for commit with SHA $pr_sha";
 
         # Start by posting pending status to GitHub
         my $status_response = $api->post_status($pr_sha,
@@ -154,28 +174,31 @@
 
         # Post success or failure, with message,
         # as well as store a corresponding pr_status file
-        my $compliance = PRProcessor::process_comments($repo_config, $comments_response->decoded_content());
+        my $compliance = $self->process_comments($repo_config, $comments_response->decoded_content());
 
         # Post status based on compliance:
-        if($compliance == 1) {
+        if($compliance eq 1) {
             # PR can be merged
+            log_debug "PR merge posting SUCCESS";
             $status_response = $api->post_status($pr_sha,
                                                  $CodeKaiser::GitHubApi::STATUS_SUCCESS, 
-                                                 "");
-        } elsif($compliance == -1) {
+                                                 $SUCCESS_MESSAGE);
+        } elsif($compliance eq -1) {
             # An error occurred in process_comments
+            log_debug "PR merge posting ERROR";
             $status_response = $api->post_status($pr_sha,
                                                  $CodeKaiser::GitHubApi::STATUS_ERROR, 
-                                                 "Code Kaiser had trouble processing comments");
+                                                 $ERROR_MESSAGE);
         } else {
             # Non-compliant failure, where $compliance is reason why (e.g. user blocked)
+            log_debug "PR merge posting FAILURE: $compliance";
             $status_response = $api->post_status($pr_sha,
-                                                 $CodeKaiser::GitHubApi::STATUS_ERROR, 
+                                                 $CodeKaiser::GitHubApi::STATUS_FAILURE, 
                                                  $compliance);
         }
 
         # 1 if success, 0 for any other reason
-        return $compliance == 1;
+        return $compliance eq 1;
     }
 
     1;

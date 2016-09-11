@@ -87,17 +87,18 @@
     ## update to GitHub once completed
     # Arguments: repo_owner, repo_name, pr_number
     sub dispatch_pr_check_process($$$$) {
-        my ($self, $repo_owner, $repo_name, $pr_number, $pr_sha) = @_;
+        my ($self, $repo_owner, $repo_name, $pr_number) = @_;
 
-        if(!$repo_owner || !$repo_name || !$pr_number || !$pr_sha) {
+        if(!$repo_owner || !$repo_name || !$pr_number) {
             log_error "An argument was null";
+            return 0;
         }
 
         my $proc = Async->new(sub {
-                                    CodeKaiser::PRProcessor->process_pr($repo_owner, $repo_name, $pr_number, $pr_sha);
+                                    CodeKaiser::PRProcessor->process_pr($repo_owner, $repo_name, $pr_number);
                                   }) or die "Can't Async execute";
 
-        $self->push_process($proc, "pr_check_process: $repo_owner/$repo_name pr-$pr_number commit-$pr_sha)");
+        $self->push_process($proc, "pr_check_process: $repo_owner/$repo_name pr-$pr_number)");
 
         log_processes
     }

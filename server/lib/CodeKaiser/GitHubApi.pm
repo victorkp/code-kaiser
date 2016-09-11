@@ -165,6 +165,7 @@
     }
 
     ## Get PR metadata
+    # Argument: pr_number
     # Return: HTTP::Response
     sub get_pull {
         my ($self, $pr_number) = @_;
