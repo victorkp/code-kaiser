@@ -9,6 +9,7 @@
     use warnings;
 
     use CodeKaiser::Logger qw(log_debug log_error log_verbose log_line);
+    use CodeKaiser::PRStatus;
 
     use JSON qw( decode_json encode_json );
     use DateTime;
@@ -30,10 +31,11 @@
     ## Given a repo's config file, and comments as a JSON string,
     ## determines if this repo is compliant with the rules set
     ## in the config
-    # Arguments: repo_config, comments_json
+    # Arguments: repo_config, comments_json, pr_status
     # Return: 1 if compliant, a string message if non-compliant, -1 if error
-    sub process_comments($$) {
-        my ($self, $repo_config, $comments_json) = @_;
+    #         pr_status->recheck_time is set as appropriate
+    sub process_comments {
+        my ($self, $repo_config, $comments_json, $pr_status) = @_;
 
         # Iterate through comments, keeping track of 
         # comments with !good, and !block, by user->time
@@ -50,6 +52,7 @@
 
             # Must have valid comment body and user login
             if(!$body || !$user) {
+                $pr_status->recheck_time($CodeKaiser::PRStatus::RECHECK_ERROR_TIME);
                 return -1;
             }
 
@@ -64,6 +67,10 @@
 
         # Check if there are users with valid blocks remaining 
         if(scalar(keys %users_blocking)) {
+            # Keep track of the shortest comment to time-out,
+            # so that we can re-run processing at that time
+            my $recheck_time = 0;
+
             # If blocking expiry is enabled...
             if($repo_config->blocking_timeout() > -1) {
                 # ... then remove blocks older than blocking_timeout hours ago
@@ -71,14 +78,26 @@
                 
                 my $time_now = DateTime->now()->epoch();
                 foreach my $user (keys %users_blocking) {
-                    my $time_comment = DateTime::Format::ISO8601->parse_datetime($users_blocking{$user})->epoch();
+                    my $time_comment = DateTime::Format::ISO8601->parse_datetime($users_blocking{$user})
+                                                                ->epoch();
+
                     # time_now - time_comment yields a difference in seconds
                     if(($time_now - $time_comment) > $timeout) {
                         log_debug "Removing timed-out comment";
                         delete($users_blocking{$user});
+                    } else {
+                        # This block will expire at expiration_time, so better
+                        # reprocess all comments when the block expires
+                        my $expiration_time = $time_comment + $timeout; 
+                        if($recheck_time == 0 || $expiration_time < $recheck_time) {
+                            $recheck_time = $expiration_time
+                        }
                     }
                 }
             }
+
+            # A comment expires at $recheck_time, or 0 indicates no rechecks needed
+            $pr_status->recheck_time($recheck_time);
 
             log_debug scalar(keys %users_blocking), " users are blocking merge";
             if(scalar(keys %users_blocking)) {
@@ -103,6 +122,8 @@
                            $repo_config->reviewers_needed());
         }
 
+        # PR is allowed to merge, no need to recheck
+        $pr_status->recheck_time(0);
         return 1;
     }
 
@@ -110,9 +131,9 @@
     ## determine if the PR should be accepted. Statuses
     ## are posted to GitHub, and a pr_status file is
     ## saved in output_directory/pr_number
-    # Arguments: repo_owner, repo_name, pr_number, pr_config, output_directory
-    # Return: boolean for success 
-    sub process_pr($$$$) {
+    # Arguments: repo_owner, repo_name, pr_number
+    # Return: boolean if merge is allowed
+    sub process_pr {
         my ($self, $repo_owner, $repo_name, $pr_number) = @_;
 
         if(!$repo_owner || !$repo_name || !$pr_number) {
@@ -121,15 +142,16 @@
         }
 
         my $repo_config = CodeKaiser::DataManager->get_repo_config($repo_owner, $repo_name);
-        my $output_path = CodeKaiser::DataManager->get_pr_output_path($repo_owner, $repo_name);
 
         if(!$repo_config || !$repo_config->github_token()) {
             log_error "Bad repo config or token";
             return 0;
         }
 
-        if(!$output_path) {
-            log_error "No output path specified";
+        my $output_path = CodeKaiser::DataManager->get_pr_status_path($repo_owner, $repo_name, $pr_number);
+        my $status = CodeKaiser::PRStatus->new(status_file => $output_path);
+        if(!$status) {
+            log_error "Could not open PRStatus";
             return 0;
         }
 
@@ -142,9 +164,13 @@
         my $pr_response = $api->get_pull($pr_number);
         if(!$pr_response->is_success) {
             # TODO surface error through some other means
-            log_error "Could get PR details for $repo_owner/$repo_name, pull $pr_number";
+            log_error "Could not get PR details for $repo_owner/$repo_name, pull request $pr_number";
             log_error $pr_response->status_line();
             log_error $pr_response->decoded_content();
+
+            $status->merge_status($CodeKaiser::PRStatus::MERGE_ERROR);
+            $status->status_message("Could not get PR details for $repo_owner/$repo_name, pull request $pr_number");
+            $status->recheck_time(0);
             return 0;
         }
 
@@ -163,6 +189,10 @@
             log_error "Could not post PENDING status";
             log_error $status_response->status_line();
             log_error $status_response->decoded_content();
+
+            $status->merge_status($CodeKaiser::PRStatus::MERGE_ERROR);
+            $status->status_message("Could not post PENDING status" .  $status_response->status_line());
+            $status->recheck_time(0);
             return 0;
         }
 
@@ -176,6 +206,11 @@
             log_error "Could not get PR comments";
             log_error $status_response->status_line();
             log_error $status_response->decoded_content();
+
+            $status->merge_status($CodeKaiser::PRStatus::MERGE_ERROR);
+            $status->status_message("Could get PR comments: " . $comments_response->status_line());
+            $status->recheck_time(0);
+            return 0;
         }
         
         # Process comments, and run rules
@@ -184,7 +219,9 @@
 
         # Post success or failure, with message,
         # as well as store a corresponding pr_status file
-        my $compliance = $self->process_comments($repo_config, $comments_response->decoded_content());
+        my $compliance = $self->process_comments($repo_config,
+                                                 $comments_response->decoded_content(),
+                                                 $status);
 
         # Post status based on compliance:
         if($compliance eq 1) {
@@ -193,21 +230,30 @@
             $status_response = $api->post_status($pr_sha,
                                                  $CodeKaiser::GitHubApi::STATUS_SUCCESS, 
                                                  $SUCCESS_MESSAGE);
+
+            $status->merge_status($CodeKaiser::PRStatus::MERGE_OK);
+            $status->status_message("");
         } elsif($compliance eq -1) {
             # An error occurred in process_comments
             log_debug "PR merge posting ERROR";
             $status_response = $api->post_status($pr_sha,
                                                  $CodeKaiser::GitHubApi::STATUS_ERROR, 
                                                  $ERROR_MESSAGE);
+
+            $status->merge_status($CodeKaiser::PRStatus::MERGE_ERROR);
+            $status->status_message("");
         } else {
             # Non-compliant failure, where $compliance is reason why (e.g. user blocked)
             log_debug "PR merge posting FAILURE: $compliance";
             $status_response = $api->post_status($pr_sha,
                                                  $CodeKaiser::GitHubApi::STATUS_FAILURE, 
                                                  $compliance);
+
+            $status->merge_status($CodeKaiser::PRStatus::MERGE_BLOCKED);
+            $status->status_message($compliance);
         }
 
-        # 1 if success, 0 for any other reason
+        # Return boolean if merge allowed
         return $compliance eq 1;
     }
 

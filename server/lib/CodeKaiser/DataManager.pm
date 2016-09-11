@@ -13,7 +13,8 @@
     @ISA         = qw(Exporter);
     @EXPORT      = ();
     @EXPORT_OK   = qw(get_diff_path get_repo_config get_diff_save_file_path
-                      get_processing_output_path get_pr_output_path);
+                      get_processing_output_path get_pr_status_directory
+                      get_pr_status_path);
 
     my $DATA_DIR = './data/';
 
@@ -66,12 +67,12 @@
 
         my $out_dir = "$DATA_DIR/$repo_owner/$repo_name/output";
         system "mkdir -p $out_dir";
-        return $out_dir;;
+        return $out_dir;
     }
 
     ## Get directory path for PR processor output files
     # Arguments: repo_owner, repo_name
-    sub get_pr_output_path {
+    sub get_pr_status_directory {
         if(scalar(@_) == 3) {
             shift @_;
         }
@@ -79,7 +80,21 @@
 
         my $out_dir = "$DATA_DIR/$repo_owner/$repo_name/pr";
         system "mkdir -p $out_dir";
-        return $out_dir;;
+        return $out_dir;
+    }
+
+    ## Get path for a PR status output file
+    # Arguments: repo_owner, repo_name, pr_number
+    sub get_pr_status_path {
+        if(scalar(@_) == 4) {
+            shift @_;
+        }
+        my ($repo_owner, $repo_name, $pr_number) = @_;
+
+        my $dir = get_pr_status_directory($repo_owner, $repo_name);
+
+        my $out_path = "$dir/$pr_number.status";
+        return $out_path;
     }
 
     ## Get a RepoConfig instance for the given repository 
