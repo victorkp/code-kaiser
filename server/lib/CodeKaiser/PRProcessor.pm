@@ -213,17 +213,13 @@
             return 0;
         }
         
-        # Process comments, and run rules
-        log_line;
-        log_debug "Processing comments: " , $comments_response->decoded_content();
-
-        # Post success or failure, with message,
-        # as well as store a corresponding pr_status file
+        # Process comments and run rules
         my $compliance = $self->process_comments($repo_config,
                                                  $comments_response->decoded_content(),
                                                  $status);
 
-        # Post status based on compliance:
+        # Post success or failure, with message,
+        # as well as store a corresponding pr_status file
         if($compliance eq 1) {
             # PR can be merged
             log_debug "PR merge posting SUCCESS";
