@@ -30,6 +30,9 @@ use JSON qw( decode_json encode_json );
     my $PR_ASSIGNED    = 'assigned';
     my $PR_UNASSIGNED  = 'unassigned';
 
+    # New issue comments have action 'created'
+    my $PR_CREATED     = 'created';
+
     # Dispatch various URLs to respective handler subroutines 
     my %dispatch = ('/event_handler' => \&event_handler,
                     '/log_processes' => \&log_processes);
@@ -123,6 +126,12 @@ use JSON qw( decode_json encode_json );
 
         my $action = $$payload{'action'};
         log_debug "Action: $action";
+
+        # Actions other than 'opened' or 'closed' may put PR Number
+        # in a different hierarchy
+        if(!$pr_number) {
+            $pr_number = $$payload{'issue'}{'number'};
+        }
 
         if(!$owner || !$repo_name || !$pr_number) {
             log_error "Bad owner, repo name, or pr number from $$payload{'name'}";

@@ -89,6 +89,10 @@
     sub dispatch_pr_check_process($$$$) {
         my ($self, $repo_owner, $repo_name, $pr_number, $pr_sha) = @_;
 
+        if(!$repo_owner || !$repo_name || !$pr_number || !$pr_sha) {
+            log_error "An argument was null";
+        }
+
         my $proc = Async->new(sub {
                                     CodeKaiser::PRProcessor->process_pr($repo_owner, $repo_name, $pr_number, $pr_sha);
                                   }) or die "Can't Async execute";
