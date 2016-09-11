@@ -12,4 +12,4 @@ test-opened:
 
 install-dependencies:
 	sudo cpan install Async Text::Diff::Parser HTTP::Server::Simple::CGI Data::Dumper \
-					  JSON
+					  JSON DateTime DateTime::Format::ISO8601

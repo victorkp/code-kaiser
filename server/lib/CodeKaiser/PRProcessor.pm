@@ -11,6 +11,8 @@
     use CodeKaiser::Logger qw(log_debug log_error log_verbose log_line);
 
     use JSON qw( decode_json encode_json );
+    use DateTime;
+    use DateTime::Format::ISO8601;
 
     use Exporter;
     use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
@@ -65,8 +67,18 @@
             # If blocking expiry is enabled...
             if($repo_config->blocking_timeout() > -1) {
                 # ... then remove blocks older than blocking_timeout hours ago
-                foreach my $block (%users_blocking) {
-                    # TODO
+                my $timeout = $repo_config->blocking_timeout() * 3600000; # hours to millis
+                
+                my $time_now = DateTime->now()->epoch();
+                foreach my $user (keys %users_blocking) {
+                    my $time_comment = DateTime::Format::ISO8601->parse_datetime($users_blocking{$user})->epoch();
+                    log_debug "Time of block is $time_comment, time now is $time_now";
+                    log_debug "Time difference is ", ($time_now - $time_comment);
+                    log_debug "Expire time is $timeout";
+                    if(($time_now - $time_comment) > $timeout) {
+                        log_debug "Removing timed-out comment";
+                        delete($users_blocking{$user});
+                    }
                 }
             }
 
