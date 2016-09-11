@@ -68,14 +68,43 @@
     ## Start processing possibly new diffs
     # Arugments: repo_owner, repo_name
     sub dispatch_diff_process($$) {
-        my ($self, $repo_owner, $repo_name) = @_;
+        my ($self, $repo_owner, $repo_name, $pr_number) = @_;
 
-        my $proc = Async->new(sub { my $files = CodeKaiser::DiffProcessor->process_diffs(
+        my $proc = Async->new(sub {
+                # Get and store PR's diff
+                my $repo_config = CodeKaiser::DataManager->get_repo_config($repo_owner, $repo_name);
+                my $token = $repo_config->github_token();
+
+                if(! $repo_config || ! $repo_config->github_token()) {
+                    log_error "Bad configuration, or no access token for $repo_owner/$repo_name";
+                    return 0;
+                }
+
+                my $api = CodeKaiser::GitHubApi->new(token      => $repo_config->github_token,
+                                                     repo_owner => $repo_owner,
+                                                     repo_name  => $repo_name); 
+
+                # Get diff from PR
+                my $diff_response = $api->get_diff($pr_number);
+                my $diff_body;
+                if($diff_response->is_success) {
+                    $diff_body = $diff_response->decoded_content;
+                } else {
+                    return 0;
+                }
+
+                open(my $OUT, '>', CodeKaiser::DataManager->get_diff_path($repo_owner, $repo_name, $pr_number))
+                        or die "Couldn't open output for diff file: $!";
+                print $OUT $diff_body;
+                close $OUT;
+               
+                my $files = CodeKaiser::DiffProcessor->process_diffs(
                                                     CodeKaiser::DataManager->get_diff_directory($repo_owner, $repo_name),
                                                     CodeKaiser::DataManager->get_diff_save_file_path($repo_owner, $repo_name));
-                                    CodeKaiser::ChartGenerator->chart_hotspot_from_struct(
-                                                $files, CodeKaiser::DataManager->get_processing_output_path($repo_owner, $repo_name));
-                                  }) or die "Can't Async execute";
+
+                CodeKaiser::ChartGenerator->chart_hotspot_from_struct(
+                                        $files, CodeKaiser::DataManager->get_processing_output_path($repo_owner, $repo_name));
+            }) or die "Can't Async execute";
 
         $self->push_process($proc, "diff_process: $repo_owner/$repo_name");
 
