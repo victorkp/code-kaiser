@@ -27,6 +27,17 @@
     # Status file path key
     my  $STATUS_FILE              = 'status_file';
 
+    # Pull Request's name on GitHub
+    my  $PR_NAME           = 'pr_name';
+
+    # PR's status, whether it is open, closed (not merged),
+    # or merged (and closed)
+    my  $PR_STATUS         = 'pr_status';
+    our $PR_UNKNOWN        = 'unknown';
+    our $PR_OPEN           = 'open';
+    our $PR_CLOSED         = 'closed';
+    our $PR_MERGED         = 'merged';
+
     # If the merge is allowed based on rules checked
     # by PRProcessor
     my  $MERGE_STATUS      = 'merge_status';
@@ -68,6 +79,35 @@
         }
     }
 
+    ## Get or set the PR's name 
+    # Argument: pr_name (optional)
+    # Return:   pr_name
+    sub pr_name {
+        my ($self, $value) = @_;
+        if (@_ == 2) {
+            $self->{$PR_NAME} = $value;
+            write_status($self);
+        }
+        return $self->{$PR_NAME};
+    }
+
+    ## Get or set the PR's status (open, closed, merged)
+    # Argument: one of $PRStatus::PR_OPEN, $PRStatus::PR_CLOSED, $PRStatus::PR_MERGED
+    # Return:   one of $PRStatus::PR_OPEN, $PRStatus::PR_CLOSED, $PRStatus::PR_MERGED, or 
+    #           $PRStatus::PR_UNKNOWN
+    sub pr_status {
+        my ($self, $value) = @_;
+        if (scalar(@_) == 2) {
+            if($value eq $PR_OPEN  || $value eq $PR_CLOSED || $value eq $PR_MERGED) {           
+                $self->{$PR_STATUS} = $value;
+                write_status($self);
+            } else {
+                die "Bad argument, expecting one of $PR_OPEN, $PR_CLOSED, or $PR_MERGED";
+            }
+        }
+        return $self->{$MERGE_STATUS};
+    }
+
     ## Get or set if merge is allowed
     # Argument: one of $PRStatus::MERGE_OK, $PRStatus::MERGE_BLOCKED, $PRStatus::MERGE_ERROR
     # Return:   one of $PRStatus::MERGE_OK, $PRStatus::MERGE_BLOCKED, $PRStatus::MERGE_ERROR, or 
@@ -84,6 +124,7 @@
         }
         return $self->{$MERGE_STATUS};
     }
+
 
     ## Get or set the status message associated with this status
     # Argument: status_message (optional)
@@ -126,6 +167,8 @@
         open(my $STATUS, ">$status->{$STATUS_FILE}")
                 or die "Could not write status: $status->{$STATUS_FILE}";
 
+        print $STATUS "$PR_NAME          : \'", $status->{$PR_NAME},  "\'\n";
+        print $STATUS "$PR_STATUS        : \'", $status->{$PR_STATUS},  "\'\n";
         print $STATUS "$MERGE_STATUS     : \'", $status->{$MERGE_STATUS},  "\'\n";
         print $STATUS "$STATUS_MESSAGE   : \'", $status->{$STATUS_MESSAGE}, "\'\n";
         print $STATUS "$RECHECK_TIME     : ",   $status->{$RECHECK_TIME},   "\n";
@@ -139,7 +182,9 @@
         my ($status_file) = @_;
 
         # Start with default values
-        my %config_hash = ( $STATUS_FILE      => $status_file,
+        my %config_hash = ( $PR_NAME          => '',
+                            $PR_STATUS        => $PR_UNKNOWN,
+                            $STATUS_FILE      => $status_file,
                             $MERGE_STATUS     => $MERGE_UNKNOWN,
                             $STATUS_MESSAGE   => '',
                             $RECHECK_TIME     => 0);
@@ -168,7 +213,11 @@
     sub parse_config_line($) {
         my ($self, $line) = @_;
         
-        if($line =~ m/^$MERGE_STATUS\s*:\s*'(.+)'\s*/) {
+        if ($line =~ m/^$PR_NAME\s*:\s*'(.*)'\s*/) {
+            $self->{$PR_NAME} = $1;
+        } elsif ($line =~ m/^$PR_STATUS\s*:\s*'(.*)'\s*/) {
+            $self->{$PR_STATUS} = $1;
+        } elsif($line =~ m/^$MERGE_STATUS\s*:\s*'(.+)'\s*/) {
             $self->{$MERGE_STATUS} = $1;
         } elsif ($line =~ m/^$STATUS_MESSAGE\s*:\s*'(.*)'\s*/) {
             $self->{$STATUS_MESSAGE} = $1;
