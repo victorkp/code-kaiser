@@ -174,8 +174,29 @@
             return 0;
         }
 
+        # Get all kinds of basic metadata about the PR
         my $pr_details = decode_json($pr_response->decoded_content());
-        my $pr_sha = $pr_details->{'head'}{'sha'};
+        my $pr_sha      = $pr_details->{'head'}{'sha'};
+        my $pr_name     = $pr_details->{'title'};
+        my $pr_creator  = $pr_details->{'user'}{'login'};
+        my $branch_base = $pr_details->{'base'}{'ref'};
+        my $branch_head = $pr_details->{'head'}{'ref'};
+        my $pr_closed   = $pr_details->{'state'}  eq 'closed';
+        my $pr_merged   = $pr_details->{'merged'} eq 'true';  # API returns true or false 
+
+        # Set basic PR name / status metadata
+        $status->pr_name($pr_name);
+        $status->pr_sha($pr_sha);
+        $status->pr_creator($pr_creator);
+        $status->branch_base($branch_base);
+        $status->branch_head($branch_head);
+        if($pr_merged) {
+            $status->pr_status($CodeKaiser::PRStatus::PR_MERGED);
+        } elsif ($pr_closed) {
+            $status->pr_status($CodeKaiser::PRStatus::PR_CLOSED);
+        } else {
+            $status->pr_status($CodeKaiser::PRStatus::PR_OPEN);
+        }
 
         log_debug "Proccessing PR: number $pr_number, on repo $repo_owner/$repo_name for commit with SHA $pr_sha";
 

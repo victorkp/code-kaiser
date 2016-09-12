@@ -18,6 +18,11 @@
     @ISA         = qw(Exporter);
     @EXPORT      = ();
     @EXPORT_OK   = qw(new
+                      pr_name
+                      pr_creator
+                      pr_status
+                      branch_base
+                      branch_head
                       merge_status
                       status_message
                       recheck_time
@@ -29,6 +34,16 @@
 
     # Pull Request's name on GitHub
     my  $PR_NAME           = 'pr_name';
+
+    # Pull Request's latest commit SHA
+    my  $PR_SHA            = 'pr_sha';
+
+    # Which user started the PR
+    my  $PR_CREATOR        = 'pr_creator';
+
+    # To and From branches
+    my  $BRANCH_BASE       = 'branch_base';
+    my  $BRANCH_HEAD       = 'branch_head';
 
     # PR's status, whether it is open, closed (not merged),
     # or merged (and closed)
@@ -87,8 +102,65 @@
         if (@_ == 2) {
             $self->{$PR_NAME} = $value;
             write_status($self);
+            return $value;
         }
         return $self->{$PR_NAME};
+    }
+
+    ## Get or set the PR head branch's latest commit's SHA
+    # Argument: pr_ha (optional)
+    # Return:   pr_ha
+    sub pr_sha {
+        my ($self, $value) = @_;
+        if (@_ == 2) {
+            if($value =~ /^[0-9a-fA-F]+$/) {           
+                $self->{$PR_SHA} = $value;
+                write_status($self);
+                return $value;
+            } else {
+                die 'Bad argument, expecting hex string for commit SHA';
+            }
+        }
+        return $self->{$PR_SHA};
+    }
+
+    ## Get or set the PR's creator 
+    # Argument: pr_creator (optional)
+    # Return:   pr_creator
+    sub pr_creator {
+        my ($self, $value) = @_;
+        if (@_ == 2) {
+            $self->{$PR_CREATOR} = $value;
+            write_status($self);
+            return $value;
+        }
+        return $self->{$PR_CREATOR};
+    }
+
+    ## Get or set the PR's Base (destination) branch
+    # Argument: branch_base (optional)
+    # Return:   branch_base
+    sub branch_base {
+        my ($self, $value) = @_;
+        if (@_ == 2) {
+            $self->{$BRANCH_BASE} = $value;
+            write_status($self);
+            return $value;
+        }
+        return $self->{$BRANCH_BASE};
+    }
+
+    ## Get or set the PR's Head (source) branch
+    # Argument: branch_head (optional)
+    # Return:   branch_head
+    sub branch_head {
+        my ($self, $value) = @_;
+        if (@_ == 2) {
+            $self->{$BRANCH_HEAD} = $value;
+            write_status($self);
+            return $value;
+        }
+        return $self->{$BRANCH_HEAD};
     }
 
     ## Get or set the PR's status (open, closed, merged)
@@ -101,6 +173,7 @@
             if($value eq $PR_OPEN  || $value eq $PR_CLOSED || $value eq $PR_MERGED) {           
                 $self->{$PR_STATUS} = $value;
                 write_status($self);
+                return $value;
             } else {
                 die "Bad argument, expecting one of $PR_OPEN, $PR_CLOSED, or $PR_MERGED";
             }
@@ -118,6 +191,7 @@
             if($value eq $MERGE_BLOCKED || $value eq $MERGE_OK || $value eq $MERGE_ERROR) {           
                 $self->{$MERGE_STATUS} = $value;
                 write_status($self);
+                return $value;
             } else {
                 die "Bad argument, expecting one of $MERGE_BLOCKED, $MERGE_OK, or $MERGE_ERROR";
             }
@@ -134,6 +208,7 @@
         if (@_ == 2) {
             $self->{$STATUS_MESSAGE} = $value;
             write_status($self);
+            return $value;
         }
         return $self->{$STATUS_MESSAGE};
     }
@@ -147,6 +222,7 @@
             if(Scalar::Util::looks_like_number($value)) {
                 $self->{$RECHECK_TIME} = $value;
                 write_status($self);
+                return $value;
             } else {
                 die 'Bad argument, expecting numeric';
             }
@@ -168,6 +244,10 @@
                 or die "Could not write status: $status->{$STATUS_FILE}";
 
         print $STATUS "$PR_NAME          : \'", $status->{$PR_NAME},  "\'\n";
+        print $STATUS "$PR_CREATOR       : \'", $status->{$PR_CREATOR},  "\'\n";
+        print $STATUS "$PR_SHA           : \'", $status->{$PR_SHA},  "\'\n";
+        print $STATUS "$BRANCH_BASE      : \'", $status->{$BRANCH_BASE},  "\'\n";
+        print $STATUS "$BRANCH_HEAD      : \'", $status->{$BRANCH_HEAD},  "\'\n";
         print $STATUS "$PR_STATUS        : \'", $status->{$PR_STATUS},  "\'\n";
         print $STATUS "$MERGE_STATUS     : \'", $status->{$MERGE_STATUS},  "\'\n";
         print $STATUS "$STATUS_MESSAGE   : \'", $status->{$STATUS_MESSAGE}, "\'\n";
@@ -183,6 +263,10 @@
 
         # Start with default values
         my %config_hash = ( $PR_NAME          => '',
+                            $PR_CREATOR       => '',
+                            $PR_SHA           => '',
+                            $BRANCH_BASE      => '',
+                            $BRANCH_HEAD      => '',
                             $PR_STATUS        => $PR_UNKNOWN,
                             $STATUS_FILE      => $status_file,
                             $MERGE_STATUS     => $MERGE_UNKNOWN,
@@ -215,6 +299,14 @@
         
         if ($line =~ m/^$PR_NAME\s*:\s*'(.*)'\s*/) {
             $self->{$PR_NAME} = $1;
+        } elsif ($line =~ m/^$PR_CREATOR\s*:\s*'(.*)'\s*/) {
+            $self->{$PR_CREATOR} = $1;
+        } elsif ($line =~ m/^$PR_SHA\s*:\s*'(.*)'\s*/) {
+            $self->{$PR_SHA} = $1;
+        } elsif ($line =~ m/^$BRANCH_BASE\s*:\s*'(.*)'\s*/) {
+            $self->{$BRANCH_BASE} = $1;
+        } elsif ($line =~ m/^$BRANCH_HEAD\s*:\s*'(.*)'\s*/) {
+            $self->{$BRANCH_HEAD} = $1;
         } elsif ($line =~ m/^$PR_STATUS\s*:\s*'(.*)'\s*/) {
             $self->{$PR_STATUS} = $1;
         } elsif($line =~ m/^$MERGE_STATUS\s*:\s*'(.+)'\s*/) {
