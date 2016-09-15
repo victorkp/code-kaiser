@@ -20,6 +20,7 @@
     @EXPORT_OK   = qw(new
                       pr_name
                       pr_creator
+                      pr_merger
                       pr_status
                       branch_base
                       branch_head
@@ -40,6 +41,9 @@
 
     # Which user started the PR
     my  $PR_CREATOR        = 'pr_creator';
+
+    # Which user merged the PR (if any)
+    my  $PR_MERGER         = 'pr_merger';
 
     # To and From branches
     my  $BRANCH_BASE       = 'branch_base';
@@ -132,6 +136,18 @@
             return $value;
         }
         return $self->{$PR_CREATOR};
+    }
+
+    ## Get or set the PR's merger
+    # Argument: pr_merger (optional)
+    # Return:   pr_merger
+    sub pr_merger {
+        my ($self, $value) = @_;
+        if (@_ == 2) {
+            $self->{$PR_MERGER} = $value;
+            return $value;
+        }
+        return $self->{$PR_MERGER};
     }
 
     ## Get or set the PR's Base (destination) branch
@@ -236,6 +252,7 @@
 
         print $STATUS "$PR_NAME          : \'", $status->{$PR_NAME},  "\'\n";
         print $STATUS "$PR_CREATOR       : \'", $status->{$PR_CREATOR},  "\'\n";
+        print $STATUS "$PR_MERGER        : \'", $status->{$PR_MERGER},  "\'\n";
         print $STATUS "$PR_SHA           : \'", $status->{$PR_SHA},  "\'\n";
         print $STATUS "$BRANCH_BASE      : \'", $status->{$BRANCH_BASE},  "\'\n";
         print $STATUS "$BRANCH_HEAD      : \'", $status->{$BRANCH_HEAD},  "\'\n";
@@ -255,6 +272,7 @@
         # Start with default values
         my %config_hash = ( $PR_NAME          => '',
                             $PR_CREATOR       => '',
+                            $PR_MERGER        => '',
                             $PR_SHA           => '',
                             $BRANCH_BASE      => '',
                             $BRANCH_HEAD      => '',
@@ -292,6 +310,8 @@
             $self->{$PR_NAME} = $1;
         } elsif ($line =~ m/^$PR_CREATOR\s*:\s*'(.*)'\s*/) {
             $self->{$PR_CREATOR} = $1;
+        } elsif ($line =~ m/^$PR_MERGER\s*:\s*'(.*)'\s*/) {
+            $self->{$PR_MERGER} = $1;
         } elsif ($line =~ m/^$PR_SHA\s*:\s*'(.*)'\s*/) {
             $self->{$PR_SHA} = $1;
         } elsif ($line =~ m/^$BRANCH_BASE\s*:\s*'(.*)'\s*/) {

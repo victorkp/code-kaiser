@@ -182,8 +182,8 @@
         my $pr_creator  = $pr_details->{'user'}{'login'};
         my $branch_base = $pr_details->{'base'}{'ref'};
         my $branch_head = $pr_details->{'head'}{'ref'};
-        my $pr_closed   = $pr_details->{'state'}  eq 'closed';
-        my $pr_merged   = $pr_details->{'merged'} eq 'true';  # API returns true or false 
+        my $pr_closed   = $pr_details->{'state'} eq 'closed';
+        my $pr_merged   = $pr_details->{'merged'};
 
         # Set basic PR name / status metadata
         $status->pr_name($pr_name);
@@ -191,8 +191,9 @@
         $status->pr_creator($pr_creator);
         $status->branch_base($branch_base);
         $status->branch_head($branch_head);
-        if($pr_merged) {
+        if($pr_merged == 1 || $pr_merged eq 'true') {
             $status->pr_status($CodeKaiser::PRStatus::PR_MERGED);
+            $status->pr_merger($pr_details->{'merged_by'}{'login'});
         } elsif ($pr_closed) {
             $status->pr_status($CodeKaiser::PRStatus::PR_CLOSED);
         } else {
