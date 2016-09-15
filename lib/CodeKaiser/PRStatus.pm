@@ -101,7 +101,6 @@
         my ($self, $value) = @_;
         if (@_ == 2) {
             $self->{$PR_NAME} = $value;
-            write_status($self);
             return $value;
         }
         return $self->{$PR_NAME};
@@ -115,7 +114,6 @@
         if (@_ == 2) {
             if($value =~ /^[0-9a-fA-F]+$/) {           
                 $self->{$PR_SHA} = $value;
-                write_status($self);
                 return $value;
             } else {
                 die 'Bad argument, expecting hex string for commit SHA';
@@ -131,7 +129,6 @@
         my ($self, $value) = @_;
         if (@_ == 2) {
             $self->{$PR_CREATOR} = $value;
-            write_status($self);
             return $value;
         }
         return $self->{$PR_CREATOR};
@@ -144,7 +141,6 @@
         my ($self, $value) = @_;
         if (@_ == 2) {
             $self->{$BRANCH_BASE} = $value;
-            write_status($self);
             return $value;
         }
         return $self->{$BRANCH_BASE};
@@ -157,7 +153,6 @@
         my ($self, $value) = @_;
         if (@_ == 2) {
             $self->{$BRANCH_HEAD} = $value;
-            write_status($self);
             return $value;
         }
         return $self->{$BRANCH_HEAD};
@@ -172,7 +167,6 @@
         if (scalar(@_) == 2) {
             if($value eq $PR_OPEN  || $value eq $PR_CLOSED || $value eq $PR_MERGED) {           
                 $self->{$PR_STATUS} = $value;
-                write_status($self);
                 return $value;
             } else {
                 die "Bad argument, expecting one of $PR_OPEN, $PR_CLOSED, or $PR_MERGED";
@@ -190,7 +184,6 @@
         if (scalar(@_) == 2) {
             if($value eq $MERGE_BLOCKED || $value eq $MERGE_OK || $value eq $MERGE_ERROR) {           
                 $self->{$MERGE_STATUS} = $value;
-                write_status($self);
                 return $value;
             } else {
                 die "Bad argument, expecting one of $MERGE_BLOCKED, $MERGE_OK, or $MERGE_ERROR";
@@ -207,7 +200,6 @@
         my ($self, $value) = @_;
         if (@_ == 2) {
             $self->{$STATUS_MESSAGE} = $value;
-            write_status($self);
             return $value;
         }
         return $self->{$STATUS_MESSAGE};
@@ -221,7 +213,6 @@
         if (@_ == 2) {
             if(Scalar::Util::looks_like_number($value)) {
                 $self->{$RECHECK_TIME} = $value;
-                write_status($self);
                 return $value;
             } else {
                 die 'Bad argument, expecting numeric';

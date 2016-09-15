@@ -171,6 +171,7 @@
             $status->merge_status($CodeKaiser::PRStatus::MERGE_ERROR);
             $status->status_message("Could not get PR details for $repo_owner/$repo_name, pull request $pr_number");
             $status->recheck_time(0);
+            $status->write_status();
             return 0;
         }
 
@@ -197,6 +198,7 @@
         } else {
             $status->pr_status($CodeKaiser::PRStatus::PR_OPEN);
         }
+        $status->write_status();
 
         log_debug "Proccessing PR: number $pr_number, on repo $repo_owner/$repo_name for commit with SHA $pr_sha";
 
@@ -214,6 +216,7 @@
             $status->merge_status($CodeKaiser::PRStatus::MERGE_ERROR);
             $status->status_message("Could not post PENDING status" .  $status_response->status_line());
             $status->recheck_time(0);
+            $status->write_status();
             return 0;
         }
 
@@ -231,6 +234,7 @@
             $status->merge_status($CodeKaiser::PRStatus::MERGE_ERROR);
             $status->status_message("Could get PR comments: " . $comments_response->status_line());
             $status->recheck_time(0);
+            $status->write_status();
             return 0;
         }
         
@@ -269,6 +273,9 @@
             $status->merge_status($CodeKaiser::PRStatus::MERGE_BLOCKED);
             $status->status_message($compliance);
         }
+
+        # Persist updated status to file
+        $status->write_status();
 
         # Return boolean if merge allowed
         return $compliance eq 1;
