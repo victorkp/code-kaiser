@@ -26,7 +26,7 @@
     sub get_caller() {
         my @caller = caller(2);
         if(@caller) {
-            return sprintf("%-30s", $caller[3]);
+            return sprintf("%-45s", $caller[3]);
         }
 
         return '';

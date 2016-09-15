@@ -141,18 +141,16 @@ use JSON qw( decode_json encode_json );
         if($action eq $PR_CLOSED) {
             # If PR was closed and merged, then
             # get and store the diff, so that further
-            # processing can be done on the diff
+            # processing can be done on the diff (e.g. hotspot detection)
             if($$payload{'pull_request'}{'merged'}) {
-                log_debug "Payload was merged";
+                log_debug "Payload was merged, retrieving new diff";
                 CodeKaiser::Dispatcher->dispatch_diff_process($repo_owner, $repo_name, $pr_number);
-            } else {
-                log_debug "$repo_owner/$repo_name (PR $pr_number) was not merged, nothing to do";
             }
-        } else {
-            # Otherwise, determine if the PR should
-            # be allowed to be merged, and post status
-            CodeKaiser::Dispatcher->dispatch_pr_check_process($repo_owner, $repo_name, $pr_number);
         }
+
+        # Update the PR's status, and determine if PR is
+        # allowed to be merged or not, posting status accordingly
+        CodeKaiser::Dispatcher->dispatch_pr_check_process($repo_owner, $repo_name, $pr_number);
 
         # Success
         return 1;
