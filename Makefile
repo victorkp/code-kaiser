@@ -14,3 +14,4 @@ test-opened:
 install-dependencies:
 	sudo cpan install --force Async Text::Diff::Parser HTTP::Server::Simple::CGI Data::Dumper \
 							  JSON DateTime DateTime::Format::Builder DateTime::Format::ISO8601
+	sudo dnf install -y perl-DateTime*
