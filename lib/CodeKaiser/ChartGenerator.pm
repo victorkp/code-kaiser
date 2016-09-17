@@ -4,7 +4,8 @@
 
     use GD::Graph::Map;
     use GD::Graph::pie;
-    use Storable;
+    use JSON;
+    use Text::Diff::Parser;
     use strict;
     use warnings;
 
@@ -15,6 +16,8 @@
     @ISA         = qw(Exporter);
     @EXPORT      = ();
     @EXPORT_OK   = qw(chart_hotspot_from_file chart_hotspot_from_struct);
+
+    my $JSON = JSON->new->pretty;
 
     ## Make a chart in high and low resolution
     ## as well as HTML map for code hotspot files,
@@ -111,11 +114,21 @@
 
         my ($save_file, $output_dir) = @_;
 
-        # Retrieve the 'files' structure which contains hotspot scores
-        my $last_save_hash = retrieve($save_file);
-        my $files          = $$last_save_hash{files};
+        open (my $SAVE, "<$save_file") or die "Could not open diff processor's save file: $!";
+        my $file_text = read_file($SAVE);
+        close($SAVE);
 
-        chart_hotspot_from_struct($files, $output_dir);
+        my $last_save_hash = $JSON->decode($file_text);
+
+        # Bad save files are removed
+        if(!$last_save_hash) {
+            unlink($save_file);
+            return;
+        }
+
+        # Retrieve the 'files' structure which contains hotspot scores,
+        # and chart based on that
+        chart_hotspot_from_struct($$last_save_hash{files}, $output_dir);
     }
 
     1;

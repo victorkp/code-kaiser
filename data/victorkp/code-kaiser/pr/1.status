@@ -1,12 +1,12 @@
 {
+   "branch_head" : "feature/json-configs",
+   "pr_creator" : "victorkp",
+   "merge_status" : "allowed",
    "pr_merger" : "victorkp",
+   "pr_name" : "Feature/json configs",
+   "recheck_time" : 0,
    "pr_sha" : "9a1708233f32ee513e9c8c2eedb143bd6f5bdb57",
    "branch_base" : "develop",
-   "pr_name" : "Feature/json configs",
-   "merge_status" : "blocked",
-   "pr_status" : "merged",
-   "pr_creator" : "victorkp",
-   "branch_head" : "feature/json-configs",
-   "status_message" : "PR has 1 of 2 needed approvals",
-   "recheck_time" : 0
+   "status_message" : "",
+   "pr_status" : "merged"
 }
