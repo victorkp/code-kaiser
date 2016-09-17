@@ -6,8 +6,11 @@
      
     use File::Spec;
     use File::Basename;
+    use File::Slurp;
     use Scalar::Util;
     use Data::Dumper;
+    use JSON;
+    use Data::Structure::Util qw( unbless );
 
     use CodeKaiser::Logger qw(log_debug log_error log_verbose log_line);
 
@@ -28,7 +31,10 @@
                       status_message
                       recheck_time
                       write_status
+                      TO_JSON
                      );
+
+    my $JSON = JSON->new->allow_blessed->convert_blessed->pretty;
 
     # Status file path key
     my  $STATUS_FILE              = 'status_file';
@@ -247,29 +253,57 @@
         my $dirname = dirname($status->{$STATUS_FILE});
         system "mkdir -p $dirname" if $dirname;
 
+        # Open, write, and close file
         open(my $STATUS, ">$status->{$STATUS_FILE}")
                 or die "Could not write status: $status->{$STATUS_FILE}";
-
-        print $STATUS "$PR_NAME          : \'", $status->{$PR_NAME},  "\'\n";
-        print $STATUS "$PR_CREATOR       : \'", $status->{$PR_CREATOR},  "\'\n";
-        print $STATUS "$PR_MERGER        : \'", $status->{$PR_MERGER},  "\'\n";
-        print $STATUS "$PR_SHA           : \'", $status->{$PR_SHA},  "\'\n";
-        print $STATUS "$BRANCH_BASE      : \'", $status->{$BRANCH_BASE},  "\'\n";
-        print $STATUS "$BRANCH_HEAD      : \'", $status->{$BRANCH_HEAD},  "\'\n";
-        print $STATUS "$PR_STATUS        : \'", $status->{$PR_STATUS},  "\'\n";
-        print $STATUS "$MERGE_STATUS     : \'", $status->{$MERGE_STATUS},  "\'\n";
-        print $STATUS "$STATUS_MESSAGE   : \'", $status->{$STATUS_MESSAGE}, "\'\n";
-        print $STATUS "$RECHECK_TIME     : ",   $status->{$RECHECK_TIME},   "\n";
+        print $STATUS $JSON->encode($status);
         close($STATUS);
     }
 
     # Load a configuration file into a hash,
-    # creating a new configuration with defaults,
-    # if needed
+    # using a new default configuration if needed
     sub load_status {
         my ($status_file) = @_;
 
-        # Start with default values
+        my $config = make_default_status($status_file);
+
+        # Write defaults at least, if no config present
+        if (! -e $status_file) {
+            log_debug "Writing default status file";
+            write_status($config);
+            return $config;
+        }
+        
+        open(my $CONFIG, "<$status_file")
+            or die "Could not read config: $status_file";
+
+        my $file_text = read_file($CONFIG);
+        close($CONFIG);
+
+        my $loaded_config = $JSON->decode($file_text);
+
+        if(!$loaded_config) {
+            log_debug "Writing default status file";
+            write_status($config);
+            return $config;
+        }
+        
+        # Overlay all loaded values on top of default values.
+        # For cases where the stored config is missing a member,
+        # this enfoces a default value for that key
+        while (my ($key, $value) = each (%{$loaded_config})) {
+            $config->{$key} = $value;
+        }
+
+        return $config;
+    }
+
+    ## Make default status, with mostly empty values
+    # Arguments: status_file_path
+    # Return: hash reference of default status
+    sub make_default_status {
+        my ($status_file) = @_;
+
         my %config_hash = ( $PR_NAME          => '',
                             $PR_CREATOR       => '',
                             $PR_MERGER        => '',
@@ -282,58 +316,20 @@
                             $STATUS_MESSAGE   => '',
                             $RECHECK_TIME     => 0);
 
-        my $config = \%config_hash;
-
-        # Write defaults at least, if no config present
-        if (! -e $status_file) {
-            log_debug "Writing default status file";
-            write_status($config);
-            return $config;
-        }
-        
-        open(my $CONFIG, "<$config->{$STATUS_FILE}")
-            or die "Could not read config: $config->{$STATUS_FILE}";
-        
-        while(my $line = <$CONFIG>) {
-            chomp($line);
-            parse_config_line($config, $line);
-        }
-
-        close($CONFIG);
-        return $config;
+        return \%config_hash;
     }
 
-    sub parse_config_line($) {
-        my ($self, $line) = @_;
-        
-        if ($line =~ m/^$PR_NAME\s*:\s*'(.*)'\s*/) {
-            $self->{$PR_NAME} = $1;
-        } elsif ($line =~ m/^$PR_CREATOR\s*:\s*'(.*)'\s*/) {
-            $self->{$PR_CREATOR} = $1;
-        } elsif ($line =~ m/^$PR_MERGER\s*:\s*'(.*)'\s*/) {
-            $self->{$PR_MERGER} = $1;
-        } elsif ($line =~ m/^$PR_SHA\s*:\s*'(.*)'\s*/) {
-            $self->{$PR_SHA} = $1;
-        } elsif ($line =~ m/^$BRANCH_BASE\s*:\s*'(.*)'\s*/) {
-            $self->{$BRANCH_BASE} = $1;
-        } elsif ($line =~ m/^$BRANCH_HEAD\s*:\s*'(.*)'\s*/) {
-            $self->{$BRANCH_HEAD} = $1;
-        } elsif ($line =~ m/^$PR_STATUS\s*:\s*'(.*)'\s*/) {
-            $self->{$PR_STATUS} = $1;
-        } elsif($line =~ m/^$MERGE_STATUS\s*:\s*'(.+)'\s*/) {
-            $self->{$MERGE_STATUS} = $1;
-        } elsif ($line =~ m/^$STATUS_MESSAGE\s*:\s*'(.*)'\s*/) {
-            $self->{$STATUS_MESSAGE} = $1;
-        } elsif ($line =~ m/^$RECHECK_TIME\s*:\s*(\d+)\s*/) {
-            if(Scalar::Util::looks_like_number($1)) {           
-                $self->{$RECHECK_TIME} = $1;
-            } else {
-                log_error "Bad configuration line, non-numeric: $line\n";
-            }
-        } else {
-            log_error "Bad configuration line: $line\n";
-        }
+    sub TO_JSON {
+        my ($status) = @_;
+
+        # Remove underlying file store, and
+        # don't have a blessing as an object
+        my %copy = %{$status};
+        delete($copy{$STATUS_FILE});
+        unbless \%copy;
+
+        return \%copy;
     }
-    
+
     1;
 }
