@@ -260,42 +260,41 @@
         close($STATUS);
     }
 
-    # Load a configuration file into a hash,
-    # using a new default configuration if needed
+    # Load a status file into a hash,
+    # using a new default status if needed
     sub load_status {
         my ($status_file) = @_;
 
-        my $config = make_default_status($status_file);
+        my $status = make_default_status($status_file);
 
-        # Write defaults at least, if no config present
+        # Write defaults at least, if no status present
         if (! -e $status_file) {
             log_debug "Writing default status file";
-            write_status($config);
-            return $config;
+            write_status($status);
+            return $status;
         }
         
-        open(my $CONFIG, "<$status_file")
-            or die "Could not read config: $status_file";
+        open(my $STATUS, "<$status_file")
+            or die "Could not read status: $status_file";
+        my $file_text = read_file($STATUS);
+        close($STATUS);
 
-        my $file_text = read_file($CONFIG);
-        close($CONFIG);
+        my $loaded_status = $JSON->decode($file_text);
 
-        my $loaded_config = $JSON->decode($file_text);
-
-        if(!$loaded_config) {
+        if(!$loaded_status) {
             log_debug "Writing default status file";
-            write_status($config);
-            return $config;
+            write_status($status);
+            return $status;
         }
         
         # Overlay all loaded values on top of default values.
-        # For cases where the stored config is missing a member,
+        # For cases where the stored status is missing a member,
         # this enfoces a default value for that key
-        while (my ($key, $value) = each (%{$loaded_config})) {
-            $config->{$key} = $value;
+        while (my ($key, $value) = each (%{$loaded_status})) {
+            $status->{$key} = $value;
         }
 
-        return $config;
+        return $status;
     }
 
     ## Make default status, with mostly empty values

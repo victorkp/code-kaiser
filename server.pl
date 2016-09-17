@@ -172,34 +172,3 @@ use JSON qw( decode_json encode_json );
 # start the server on port 8080
 CodeKaiser->new(8080)->run();
 
-# my $api = CodeKaiser::GitHubApi->new(token      => '236ceea5c4582dbdd71400ad2166e298a9b7c822',
-#                                      repo_owner => 'victorkp',
-#                                      repo_name  => 'dummy-test');
-# 
-# print $api->token . "\n";
-# print $api->repo_owner . "\n";
-# print $api->repo_name . "\n\n";
-# 
-# my $response = $api->get_issue_comments(2);
-# print $response->request()->uri() . "\n";
-# print $response->status_line() . "\n";
-# if ($response->is_success) {
-#     my @payload = @{decode_json($response->decoded_content)};
-# 
-#     for my $comment(@payload){
-#         print "Comment:\n";
-#         printf "    User: %s\n", $comment->{user}{login};
-#         printf "    Body: %s\n", $comment->{body};
-#         printf "    Time: %s\n", $comment->{updated_at};
-#         printf "    Time: %s\n", $comment->{html_url};
-#     }
-# }
-# 
-# print "\n\n";
-# $response = $api->post_status("144fe97f8bc30ea81138509e7cbce2432d836d78",
-#                               response->STATUS_FAILURE, 
-#                               "victorkp blocked merge");
-# print $response->request()->uri() . "\n";
-# print $response->status_line() . "\n";
-#     print $response->decoded_content;
-
