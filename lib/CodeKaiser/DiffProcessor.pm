@@ -4,7 +4,7 @@
 
     use File::Slurp;
     use Text::Diff::Parser;
-    use Storable;
+    use JSON;
     use strict;
     use warnings;
 
@@ -17,6 +17,8 @@
     @ISA         = qw(Exporter);
     @EXPORT      = ();
     @EXPORT_OK   = qw(process_diffs);
+
+    my $JSON = JSON->new->pretty;
 
     ## Process diff files in a directory, using
     ## a specified file as a temp-save file, 
@@ -36,10 +38,20 @@
 
         # Load previously processed statistics, if save file exists
         if(-f $save_file) {
-            my $last_save_hash = retrieve($save_file);
+            open (my $SAVE, "<$save_file") or die "Could not open diff processor's save file: $!";
+            my $file_text = read_file($SAVE);
+            close($SAVE);
 
-            $last_diff_processed = $$last_save_hash{last_diff_processed};
-            %files               = %{$$last_save_hash{files}};
+            my $last_save_hash = $JSON->decode($file_text);
+
+            # If save file was bad, then remove it, otherwise
+            # start from that save file's checkpoint
+            if(!$last_save_hash) {
+                unlink $save_file;
+            } else {
+                $last_diff_processed = $$last_save_hash{last_diff_processed};
+                %files               = %{$$last_save_hash{files}};
+            }
         }
 
         scalar(@_) == 3 or die "Required parameters: <diff-directory> <save-file>\n";
@@ -153,9 +165,11 @@
             $files{$f}{hotspot_score} = $files{$f}{changes_score} * $files{$f}{pr_count}**2;
         }
 
-        # Store everything to save file
-        store({ last_diff_processed => $last_diff_processed,
-                 files               => \%files }, $save_file);
+        # Store everything to save file, in JSON format
+        open (my $SAVE, ">$save_file") or die "Could not open diff processor's save file: $!";
+        print $SAVE $JSON->encode({ last_diff_processed => $last_diff_processed,
+                                    files               => \%files } );
+        close($SAVE);
 
         return \%files;
     }
