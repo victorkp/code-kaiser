@@ -40,6 +40,7 @@ $status->recheck_time(100);
 $status->status_message("test");
 $status->branch_base("base");
 $status->branch_head("head");
+$status->write_status();
 $status = CodeKaiser::PRStatus->new(status_file => 'tmp/test-status');
 $status->pr_name()               eq "test-name"                         or die;
 $status->pr_sha()                eq "abcd1234"                          or die;

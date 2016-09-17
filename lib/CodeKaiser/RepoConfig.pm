@@ -6,8 +6,11 @@
      
     use File::Spec;
     use File::Basename;
+    use File::Slurp;
     use Scalar::Util;
     use Data::Dumper;
+    use JSON;
+    use Data::Structure::Util qw( unbless );
 
     use CodeKaiser::Logger qw(log_debug log_error log_verbose log_line);
 
@@ -22,7 +25,10 @@
                       reviewers_needed
                       blocking_enabled
                       blocking_timeout
+                      TO_JSON
                      );
+
+    my $JSON = JSON->new->allow_blessed->convert_blessed->pretty;
 
     # Configuration File path key
     my  $CONFIG_FILE              = 'config_file';
@@ -146,11 +152,9 @@
         my $dirname = dirname($config->{$CONFIG_FILE});
         system "mkdir -p $dirname" if $dirname;
 
-        open(my $CONFIG, ">$config->{$CONFIG_FILE}") or die "Could not write config: $config->{$CONFIG_FILE}";
-        print $CONFIG "$GITHUB_TOKEN     : $config->{$GITHUB_TOKEN}\n";
-        print $CONFIG "$REVIEWERS_NEEDED : $config->{$REVIEWERS_NEEDED}\n";
-        print $CONFIG "$BLOCKING_ENABLED : $config->{$BLOCKING_ENABLED}\n";
-        print $CONFIG "$BLOCKING_TIMEOUT : $config->{$BLOCKING_TIMEOUT}\n";
+        open(my $CONFIG, ">$config->{$CONFIG_FILE}")
+            or die "Could not write config: $config->{$CONFIG_FILE}";
+        print $CONFIG $JSON->encode($config);
         close($CONFIG);
     }
 
@@ -161,61 +165,61 @@
         my ($config_file) = @_;
 
         # Start with default values
+        my $config = make_default_config($config_file);
+
+        # Write defaults at least, if no config present
+        if (! -e $config_file) {
+            log_debug "Writing default repo config file";
+            write_config($config);
+            return $config;
+        }
+
+        
+        open(my $CONFIG, "<$config->{$CONFIG_FILE}")
+            or die "Could not read repo config: $config->{$CONFIG_FILE}";
+
+        my $file_text = read_file($CONFIG);
+        close($CONFIG);
+
+        my $loaded_config = $JSON->decode($file_text);
+
+        if(!$loaded_config) {
+            log_debug "Writing default repo config file";
+            write_status($config);
+            return $config;
+        }
+        
+        # Overlay all loaded values on top of default values.
+        # For cases where the stored config is missing a member,
+        # this enfoces a default value for that key
+        while (my ($key, $value) = each (%{$loaded_config})) {
+            $config->{$key} = $value;
+        }
+
+        return $config;
+    }
+
+    sub make_default_config {
+        my ($config_file) = @_;
+
         my %config_hash = ( $CONFIG_FILE      => $config_file,
                             $GITHUB_TOKEN     => $DEFAULT_GITHUB_TOKEN,
                             $REVIEWERS_NEEDED => $DEFAULT_REVIEWERS_NEEDED,
                             $BLOCKING_ENABLED => $DEFAULT_BLOCKING_ENABLED,
                             $BLOCKING_TIMEOUT => $DEFAULT_BLOCKING_TIMEOUT );
-
-        my $config = \%config_hash;
-
-        # Write defaults at least, if no config present
-        if (! -e $config_file) {
-            write_config($config);
-            return $config;
-        }
-        
-        open(my $CONFIG, "<$config->{$CONFIG_FILE}") or die "Could not read config: $config->{$CONFIG_FILE}";
-        
-        while(my $line = <$CONFIG>) {
-            chomp($line);
-            parse_config_line($config, $line);
-        }
-
-        close($CONFIG);
-        return $config;
+        return \%config_hash;
     }
 
-    sub parse_config_line($) {
-        my ($self, $line) = @_;
-        
-        if($line =~ m/^$GITHUB_TOKEN\s*:\s*(.+)\s*/) {
-            if($line =~ m/^$GITHUB_TOKEN\s*:\s*([0-9a-fA-F]+)\s*/) {
-                $self->{$GITHUB_TOKEN} = $1;
-            } else {
-                log_error "Bad configuration line, non-hex token: $line\n";
-            }
-        } elsif ($line =~ m/^$REVIEWERS_NEEDED\s*:\s*(.+)\s*/) {
-            if(Scalar::Util::looks_like_number($1)) {           
-                $self->{$REVIEWERS_NEEDED} = $1;
-            } else {
-                log_error "Bad configuration line, non-numeric: $line\n";
-            }
-        } elsif ($line =~ m/^$BLOCKING_ENABLED\s*:\s*(\d+)\s*/) {
-            if(Scalar::Util::looks_like_number($1)) {           
-                $self->{$BLOCKING_ENABLED} = $1;
-            } else {
-                log_error "Bad configuration line, non-numeric: $line\n";
-            }
-        } elsif ($line =~ m/^$BLOCKING_TIMEOUT\s*:\s*(\d+)\s*/) {
-            if(Scalar::Util::looks_like_number($1)) {           
-                $self->{$BLOCKING_TIMEOUT} = $1;
-            } else {
-                log_error "Bad configuration line, non-numeric: $line\n";
-            }
-        } else {
-            log_error "Bad configuration line: $line\n";
-        }
+    sub TO_JSON {
+        my ($config) = @_;
+
+        # Remove underlying file store, and
+        # don't have a blessing as an object
+        my %copy = %{$config};
+        delete($copy{$CONFIG_FILE});
+        unbless \%copy;
+
+        return \%copy;
     }
     
     1;
