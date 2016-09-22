@@ -1,0 +1,12 @@
+{
+   "pr_name" : "DiffProcessor and ChartGenerator use standard JSON format, instead of…",
+   "recheck_time" : 0,
+   "pr_sha" : "040f33c67d6821580ddfaa0573189a2856fb5fe9",
+   "branch_base" : "develop",
+   "status_message" : "",
+   "pr_status" : "merged",
+   "branch_head" : "feature/diff-processor-saves-in-json",
+   "pr_creator" : "victorkp",
+   "merge_status" : "allowed",
+   "pr_merger" : "victorkp"
+}

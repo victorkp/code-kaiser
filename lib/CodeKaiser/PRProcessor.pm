@@ -61,7 +61,10 @@
             }
 
             if($body =~ /!good/) {
-                $users_approving{$user} = $comment->{'updated_at'};
+                # User can't approve their own PR!
+                if($user ne $pr_status->pr_creator) {
+                    $users_approving{$user} = $comment->{'updated_at'};
+                }
             }
         }
 

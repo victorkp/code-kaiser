@@ -1,5 +1,9 @@
 lib/CodeKaiser/PRStatus.pm : 14884
 lib/CodeKaiser/RepoConfig.pm : 9604
 server.pl : 961
+lib/CodeKaiser/DiffProcessor.pm : 841
+lib/CodeKaiser/ChartGenerator.pm : 529
+data/victorkp/code-kaiser/pr/1.status : 196
 Makefile : 9
+data/victorkp/code-kaiser/repo.config : 1
 test/PRStatusTest.pm : 1

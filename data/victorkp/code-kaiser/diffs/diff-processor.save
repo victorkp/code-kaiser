@@ -1,60 +1,104 @@
 {
-   "last_diff_processed" : "1",
+   "last_diff_processed" : "2",
    "files" : {
       "Makefile" : {
-         "pr_count" : 1,
-         "changes" : 3,
-         "changes_score" : 9,
-         "removes" : 1,
-         "adds" : 1,
          "hotspot_score" : 9,
          "pull_requests" : [
             "1"
-         ]
+         ],
+         "pr_count" : 1,
+         "changes" : 3,
+         "changes_score" : 9,
+         "adds" : 1,
+         "removes" : 1
       },
       "test/PRStatusTest.pm" : {
-         "pull_requests" : [
-            "1"
-         ],
-         "hotspot_score" : 1,
          "changes_score" : 1,
-         "removes" : 0,
          "adds" : 1,
+         "removes" : 0,
          "pr_count" : 1,
-         "changes" : 1
-      },
-      "lib/CodeKaiser/PRStatus.pm" : {
-         "adds" : 13,
-         "changes_score" : 14884,
-         "removes" : 8,
-         "changes" : 122,
-         "pr_count" : 1,
+         "changes" : 1,
          "pull_requests" : [
             "1"
          ],
-         "hotspot_score" : 14884
+         "hotspot_score" : 1
       },
-      "lib/CodeKaiser/RepoConfig.pm" : {
+      "data/victorkp/code-kaiser/pr/1.status" : {
          "pr_count" : 1,
-         "changes" : 98,
-         "removes" : 6,
-         "adds" : 11,
-         "changes_score" : 9604,
-         "hotspot_score" : 9604,
+         "changes" : 14,
+         "changes_score" : 196,
+         "removes" : 1,
+         "adds" : 3,
+         "hotspot_score" : 196,
          "pull_requests" : [
-            "1"
+            "2"
          ]
       },
-      "server.pl" : {
-         "hotspot_score" : 961,
+      "lib/CodeKaiser/ChartGenerator.pm" : {
+         "hotspot_score" : 529,
+         "pull_requests" : [
+            "2"
+         ],
+         "pr_count" : 1,
+         "changes" : 23,
+         "removes" : 3,
+         "changes_score" : 529,
+         "adds" : 4
+      },
+      "lib/CodeKaiser/PRStatus.pm" : {
+         "hotspot_score" : 14884,
          "pull_requests" : [
             "1"
          ],
+         "changes" : 122,
+         "pr_count" : 1,
+         "adds" : 13,
+         "removes" : 8,
+         "changes_score" : 14884
+      },
+      "lib/CodeKaiser/DiffProcessor.pm" : {
+         "removes" : 3,
+         "changes_score" : 841,
+         "adds" : 4,
+         "pr_count" : 1,
+         "changes" : 29,
+         "pull_requests" : [
+            "2"
+         ],
+         "hotspot_score" : 841
+      },
+      "data/victorkp/code-kaiser/repo.config" : {
+         "adds" : 1,
+         "removes" : 1,
+         "changes_score" : 1,
+         "pr_count" : 1,
+         "changes" : 1,
+         "pull_requests" : [
+            "2"
+         ],
+         "hotspot_score" : 1
+      },
+      "lib/CodeKaiser/RepoConfig.pm" : {
+         "changes_score" : 9604,
+         "adds" : 11,
+         "removes" : 6,
+         "pr_count" : 1,
+         "changes" : 98,
+         "pull_requests" : [
+            "1"
+         ],
+         "hotspot_score" : 9604
+      },
+      "server.pl" : {
          "pr_count" : 1,
          "changes" : 31,
          "adds" : 0,
+         "removes" : 1,
          "changes_score" : 961,
-         "removes" : 1
+         "hotspot_score" : 961,
+         "pull_requests" : [
+            "1"
+         ]
       }
    }
 }
