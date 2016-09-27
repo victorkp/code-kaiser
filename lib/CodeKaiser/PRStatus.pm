@@ -30,7 +30,7 @@
                       merge_status
                       status_message
                       recheck_time
-                      write_status
+                      write_file
                       TO_JSON
                      );
 
@@ -246,7 +246,7 @@
     # Write the configuration
     # to the config file - for use
     # when updating or saving configs
-    sub write_status {
+    sub write_file {
         my ($status) = @_;
         assert_values $status;
 
@@ -270,7 +270,7 @@
         # Write defaults at least, if no status present
         if (! -e $status_file) {
             log_debug "Writing default status file";
-            write_status($status);
+            write_file($status);
             return $status;
         }
         
@@ -283,7 +283,7 @@
 
         if(!$loaded_status) {
             log_debug "Writing default status file";
-            write_status($status);
+            write_file($status);
             return $status;
         }
         

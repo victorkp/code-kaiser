@@ -171,7 +171,7 @@
             $status->merge_status($CodeKaiser::PRStatus::MERGE_ERROR);
             $status->status_message("Could not get PR details for $repo_owner/$repo_name, pull request $pr_number");
             $status->recheck_time(0);
-            $status->write_status();
+            $status->write_file();
             return 0;
         }
 
@@ -199,7 +199,7 @@
         } else {
             $status->pr_status($CodeKaiser::PRStatus::PR_OPEN);
         }
-        $status->write_status();
+        $status->write_file();
 
         log_debug "Proccessing PR: number $pr_number, on repo $repo_owner/$repo_name for commit with SHA $pr_sha";
 
@@ -217,7 +217,7 @@
             $status->merge_status($CodeKaiser::PRStatus::MERGE_ERROR);
             $status->status_message("Could not post PENDING status" .  $status_response->status_line());
             $status->recheck_time(0);
-            $status->write_status();
+            $status->write_file();
             return 0;
         }
 
@@ -235,7 +235,7 @@
             $status->merge_status($CodeKaiser::PRStatus::MERGE_ERROR);
             $status->status_message("Could get PR comments: " . $comments_response->status_line());
             $status->recheck_time(0);
-            $status->write_status();
+            $status->write_file();
             return 0;
         }
         
@@ -276,10 +276,46 @@
         }
 
         # Persist updated status to file
-        $status->write_status();
+        $status->write_file();
 
         # Return boolean if merge allowed
         return $compliance eq 1;
+    }
+
+    ## Given a PR that has been closed,
+    ## keep track of user statistics (e.g. lines reviewed, written, etc)
+    ## if the PR has been mereged
+    # Arguments: repo_owner, repo_name, pr_number, diff_file
+    # Return: boolean for success (0 on error)
+    sub process_pr_closed {
+        my ($self, $repo_owner, $repo_name, $pr_number, $diff_file) = @_;
+
+        if(!$repo_owner || !$repo_name || !$pr_number || !$diff_file) {
+            log_error "An argument was null: $repo_owner, $repo_name, $pr_number";
+            return 0;
+        }
+
+        my $repo_config = CodeKaiser::DataManager->get_repo_config($repo_owner, $repo_name);
+
+        if(!$repo_config || !$repo_config->github_token()) {
+            log_error "Bad repo config or token";
+            return 0;
+        }
+
+        my $output_path = CodeKaiser::DataManager->get_pr_status_path($repo_owner, $repo_name, $pr_number);
+        my $status = CodeKaiser::PRStatus->new(status_file => $output_path);
+        if(!$status) {
+            log_error "Could not open PRStatus";
+            return 0;
+        }
+
+        if($status->pr_status ne $CodeKaiser::PRStatus::PR_MERGED) {
+            # Don't do anything if PR not merged
+            return 1;
+        }
+
+
+        return 1;
     }
 
     1;

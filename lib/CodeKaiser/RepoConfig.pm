@@ -86,7 +86,7 @@
         if (@_ == 2) {
             if($value =~ /^[0-9a-fA-F]+$/) {           
                 $self->{$GITHUB_TOKEN} = $value;
-                write_config($self);
+                write_file($self);
             } else {
                 die 'Bad argument, expecting hex token';
             }
@@ -102,7 +102,7 @@
         if (@_ == 2) {
             if(Scalar::Util::looks_like_number($value)) {           
                 $self->{$REVIEWERS_NEEDED} = $value;
-                write_config($self);
+                write_file($self);
             } else {
                 die 'Bad argument, expecting numeric';
             }
@@ -118,7 +118,7 @@
         if (@_ == 2) {
             if(Scalar::Util::looks_like_number($value)) {           
                 $self->{$BLOCKING_ENABLED} = $value;
-                write_config($self);
+                write_file($self);
             } else {
                 die 'Bad argument, expecting numeric';
             }
@@ -134,7 +134,7 @@
         if (@_ == 2) {
             if(Scalar::Util::looks_like_number($value)) {           
                 $self->{$BLOCKING_TIMEOUT} = $value;
-                write_config($self);
+                write_file($self);
             } else {
                 die 'Bad argument, expecting numeric';
             }
@@ -145,7 +145,7 @@
     # Write the configuration
     # to the config file - for use
     # when updating or saving configs
-    sub write_config {
+    sub write_file {
         my ($config) = @_;
         assert_values $config;
 
@@ -170,7 +170,7 @@
         # Write defaults at least, if no config present
         if (! -e $config_file) {
             log_debug "Writing default repo config file";
-            write_config($config);
+            write_file($config);
             return $config;
         }
 
@@ -185,7 +185,7 @@
 
         if(!$loaded_config) {
             log_debug "Writing default repo config file";
-            write_status($config);
+            write_file($config);
             return $config;
         }
         
