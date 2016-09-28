@@ -79,6 +79,17 @@
 
             print "Processing file $diff_file.diff\n";
 
+            my $diff_statistics = CodeKaiser::DiffStatistics->new("$diff_dir/$diff_file.stat");
+                                    
+            if(!$diff_statistics) {
+                log_error("Could not get diff statistics: $diff_dir/$diff_file.stat");
+                return 0;
+            }
+
+            # Clear out diff statistics, in case we've already seen a diff for this PR
+            $diff_statistics->clear_additions_and_removals();
+
+
             # Strip one directory, because GitHub uses 'a/' and 'b/'
             # base branch and branch to merge
             my $parser = Text::Diff::Parser->new("$diff_dir/$diff_file.diff");
@@ -125,11 +136,15 @@
                 $files{$file_changed}{changes} += $size;
                 if($change->type eq "ADD") {
                     $files{$file_changed}{adds}++;
+                    $diff_statistics->add_additions($file_changed, $size);
                 } elsif($change->type eq "REMOVE") {
                     $files{$file_changed}{removes}++;
+                    $diff_statistics->add_removals($file_changed, $size);
                 } else { # Change is a "modify" 
                     $files{$file_changed}{adds}++;
                     $files{$file_changed}{removes}++;
+                    $diff_statistics->add_additions($file_changed, $size);
+                    $diff_statistics->add_removals($file_changed, $size);
                 }
                 
                 # If this filename has no recorded diffs, or if the last
@@ -150,6 +165,8 @@
                     $files_changed_by_diff{$file_changed}{changes} += $size;
                 }
             }
+
+            $diff_statistics->write_file();
 
             # Now that all changes have been made by this diff, 
             # add to the changes_score for this file

@@ -309,11 +309,13 @@
             return 0;
         }
 
+        # Don't do anything if PR not merged
         if($status->pr_status ne $CodeKaiser::PRStatus::PR_MERGED) {
-            # Don't do anything if PR not merged
             return 1;
         }
 
+
+        # TODO
 
         return 1;
     }

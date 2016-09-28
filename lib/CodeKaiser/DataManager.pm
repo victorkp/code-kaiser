@@ -12,8 +12,12 @@
     $VERSION     = 1.00;
     @ISA         = qw(Exporter);
     @EXPORT      = ();
-    @EXPORT_OK   = qw(get_diff_path get_repo_config get_diff_save_file_path
-                      get_processing_output_path get_pr_status_directory
+    @EXPORT_OK   = qw(get_diff_path
+                      get_repo_config
+                      get_diff_save_file_path
+                      get_diff_statistics_path
+                      get_processing_output_path
+                      get_pr_status_directory
                       get_pr_status_path);
 
     my $DATA_DIR = './data/';
@@ -43,6 +47,21 @@
 
         my $diff_dir = get_diff_directory($repo_owner, $repo_name);
         return "$diff_dir/$diff_number.diff";
+    }
+
+    ## Get file path for a diff file's statistics
+    ## (CodeKaiser::DiffStatistics file)
+    # Arguments: repo_owner, repo_name, diff_number
+    sub get_diff_statistics_path {
+        if(scalar(@_) == 4) {
+            shift @_;
+        }
+        my ($repo_owner, $repo_name, $diff_number) = @_;
+
+        Scalar::Util::looks_like_number($1) or die "Diff number is non numeric: $diff_number\n$!";
+
+        my $diff_dir = get_diff_directory($repo_owner, $repo_name);
+        return "$diff_dir/$diff_number.stat";
     }
 
     ## Get save file path for diff processor
@@ -84,6 +103,7 @@
     }
 
     ## Get path for a PR status output file
+    ## (CodeKaiser::PRStatus file)
     # Arguments: repo_owner, repo_name, pr_number
     sub get_pr_status_path {
         if(scalar(@_) == 4) {
@@ -98,6 +118,7 @@
     }
 
     ## Get a RepoConfig instance for the given repository 
+    ## (CodeKaiser::RepoConfig file)
     # Arguments: repo_owner, repo_name
     sub get_repo_config {
         if(scalar(@_) == 3) {
