@@ -8,6 +8,8 @@
 
 [Convolutional Neural Networks for NLP](http://www.wildml.com/2015/11/understanding-convolutional-neural-networks-for-nlp/)
 
+[Implementing CNN for Text Classification in TensorFlow](http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/)
+
 Detection Goals (in Java, for now):
   - Code is unreadable (maybe not enough comments?)
   - Subroutine is too long
