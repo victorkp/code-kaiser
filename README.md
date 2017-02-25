@@ -15,6 +15,7 @@ Pull Requests:
 Code Hotspots:
   - Each merged pull request updates a model of "hot" files
   - Hot file model plugs into a pie chart generator showing which files have been most actively worked on recent PRs
+  - ![Example hotspots of this repo](data/victorkp/code-kaiser/output/hotspots.png)
 
 ### Examples
 
@@ -42,6 +43,7 @@ Code Hotspots:
 4. Create a pull request! This finishes setup of CodeKaiser and allows you to complete the next step
 5. Setup GitHub protected branches, to force CodeKaiser checks to succeed before allowing a merge
    - ![Protected Branch Setup](readme/protected-branch.png)
+6. You can monitor your hotspot files in `data/<repo-owner>/<repo-name>/output/`, which contains small and large `.png` outputs, as well as an `html` snippet and a CSV
 
 ## Future Work
 
