@@ -15,18 +15,18 @@ Pull Requests:
 Code Hotspots:
   - Each merged pull request updates a model of "hot" files
   - Hot file model plugs into a pie chart generator showing which files have been most actively worked on recent PRs
-  - ![Example hotspots of this repo](data/victorkp/code-kaiser/output/hotspots.png)
+  - <img src="data/victorkp/code-kaiser/output/hotspots.png" alt="Example hotspots of this repo" style="width: 300px;"/>
 
 ### Examples
 
 #### Blocking a PR ###
-![Blocking comment](readme/block.png)
+<img src="readme/block.png" alt="Blocking comment" style="width: 300px;"/>
 
 
 #### Allowing a PR ###
-![Good comment](readme/good.png)
+<img src="readme/good.png" alt="Good comment" style="width: 300px;"/>
 
-![Merge Allowed](readme/merge-allowed.png)
+<img src="readme/merge-allowed.png" alt="Enough good comments to pass" style="width: 300px;"/>
 
 ## Setup ##
 
@@ -37,10 +37,10 @@ Code Hotspots:
 3. Setup a GitHub webhook for your repo, so that your Code Kaiser instance recieves events from GitHub:
    - If you have a public IP, great! CodeKaiser defaults to port 8080
    - Otherwise, you can use ngrok. Install ngrok, and run `make ngrok` to start it, then use your ngrok forwarding URL:
-   - ![Webhook Setup](readme/webhook.png)
+   - <img src="readme/webhook.png" alt="Webhook setup" style="width: 500px;"/>
 4. Create a pull request! This finishes setup of CodeKaiser and allows you to complete the next step
 5. Setup GitHub protected branches, to force CodeKaiser checks to succeed before allowing a merge
-   - ![Protected Branch Setup](readme/protected-branch.png)
+   - <img src="readme/protected-branch.png" alt="Protected Branch setup" style="width: 500px;"/>
 6. You can monitor your hotspot files in `data/<repo-owner>/<repo-name>/output/`, which contains small and large `.png` outputs, as well as an `html` snippet and a CSV
 
 ## Future Work
